@@ -2,6 +2,7 @@ package com.eskcti.algashop.ordering.domain.entity;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.util.HashSet;
 import java.util.Set;
 
 import com.eskcti.algashop.ordering.domain.valueobject.BillingInfo;
@@ -51,26 +52,42 @@ public final class OrderTestDataBuilder {
         .paymentMethod(PaymentMethod.CREDIT_CARD)
         .shippingCost(new Money("10.00"))
         .expectedDeliveryDate(LocalDate.now().plusDays(5))
-        .items(Set.of(existingOrderItem(orderId).build()));
+        .items(new HashSet<>(Set.of(existingOrderItem(orderId).build())));
   }
 
   public static OrderItem.ExistingOrderItemBuilder existingOrderItem(OrderId orderId) {
     return OrderItem.existing()
         .id(new OrderItemId(1L))
         .orderId(orderId)
-        .productId(new ProductId())
-        .productName(new ProductName("Notebook"))
-        .price(new Money("50.00"))
-        .quantity(new Quantity(2))
+        .productId(validProductId())
+        .productName(validProductName())
+        .price(validPrice())
+        .quantity(validQuantity())
         .totalAmount(new Money("100.00"));
   }
 
   public static OrderItem.BrandNewOrderItemBuilder brandNewOrderItem(OrderId orderId) {
     return OrderItem.brandNew()
         .orderId(orderId)
-        .productId(new ProductId())
-        .productName(new ProductName("Notebook"))
-        .price(new Money("50.00"))
-        .quantity(new Quantity(2));
+        .productId(validProductId())
+        .productName(validProductName())
+        .price(validPrice())
+        .quantity(validQuantity());
+  }
+
+  public static ProductId validProductId() {
+    return new ProductId();
+  }
+
+  public static ProductName validProductName() {
+    return new ProductName("Notebook");
+  }
+
+  public static Money validPrice() {
+    return new Money("50.00");
+  }
+
+  public static Quantity validQuantity() {
+    return new Quantity(2);
   }
 }

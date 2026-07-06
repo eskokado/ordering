@@ -6,9 +6,11 @@ import org.junit.jupiter.api.Test;
 import org.assertj.core.api.Assertions;
 
 import com.eskcti.algashop.ordering.domain.valueobject.Money;
+import com.eskcti.algashop.ordering.domain.valueobject.ProductName;
 import com.eskcti.algashop.ordering.domain.valueobject.Quantity;
 import com.eskcti.algashop.ordering.domain.valueobject.id.CustomerId;
 import com.eskcti.algashop.ordering.domain.valueobject.id.OrderId;
+import com.eskcti.algashop.ordering.domain.valueobject.id.ProductId;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -33,6 +35,78 @@ class OrderTest {
     assertThat(order.shippingCost()).isNull();
     assertThat(order.expectedDeliveryDate()).isNull();
     assertThat(order.items()).isEmpty();
+  }
+
+  @Test
+  void given_draftOrder_whenAddItem_shouldIncludeBrandNewOrderItem() {
+    Order order = OrderTestDataBuilder.draftOrder();
+    ProductId productId = OrderTestDataBuilder.validProductId();
+    ProductName productName = OrderTestDataBuilder.validProductName();
+    Money price = OrderTestDataBuilder.validPrice();
+    Quantity quantity = OrderTestDataBuilder.validQuantity();
+
+    order.addItem(productId, productName, price, quantity);
+
+    assertThat(order.items()).hasSize(1);
+    OrderItem addedItem = order.items().iterator().next();
+    assertThat(addedItem.orderId()).isEqualTo(order.id());
+    assertThat(addedItem.productId()).isEqualTo(productId);
+    assertThat(addedItem.productName()).isEqualTo(productName);
+    assertThat(addedItem.price()).isEqualTo(price);
+    assertThat(addedItem.quantity()).isEqualTo(quantity);
+    assertThat(addedItem.totalAmount()).isEqualTo(Money.ZERO);
+  }
+
+  @Test
+  void given_draftOrder_whenAddMultipleItems_shouldIncreaseItemsCollection() {
+    Order order = OrderTestDataBuilder.draftOrder();
+
+    order.addItem(
+        OrderTestDataBuilder.validProductId(),
+        OrderTestDataBuilder.validProductName(),
+        OrderTestDataBuilder.validPrice(),
+        OrderTestDataBuilder.validQuantity());
+    order.addItem(
+        OrderTestDataBuilder.validProductId(),
+        new ProductName("Mouse"),
+        new Money("25.00"),
+        new Quantity(1));
+
+    assertThat(order.items()).hasSize(2);
+  }
+
+  @Test
+  void given_existingOrder_whenAddItem_shouldAppendToExistingItems() {
+    Order order = OrderTestDataBuilder.existingOrder().build();
+
+    order.addItem(
+        OrderTestDataBuilder.validProductId(),
+        new ProductName("Keyboard"),
+        new Money("120.00"),
+        new Quantity(1));
+
+    assertThat(order.items()).hasSize(2);
+  }
+
+  @Test
+  void given_invalidItemData_whenAddItem_shouldGenerateException() {
+    Order order = OrderTestDataBuilder.draftOrder();
+
+    Assertions.assertThatNullPointerException()
+        .isThrownBy(() -> order.addItem(null, OrderTestDataBuilder.validProductName(),
+            OrderTestDataBuilder.validPrice(), OrderTestDataBuilder.validQuantity()));
+
+    Assertions.assertThatNullPointerException()
+        .isThrownBy(() -> order.addItem(OrderTestDataBuilder.validProductId(), null,
+            OrderTestDataBuilder.validPrice(), OrderTestDataBuilder.validQuantity()));
+
+    Assertions.assertThatNullPointerException()
+        .isThrownBy(() -> order.addItem(OrderTestDataBuilder.validProductId(),
+            OrderTestDataBuilder.validProductName(), null, OrderTestDataBuilder.validQuantity()));
+
+    Assertions.assertThatNullPointerException()
+        .isThrownBy(() -> order.addItem(OrderTestDataBuilder.validProductId(),
+            OrderTestDataBuilder.validProductName(), OrderTestDataBuilder.validPrice(), null));
   }
 
   @Test
