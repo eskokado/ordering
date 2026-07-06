@@ -1,8 +1,8 @@
 package com.eskcti.algashop.ordering.domain.valueobject;
 
 import java.time.LocalDate;
+import java.time.Period;
 import java.util.Objects;
-import java.time.Duration;
 
 import com.eskcti.algashop.ordering.domain.exception.ErrorMessages;
 
@@ -16,7 +16,7 @@ public record BirthDate(LocalDate value) {
   }
 
   public Integer age() {
-    return (int) Duration.between(value, LocalDate.now()).toDays();
+    return Period.between(value, LocalDate.now()).getYears();
   }
 
   @Override

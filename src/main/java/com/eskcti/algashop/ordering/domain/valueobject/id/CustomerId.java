@@ -1,4 +1,4 @@
-package com.eskcti.algashop.ordering.domain.valueobject;
+package com.eskcti.algashop.ordering.domain.valueobject.id;
 
 import java.util.Objects;
 import java.util.UUID;

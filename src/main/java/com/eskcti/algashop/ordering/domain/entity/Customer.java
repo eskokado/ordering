@@ -6,6 +6,8 @@ import java.util.UUID;
 
 import com.eskcti.algashop.ordering.domain.exception.CustomerArchivedException;
 import com.eskcti.algashop.ordering.domain.valueobject.*;
+import com.eskcti.algashop.ordering.domain.valueobject.id.CustomerId;
+
 import lombok.Builder;
 
 import static com.eskcti.algashop.ordering.domain.exception.ErrorMessages.VALIDATION_ERROR_FULLNAME_IS_NULL;
@@ -236,7 +238,8 @@ public class Customer {
 
   @Override
   public boolean equals(Object o) {
-    if (o == null || getClass() != o.getClass()) return false;
+    if (o == null || getClass() != o.getClass())
+      return false;
     Customer customer = (Customer) o;
     return Objects.equals(id, customer.id);
   }
