@@ -6,6 +6,7 @@ import org.assertj.core.api.Assertions;
 import com.eskcti.algashop.ordering.domain.valueobject.Money;
 import com.eskcti.algashop.ordering.domain.valueobject.ProductName;
 import com.eskcti.algashop.ordering.domain.valueobject.Quantity;
+import com.eskcti.algashop.ordering.domain.valueobject.id.OrderId;
 import com.eskcti.algashop.ordering.domain.valueobject.id.OrderItemId;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -13,11 +14,26 @@ import static org.assertj.core.api.Assertions.assertThat;
 class OrderItemTest {
 
   @Test
-  void given_validData_whenCreateOrderItem_shouldExposeFields() {
-    OrderItem orderItem = OrderTestDataBuilder.validOrderItem();
+  void given_brandNewOrderItem_whenBuild_shouldInitializeDefaults() {
+    OrderId orderId = new OrderId(1L);
+    OrderItem orderItem = OrderTestDataBuilder.brandNewOrderItem(orderId).build();
 
     assertThat(orderItem.id()).isNotNull();
-    assertThat(orderItem.orderId()).isNotNull();
+    assertThat(orderItem.orderId()).isEqualTo(orderId);
+    assertThat(orderItem.productId()).isNotNull();
+    assertThat(orderItem.productName()).isEqualTo(new ProductName("Notebook"));
+    assertThat(orderItem.price()).isEqualTo(new Money("50.00"));
+    assertThat(orderItem.quantity()).isEqualTo(new Quantity(2));
+    assertThat(orderItem.totalAmount()).isEqualTo(Money.ZERO);
+  }
+
+  @Test
+  void given_existingOrderItem_whenBuild_shouldExposeFields() {
+    OrderId orderId = new OrderId(1L);
+    OrderItem orderItem = OrderTestDataBuilder.existingOrderItem(orderId).build();
+
+    assertThat(orderItem.id()).isNotNull();
+    assertThat(orderItem.orderId()).isEqualTo(orderId);
     assertThat(orderItem.productId()).isNotNull();
     assertThat(orderItem.productName()).isEqualTo(new ProductName("Notebook"));
     assertThat(orderItem.price()).isEqualTo(new Money("50.00"));
@@ -28,8 +44,9 @@ class OrderItemTest {
   @Test
   void given_orderItemsWithSameId_whenCompare_shouldBeEqual() {
     OrderItemId orderItemId = new OrderItemId(42L);
-    OrderItem first = OrderTestDataBuilder.orderItem(builder -> builder.withId(orderItemId));
-    OrderItem second = OrderTestDataBuilder.orderItem(builder -> builder.withId(orderItemId));
+    OrderId orderId = new OrderId(1L);
+    OrderItem first = OrderTestDataBuilder.existingOrderItem(orderId).id(orderItemId).build();
+    OrderItem second = OrderTestDataBuilder.existingOrderItem(orderId).id(orderItemId).build();
 
     assertThat(first).isEqualTo(second);
     assertThat(first.hashCode()).isEqualTo(second.hashCode());
@@ -37,8 +54,9 @@ class OrderItemTest {
 
   @Test
   void given_orderItemsWithDifferentId_whenCompare_shouldNotBeEqual() {
-    OrderItem first = OrderTestDataBuilder.orderItem(builder -> builder.withId(new OrderItemId(1L)));
-    OrderItem second = OrderTestDataBuilder.orderItem(builder -> builder.withId(new OrderItemId(2L)));
+    OrderId orderId = new OrderId(1L);
+    OrderItem first = OrderTestDataBuilder.existingOrderItem(orderId).id(new OrderItemId(1L)).build();
+    OrderItem second = OrderTestDataBuilder.existingOrderItem(orderId).id(new OrderItemId(2L)).build();
 
     assertThat(first).isNotEqualTo(second);
     assertThat(first).isNotEqualTo(null);
@@ -46,26 +64,48 @@ class OrderItemTest {
   }
 
   @Test
-  void given_nullRequiredFields_whenCreateOrderItem_shouldGenerateException() {
-    Assertions.assertThatNullPointerException()
-        .isThrownBy(() -> OrderTestDataBuilder.orderItem(builder -> builder.withId(null)));
+  void given_nullRequiredFields_whenBuildExistingOrderItem_shouldGenerateException() {
+    OrderId orderId = new OrderId(1L);
 
     Assertions.assertThatNullPointerException()
-        .isThrownBy(() -> OrderTestDataBuilder.orderItem(builder -> builder.withOrderId(null)));
+        .isThrownBy(() -> OrderTestDataBuilder.existingOrderItem(orderId).id(null).build());
 
     Assertions.assertThatNullPointerException()
-        .isThrownBy(() -> OrderTestDataBuilder.orderItem(builder -> builder.withProductId(null)));
+        .isThrownBy(() -> OrderTestDataBuilder.existingOrderItem(orderId).orderId(null).build());
 
     Assertions.assertThatNullPointerException()
-        .isThrownBy(() -> OrderTestDataBuilder.orderItem(builder -> builder.withProductName(null)));
+        .isThrownBy(() -> OrderTestDataBuilder.existingOrderItem(orderId).productId(null).build());
 
     Assertions.assertThatNullPointerException()
-        .isThrownBy(() -> OrderTestDataBuilder.orderItem(builder -> builder.withPrice(null)));
+        .isThrownBy(() -> OrderTestDataBuilder.existingOrderItem(orderId).productName(null).build());
 
     Assertions.assertThatNullPointerException()
-        .isThrownBy(() -> OrderTestDataBuilder.orderItem(builder -> builder.withQuantity(null)));
+        .isThrownBy(() -> OrderTestDataBuilder.existingOrderItem(orderId).price(null).build());
 
     Assertions.assertThatNullPointerException()
-        .isThrownBy(() -> OrderTestDataBuilder.orderItem(builder -> builder.withTotalAmount(null)));
+        .isThrownBy(() -> OrderTestDataBuilder.existingOrderItem(orderId).quantity(null).build());
+
+    Assertions.assertThatNullPointerException()
+        .isThrownBy(() -> OrderTestDataBuilder.existingOrderItem(orderId).totalAmount(null).build());
+  }
+
+  @Test
+  void given_nullRequiredFields_whenBuildBrandNewOrderItem_shouldGenerateException() {
+    OrderId orderId = new OrderId(1L);
+
+    Assertions.assertThatNullPointerException()
+        .isThrownBy(() -> OrderTestDataBuilder.brandNewOrderItem(orderId).orderId(null).build());
+
+    Assertions.assertThatNullPointerException()
+        .isThrownBy(() -> OrderTestDataBuilder.brandNewOrderItem(orderId).productId(null).build());
+
+    Assertions.assertThatNullPointerException()
+        .isThrownBy(() -> OrderTestDataBuilder.brandNewOrderItem(orderId).productName(null).build());
+
+    Assertions.assertThatNullPointerException()
+        .isThrownBy(() -> OrderTestDataBuilder.brandNewOrderItem(orderId).price(null).build());
+
+    Assertions.assertThatNullPointerException()
+        .isThrownBy(() -> OrderTestDataBuilder.brandNewOrderItem(orderId).quantity(null).build());
   }
 }

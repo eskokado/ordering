@@ -23,6 +23,13 @@ class OrderIdTest {
   }
 
   @Test
+  void shouldCreateWithGeneratedTsid() {
+    OrderId orderId = new OrderId();
+
+    Assertions.assertThat(orderId.value()).isNotNull();
+  }
+
+  @Test
   void shouldCreateFromString() {
     String tsidValue = TSID.from(12345L).toString();
     OrderId orderId = new OrderId(tsidValue);
