@@ -7,8 +7,9 @@ import com.eskcti.algashop.ordering.domain.valueobject.Phone;
 import com.eskcti.algashop.ordering.domain.valueobject.Document;
 import com.eskcti.algashop.ordering.domain.valueobject.Address;
 import com.eskcti.algashop.ordering.domain.valueobject.ZipCode;
+import com.eskcti.algashop.ordering.domain.valueobject.id.CustomerId;
 import com.eskcti.algashop.ordering.domain.valueobject.LoyaltyPoints;
-import com.eskcti.algashop.ordering.domain.valueobject.CustomerId;
+
 import java.time.OffsetDateTime;
 import java.time.LocalDate;
 

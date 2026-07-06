@@ -16,6 +16,7 @@ class BirthDateTest {
 
     Assertions.assertThat(birthDate.value()).isEqualTo(date);
     Assertions.assertThat(birthDate.toString()).isEqualTo("1991-07-05");
+    Assertions.assertThat(birthDate.age()).isPositive();
   }
 
   @Test

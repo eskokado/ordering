@@ -50,6 +50,14 @@ class LoyaltyPointsTest {
   }
 
   @Test
+  void shouldNotAddNullLoyaltyPoints() {
+    LoyaltyPoints loyaltyPoints = new LoyaltyPoints(10);
+
+    Assertions.assertThatNullPointerException()
+        .isThrownBy(() -> loyaltyPoints.add((LoyaltyPoints) null));
+  }
+
+  @Test
   void shouldNotAddValue() {
     LoyaltyPoints loyaltyPoints = new LoyaltyPoints(10);
 

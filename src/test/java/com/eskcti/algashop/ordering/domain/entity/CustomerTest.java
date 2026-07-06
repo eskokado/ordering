@@ -12,9 +12,65 @@ import com.eskcti.algashop.ordering.domain.valueobject.Phone;
 import com.eskcti.algashop.ordering.domain.valueobject.ZipCode;
 import com.eskcti.algashop.ordering.domain.valueobject.Document;
 
+import com.eskcti.algashop.ordering.domain.valueobject.id.CustomerId;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 class CustomerTest {
+
+  @Test
+  void given_brandNewCustomer_whenBuild_shouldInitializeDefaults() {
+    Customer customer = CustomerTestDataBuilder.brandNewCustomer().build();
+
+    assertThat(customer.id()).isNotNull();
+    assertThat(customer.isArchived()).isFalse();
+    assertThat(customer.loyaltyPoints()).isEqualTo(LoyaltyPoints.ZERO);
+    assertThat(customer.registeredAt()).isNotNull();
+    assertThat(customer.archivedAt()).isNull();
+  }
+
+  @Test
+  void given_customer_whenChangeData_shouldUpdateFields() {
+    Customer customer = CustomerTestDataBuilder.brandNewCustomer().build();
+
+    customer.changeName(new FullName("Jane", "Smith"));
+    customer.changePhone(new Phone("111-222-3333"));
+    customer.changeAddress(Address.builder()
+        .street("New Street")
+        .number("99")
+        .neighborhood("Downtown")
+        .city("York")
+        .state("South California")
+        .zipCode(new ZipCode("54321"))
+        .build());
+    customer.enablePromotionNotifications();
+    customer.disablePromotionNotifications();
+
+    assertThat(customer.fullName()).isEqualTo(new FullName("Jane", "Smith"));
+    assertThat(customer.phone()).isEqualTo(new Phone("111-222-3333"));
+    assertThat(customer.address().street()).isEqualTo("New Street");
+    assertThat(customer.isPromotionNotificationsAllowed()).isFalse();
+  }
+
+  @Test
+  void given_customersWithSameId_whenCompare_shouldBeEqual() {
+    CustomerId customerId = new CustomerId();
+    Customer first = CustomerTestDataBuilder.existingCustomer().id(customerId).build();
+    Customer second = CustomerTestDataBuilder.existingCustomer().id(customerId).build();
+
+    assertThat(first).isEqualTo(second);
+    assertThat(first.hashCode()).isEqualTo(second.hashCode());
+  }
+
+  @Test
+  void given_customersWithDifferentId_whenCompare_shouldNotBeEqual() {
+    Customer first = CustomerTestDataBuilder.existingCustomer().build();
+    Customer second = CustomerTestDataBuilder.existingCustomer().build();
+
+    assertThat(first).isNotEqualTo(second);
+    assertThat(first).isNotEqualTo(null);
+    assertThat(first).isNotEqualTo("not-a-customer");
+  }
 
   @Test
   void given_invalidEmail_whenTryCreateCustomer_shouldGenerateException() {
@@ -69,6 +125,15 @@ class CustomerTest {
 
     Assertions.assertThatExceptionOfType(CustomerArchivedException.class)
         .isThrownBy(() -> customer.changePhone(new Phone("123-123-1111")));
+
+    Assertions.assertThatExceptionOfType(CustomerArchivedException.class)
+        .isThrownBy(() -> customer.changeName(new FullName("John", "Doe")));
+
+    Assertions.assertThatExceptionOfType(CustomerArchivedException.class)
+        .isThrownBy(() -> customer.changeAddress(CustomerTestDataBuilder.brandNewCustomer().build().address()));
+
+    Assertions.assertThatExceptionOfType(CustomerArchivedException.class)
+        .isThrownBy(() -> customer.addLoyaltyPoints(new LoyaltyPoints(10)));
 
     Assertions.assertThatExceptionOfType(CustomerArchivedException.class)
         .isThrownBy(customer::enablePromotionNotifications);
