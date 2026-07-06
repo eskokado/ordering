@@ -14,6 +14,8 @@ import com.eskcti.algashop.ordering.domain.valueobject.BillingInfo;
 import com.eskcti.algashop.ordering.domain.valueobject.ShippingInfo;
 import com.eskcti.algashop.ordering.domain.entity.OrderStatus;
 import com.eskcti.algashop.ordering.domain.entity.PaymentMethod;
+import com.eskcti.algashop.ordering.domain.valueobject.id.ProductId;
+import com.eskcti.algashop.ordering.domain.valueobject.ProductName;
 
 public class Order {
 
@@ -82,6 +84,24 @@ public class Order {
         null,
         null,
         new HashSet<>());
+  }
+
+  public void addItem(ProductId productId, ProductName productName,
+      Money price, Quantity quantity) {
+
+    OrderItem orderItem = OrderItem.brandNew()
+        .orderId(this.id())
+        .price(price)
+        .quantity(quantity)
+        .productName(productName)
+        .productId(productId)
+        .build();
+
+    if (this.items == null) {
+      this.items = new HashSet<>();
+    }
+
+    this.items.add(orderItem);
   }
 
   public OrderId id() {
