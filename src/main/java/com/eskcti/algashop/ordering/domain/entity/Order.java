@@ -4,12 +4,16 @@ import java.util.Objects;
 import java.util.Set;
 import java.time.OffsetDateTime;
 import java.time.LocalDate;
+import java.util.HashSet;
+import lombok.Builder;
 import com.eskcti.algashop.ordering.domain.valueobject.id.OrderId;
 import com.eskcti.algashop.ordering.domain.valueobject.id.CustomerId;
 import com.eskcti.algashop.ordering.domain.valueobject.Money;
 import com.eskcti.algashop.ordering.domain.valueobject.Quantity;
 import com.eskcti.algashop.ordering.domain.valueobject.BillingInfo;
 import com.eskcti.algashop.ordering.domain.valueobject.ShippingInfo;
+import com.eskcti.algashop.ordering.domain.entity.OrderStatus;
+import com.eskcti.algashop.ordering.domain.entity.PaymentMethod;
 
 public class Order {
 
@@ -35,6 +39,7 @@ public class Order {
 
   private Set<OrderItem> items;
 
+  @Builder(builderClassName = "ExistingOrderBuilder", builderMethodName = "existing")
   public Order(OrderId id, CustomerId customerId,
       Money totalAmount, Quantity totalItems,
       OffsetDateTime placedAt, OffsetDateTime paidAt,
@@ -58,6 +63,25 @@ public class Order {
     this.setShippingCost(shippingCost);
     this.setExpectedDeliveryDate(expectedDeliveryDate);
     this.setItems(items);
+  }
+
+  public static Order draft(CustomerId customerId) {
+    return new Order(
+        new OrderId(),
+        customerId,
+        Money.ZERO,
+        Quantity.ZERO,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        OrderStatus.DRAFT,
+        null,
+        null,
+        null,
+        new HashSet<>());
   }
 
   public OrderId id() {
@@ -157,12 +181,10 @@ public class Order {
   }
 
   private void setBilling(BillingInfo billing) {
-    Objects.requireNonNull(billing);
     this.billing = billing;
   }
 
   private void setShipping(ShippingInfo shipping) {
-    Objects.requireNonNull(shipping);
     this.shipping = shipping;
   }
 
@@ -172,7 +194,6 @@ public class Order {
   }
 
   private void setPaymentMethod(PaymentMethod paymentMethod) {
-    Objects.requireNonNull(paymentMethod);
     this.paymentMethod = paymentMethod;
   }
 
