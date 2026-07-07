@@ -38,6 +38,13 @@ class LoyaltyPointsTest {
   }
 
   @Test
+  void shouldConvertToStringUsingValue() {
+    LoyaltyPoints loyaltyPoints = new LoyaltyPoints(10);
+
+    Assertions.assertThat(loyaltyPoints.toString()).isEqualTo("10");
+  }
+
+  @Test
   void shouldNotCreateWithNullValue() {
     Assertions.assertThatNullPointerException()
         .isThrownBy(() -> new LoyaltyPoints(null));

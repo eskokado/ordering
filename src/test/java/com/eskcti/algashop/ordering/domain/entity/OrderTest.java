@@ -1,20 +1,64 @@
 package com.eskcti.algashop.ordering.domain.entity;
 
+import java.lang.reflect.Field;
 import java.time.OffsetDateTime;
 
 import org.junit.jupiter.api.Test;
 import org.assertj.core.api.Assertions;
 
+import com.eskcti.algashop.ordering.domain.exception.OrderStatusCannotBeChangedException;
 import com.eskcti.algashop.ordering.domain.valueobject.Money;
 import com.eskcti.algashop.ordering.domain.valueobject.ProductName;
 import com.eskcti.algashop.ordering.domain.valueobject.Quantity;
-import com.eskcti.algashop.ordering.domain.valueobject.id.CustomerId;
 import com.eskcti.algashop.ordering.domain.valueobject.id.OrderId;
 import com.eskcti.algashop.ordering.domain.valueobject.id.ProductId;
 
+import static com.eskcti.algashop.ordering.domain.exception.ErrorMessages.ERROR_ORDER_STATUS_CANNOT_BE_CHANGED;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class OrderTest {
+
+  @Test
+  void given_draftOrder_whenPlace_shouldChangeStatusToPlaced() {
+    Order order = OrderTestDataBuilder.draftOrder();
+
+    assertThat(order.isDraft()).isTrue();
+    assertThat(order.isPlaced()).isFalse();
+
+    order.place();
+
+    assertThat(order.status()).isEqualTo(OrderStatus.PLACED);
+    assertThat(order.isDraft()).isFalse();
+    assertThat(order.isPlaced()).isTrue();
+  }
+
+  @Test
+  void given_placedOrder_whenPlace_shouldGenerateException() {
+    Order order = OrderTestDataBuilder.existingOrder().build();
+
+    Assertions.assertThatExceptionOfType(OrderStatusCannotBeChangedException.class)
+        .isThrownBy(order::place)
+        .withMessage(String.format(
+            ERROR_ORDER_STATUS_CANNOT_BE_CHANGED,
+            order.id(),
+            OrderStatus.PLACED,
+            OrderStatus.PLACED));
+  }
+
+  @Test
+  void given_canceledOrder_whenPlace_shouldGenerateException() {
+    Order order = OrderTestDataBuilder.existingOrder()
+        .status(OrderStatus.CANCELED)
+        .build();
+
+    Assertions.assertThatExceptionOfType(OrderStatusCannotBeChangedException.class)
+        .isThrownBy(order::place)
+        .withMessage(String.format(
+            ERROR_ORDER_STATUS_CANNOT_BE_CHANGED,
+            order.id(),
+            OrderStatus.CANCELED,
+            OrderStatus.PLACED));
+  }
 
   @Test
   void given_draftOrder_whenCreate_shouldInitializeDefaults() {
@@ -54,11 +98,13 @@ class OrderTest {
     assertThat(addedItem.productName()).isEqualTo(productName);
     assertThat(addedItem.price()).isEqualTo(price);
     assertThat(addedItem.quantity()).isEqualTo(quantity);
-    assertThat(addedItem.totalAmount()).isEqualTo(Money.ZERO);
+    assertThat(addedItem.totalAmount()).isEqualTo(new Money("100.00"));
+    assertThat(order.totalAmount()).isEqualTo(new Money("100.00"));
+    assertThat(order.totalItems()).isEqualTo(new Quantity(2));
   }
 
   @Test
-  void given_draftOrder_whenAddMultipleItems_shouldIncreaseItemsCollection() {
+  void given_draftOrder_whenAddMultipleItems_shouldRecalculateTotals() {
     Order order = OrderTestDataBuilder.draftOrder();
 
     order.addItem(
@@ -73,6 +119,23 @@ class OrderTest {
         new Quantity(1));
 
     assertThat(order.items()).hasSize(2);
+    assertThat(order.totalAmount()).isEqualTo(new Money("125.00"));
+    assertThat(order.totalItems()).isEqualTo(new Quantity(3));
+  }
+
+  @Test
+  void given_existingOrderWithShippingCost_whenAddItem_shouldRecalculateTotalsIncludingShipping() {
+    Order order = OrderTestDataBuilder.existingOrder().build();
+
+    order.addItem(
+        OrderTestDataBuilder.validProductId(),
+        new ProductName("Keyboard"),
+        new Money("120.00"),
+        new Quantity(1));
+
+    assertThat(order.items()).hasSize(2);
+    assertThat(order.totalAmount()).isEqualTo(new Money("230.00"));
+    assertThat(order.totalItems()).isEqualTo(new Quantity(3));
   }
 
   @Test
@@ -107,6 +170,56 @@ class OrderTest {
     Assertions.assertThatNullPointerException()
         .isThrownBy(() -> order.addItem(OrderTestDataBuilder.validProductId(),
             OrderTestDataBuilder.validProductName(), OrderTestDataBuilder.validPrice(), null));
+  }
+
+  @Test
+  void given_order_whenGetItems_shouldReturnUnmodifiableCollection() {
+    Order order = OrderTestDataBuilder.draftOrder();
+    order.addItem(
+        OrderTestDataBuilder.validProductId(),
+        OrderTestDataBuilder.validProductName(),
+        OrderTestDataBuilder.validPrice(),
+        OrderTestDataBuilder.validQuantity());
+
+    Assertions.assertThatThrownBy(() -> order.items().add(
+        OrderTestDataBuilder.brandNewOrderItem(order.id()).build()))
+        .isInstanceOf(UnsupportedOperationException.class);
+
+    Assertions.assertThatThrownBy(() -> order.items().clear())
+        .isInstanceOf(UnsupportedOperationException.class);
+  }
+
+  @Test
+  void given_order_whenAddItemAfterGetItems_shouldReflectUpdatedCollection() {
+    Order order = OrderTestDataBuilder.draftOrder();
+
+    assertThat(order.items()).isEmpty();
+
+    order.addItem(
+        OrderTestDataBuilder.validProductId(),
+        OrderTestDataBuilder.validProductName(),
+        OrderTestDataBuilder.validPrice(),
+        OrderTestDataBuilder.validQuantity());
+
+    assertThat(order.items()).hasSize(1);
+  }
+
+  @Test
+  void given_orderWithNullItems_whenAddItem_shouldInitializeCollection() throws Exception {
+    Order order = OrderTestDataBuilder.draftOrder();
+    Field itemsField = Order.class.getDeclaredField("items");
+    itemsField.setAccessible(true);
+    itemsField.set(order, null);
+
+    order.addItem(
+        OrderTestDataBuilder.validProductId(),
+        OrderTestDataBuilder.validProductName(),
+        OrderTestDataBuilder.validPrice(),
+        OrderTestDataBuilder.validQuantity());
+
+    assertThat(order.items()).hasSize(1);
+    assertThat(order.totalAmount()).isEqualTo(new Money("100.00"));
+    assertThat(order.totalItems()).isEqualTo(new Quantity(2));
   }
 
   @Test

@@ -24,7 +24,18 @@ class OrderItemTest {
     assertThat(orderItem.productName()).isEqualTo(new ProductName("Notebook"));
     assertThat(orderItem.price()).isEqualTo(new Money("50.00"));
     assertThat(orderItem.quantity()).isEqualTo(new Quantity(2));
-    assertThat(orderItem.totalAmount()).isEqualTo(Money.ZERO);
+    assertThat(orderItem.totalAmount()).isEqualTo(new Money("100.00"));
+  }
+
+  @Test
+  void given_brandNewOrderItem_whenBuild_shouldCalculateTotalFromPriceAndQuantity() {
+    OrderId orderId = new OrderId(1L);
+    OrderItem orderItem = OrderTestDataBuilder.brandNewOrderItem(orderId)
+        .price(new Money("25.50"))
+        .quantity(new Quantity(3))
+        .build();
+
+    assertThat(orderItem.totalAmount()).isEqualTo(new Money("76.50"));
   }
 
   @Test
