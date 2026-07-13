@@ -1,18 +1,26 @@
 package com.eskcti.algashop.ordering.domain.entity;
 
 import java.lang.reflect.Field;
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 
 import org.junit.jupiter.api.Test;
 import org.assertj.core.api.Assertions;
 
+import com.eskcti.algashop.ordering.domain.exception.OrderCannotBePlacedException;
+import com.eskcti.algashop.ordering.domain.exception.OrderInvalidShippingDeliveryDateException;
 import com.eskcti.algashop.ordering.domain.exception.OrderStatusCannotBeChangedException;
+import com.eskcti.algashop.ordering.domain.valueobject.BillingInfo;
 import com.eskcti.algashop.ordering.domain.valueobject.Money;
 import com.eskcti.algashop.ordering.domain.valueobject.ProductName;
 import com.eskcti.algashop.ordering.domain.valueobject.Quantity;
+import com.eskcti.algashop.ordering.domain.valueobject.ShippingInfo;
+import com.eskcti.algashop.ordering.domain.valueobject.ValueObjectTestFixtures;
 import com.eskcti.algashop.ordering.domain.valueobject.id.OrderId;
 import com.eskcti.algashop.ordering.domain.valueobject.id.ProductId;
 
+import static com.eskcti.algashop.ordering.domain.exception.ErrorMessages.ERROR_ORDER_CANNOT_BE_PLACED_HAS_NOT_ITEMS;
+import static com.eskcti.algashop.ordering.domain.exception.ErrorMessages.ERROR_ORDER_DELIVERY_DATE_CANNOT_BE_IN_THE_PAST;
 import static com.eskcti.algashop.ordering.domain.exception.ErrorMessages.ERROR_ORDER_STATUS_CANNOT_BE_CHANGED;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -20,16 +28,33 @@ class OrderTest {
 
   @Test
   void given_draftOrder_whenPlace_shouldChangeStatusToPlaced() {
-    Order order = OrderTestDataBuilder.draftOrder();
+    Order order = aPlaceableDraftOrder();
 
     assertThat(order.isDraft()).isTrue();
     assertThat(order.isPlaced()).isFalse();
+    assertThat(order.placedAt()).isNull();
 
     order.place();
 
     assertThat(order.status()).isEqualTo(OrderStatus.PLACED);
     assertThat(order.isDraft()).isFalse();
     assertThat(order.isPlaced()).isTrue();
+    assertThat(order.placedAt()).isNotNull();
+  }
+
+  @Test
+  void given_draftOrderWithoutItems_whenPlace_shouldGenerateException() {
+    Order order = OrderTestDataBuilder.draftOrder();
+    order.changeBilling(OrderTestDataBuilder.existingOrder().build().billing());
+    order.changePaymentMethod(PaymentMethod.CREDIT_CARD);
+    order.changeShipping(
+        OrderTestDataBuilder.existingOrder().build().shipping(),
+        new Money("10.00"),
+        LocalDate.now().plusDays(5));
+
+    Assertions.assertThatExceptionOfType(OrderCannotBePlacedException.class)
+        .isThrownBy(order::place)
+        .withMessage(String.format(ERROR_ORDER_CANNOT_BE_PLACED_HAS_NOT_ITEMS, order.id()));
   }
 
   @Test
@@ -244,6 +269,100 @@ class OrderTest {
   }
 
   @Test
+  void given_order_whenChangeShipping_shouldUpdateFieldsAndRecalculateTotal() {
+    Order order = OrderTestDataBuilder.existingOrder().build();
+    ShippingInfo shipping = ShippingInfo.builder()
+        .fullName(ValueObjectTestFixtures.validFullName())
+        .document(ValueObjectTestFixtures.validDocument())
+        .phone(ValueObjectTestFixtures.validPhone())
+        .address(ValueObjectTestFixtures.validAddress().toBuilder()
+            .street("Shipping Street")
+            .number("999")
+            .build())
+        .build();
+    Money shippingCost = new Money("25.00");
+    LocalDate expectedDeliveryDate = LocalDate.now().plusDays(7);
+
+    order.changeShipping(shipping, shippingCost, expectedDeliveryDate);
+
+    assertThat(order.shipping()).isEqualTo(shipping);
+    assertThat(order.shippingCost()).isEqualTo(shippingCost);
+    assertThat(order.expectedDeliveryDate()).isEqualTo(expectedDeliveryDate);
+    assertThat(order.totalAmount()).isEqualTo(new Money("125.00"));
+  }
+
+  @Test
+  void given_order_whenChangeShippingWithPastExpectedDate_shouldGenerateException() {
+    Order order = OrderTestDataBuilder.existingOrder().build();
+    ShippingInfo shipping = OrderTestDataBuilder.existingOrder().build().shipping();
+    LocalDate expectedDeliveryDate = LocalDate.now().minusDays(1);
+
+    Assertions.assertThatExceptionOfType(OrderInvalidShippingDeliveryDateException.class)
+        .isThrownBy(() -> order.changeShipping(shipping, new Money("25.00"), expectedDeliveryDate))
+        .withMessage(String.format(ERROR_ORDER_DELIVERY_DATE_CANNOT_BE_IN_THE_PAST, order.id()));
+  }
+
+  @Test
+  void given_order_whenChangeShippingWithNullRequiredFields_shouldGenerateException() {
+    Order order = OrderTestDataBuilder.existingOrder().build();
+    ShippingInfo shipping = OrderTestDataBuilder.existingOrder().build().shipping();
+    Money shippingCost = new Money("25.00");
+    LocalDate expectedDeliveryDate = LocalDate.now().plusDays(7);
+
+    Assertions.assertThatNullPointerException()
+        .isThrownBy(() -> order.changeShipping(null, shippingCost, expectedDeliveryDate));
+
+    Assertions.assertThatNullPointerException()
+        .isThrownBy(() -> order.changeShipping(shipping, null, expectedDeliveryDate));
+
+    Assertions.assertThatNullPointerException()
+        .isThrownBy(() -> order.changeShipping(shipping, shippingCost, null));
+  }
+
+  @Test
+  void given_order_whenChangePaymentMethod_shouldUpdateField() {
+    Order order = OrderTestDataBuilder.existingOrder().build();
+
+    order.changePaymentMethod(PaymentMethod.GATEWAY_BALANCE);
+
+    assertThat(order.paymentMethod()).isEqualTo(PaymentMethod.GATEWAY_BALANCE);
+  }
+
+  @Test
+  void given_order_whenChangePaymentMethodWithNull_shouldGenerateException() {
+    Order order = OrderTestDataBuilder.existingOrder().build();
+
+    Assertions.assertThatNullPointerException()
+        .isThrownBy(() -> order.changePaymentMethod(null));
+  }
+
+  @Test
+  void given_order_whenChangeBilling_shouldUpdateField() {
+    Order order = OrderTestDataBuilder.existingOrder().build();
+    BillingInfo billing = BillingInfo.builder()
+        .fullName(ValueObjectTestFixtures.validFullName())
+        .document(ValueObjectTestFixtures.validDocument())
+        .phone(ValueObjectTestFixtures.validPhone())
+        .address(ValueObjectTestFixtures.validAddress().toBuilder()
+            .street("Billing Street")
+            .number("123")
+            .build())
+        .build();
+
+    order.changeBilling(billing);
+
+    assertThat(order.billing()).isEqualTo(billing);
+  }
+
+  @Test
+  void given_order_whenChangeBillingWithNull_shouldGenerateException() {
+    Order order = OrderTestDataBuilder.existingOrder().build();
+
+    Assertions.assertThatNullPointerException()
+        .isThrownBy(() -> order.changeBilling(null));
+  }
+
+  @Test
   void given_paidOrder_whenBuild_shouldAllowOptionalTimestamps() {
     OffsetDateTime now = OffsetDateTime.now();
     Order order = OrderTestDataBuilder.existingOrder()
@@ -304,5 +423,21 @@ class OrderTest {
 
     Assertions.assertThatNullPointerException()
         .isThrownBy(() -> OrderTestDataBuilder.existingOrder().items(null).build());
+  }
+
+  private Order aPlaceableDraftOrder() {
+    Order order = OrderTestDataBuilder.draftOrder();
+    order.addItem(
+        OrderTestDataBuilder.validProductId(),
+        OrderTestDataBuilder.validProductName(),
+        OrderTestDataBuilder.validPrice(),
+        OrderTestDataBuilder.validQuantity());
+    order.changeBilling(OrderTestDataBuilder.existingOrder().build().billing());
+    order.changePaymentMethod(PaymentMethod.CREDIT_CARD);
+    order.changeShipping(
+        OrderTestDataBuilder.existingOrder().build().shipping(),
+        new Money("10.00"),
+        LocalDate.now().plusDays(5));
+    return order;
   }
 }

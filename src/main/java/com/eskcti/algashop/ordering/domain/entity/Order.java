@@ -17,6 +17,8 @@ import com.eskcti.algashop.ordering.domain.valueobject.ShippingInfo;
 import com.eskcti.algashop.ordering.domain.valueobject.id.ProductId;
 import com.eskcti.algashop.ordering.domain.valueobject.ProductName;
 import com.eskcti.algashop.ordering.domain.exception.OrderStatusCannotBeChangedException;
+import com.eskcti.algashop.ordering.domain.exception.OrderCannotBePlacedException;
+import com.eskcti.algashop.ordering.domain.exception.OrderInvalidShippingDeliveryDateException;
 
 public class Order {
 
@@ -108,16 +110,44 @@ public class Order {
   }
 
   public void place() {
-    // TODO Business rules!
+    Objects.requireNonNull(this.shipping());
+    Objects.requireNonNull(this.billing());
+    Objects.requireNonNull(this.expectedDeliveryDate());
+    Objects.requireNonNull(this.shippingCost());
+    Objects.requireNonNull(this.paymentMethod());
+    Objects.requireNonNull(this.items());
+
+    if (this.items().isEmpty()) {
+      throw new OrderCannotBePlacedException(this.id());
+    }
+
+    this.setPlacedAt(OffsetDateTime.now());
     this.changeStatus(OrderStatus.PLACED);
   }
 
-  private void changeStatus(OrderStatus newStatus) {
-    Objects.requireNonNull(newStatus);
-    if (this.status().canNotChangeTo(newStatus)) {
-      throw new OrderStatusCannotBeChangedException(this.id(), this.status(), newStatus);
+  public void changePaymentMethod(PaymentMethod paymentMethod) {
+    Objects.requireNonNull(paymentMethod);
+    this.setPaymentMethod(paymentMethod);
+  }
+
+  public void changeBilling(BillingInfo billing) {
+    Objects.requireNonNull(billing);
+    this.setBilling(billing);
+  }
+
+  public void changeShipping(ShippingInfo shipping, Money shippingCost, LocalDate expectedDeliveryDate) {
+    Objects.requireNonNull(shipping);
+    Objects.requireNonNull(shippingCost);
+    Objects.requireNonNull(expectedDeliveryDate);
+
+    if (expectedDeliveryDate.isBefore(LocalDate.now())) {
+      throw new OrderInvalidShippingDeliveryDateException(this.id());
     }
-    this.setStatus(newStatus);
+
+    this.setShipping(shipping);
+    this.setShippingCost(shippingCost);
+    this.setExpectedDeliveryDate(expectedDeliveryDate);
+    this.recalculateTotals();
   }
 
   public boolean isDraft() {
@@ -206,6 +236,14 @@ public class Order {
 
     this.setTotalAmount(new Money(totalAmount));
     this.setTotalItems(new Quantity(totalItemsQuantity));
+  }
+
+  private void changeStatus(OrderStatus newStatus) {
+    Objects.requireNonNull(newStatus);
+    if (this.status().canNotChangeTo(newStatus)) {
+      throw new OrderStatusCannotBeChangedException(this.id(), this.status(), newStatus);
+    }
+    this.setStatus(newStatus);
   }
 
   private void setId(OrderId id) {

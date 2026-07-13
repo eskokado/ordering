@@ -24,5 +24,7 @@ class ErrorMessagesTest {
     assertThat(ErrorMessages.ERROR_CUSTOMER_ARCHIVED).isEqualTo("Customer is archived it cannot be changed");
     assertThat(ErrorMessages.ERROR_ORDER_STATUS_CANNOT_BE_CHANGED)
         .isEqualTo("Cannot change order %s status from %s to %s");
+    assertThat(ErrorMessages.ERROR_ORDER_DELIVERY_DATE_CANNOT_BE_IN_THE_PAST)
+        .isEqualTo("Order %s expected delivery date cannot be in the past");
   }
 }
