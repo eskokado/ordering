@@ -7,6 +7,7 @@ import java.util.Set;
 
 import com.eskcti.algashop.ordering.domain.valueobject.BillingInfo;
 import com.eskcti.algashop.ordering.domain.valueobject.Money;
+import com.eskcti.algashop.ordering.domain.valueobject.Product;
 import com.eskcti.algashop.ordering.domain.valueobject.ProductName;
 import com.eskcti.algashop.ordering.domain.valueobject.Quantity;
 import com.eskcti.algashop.ordering.domain.valueobject.ShippingInfo;
@@ -69,10 +70,26 @@ public final class OrderTestDataBuilder {
   public static OrderItem.BrandNewOrderItemBuilder brandNewOrderItem(OrderId orderId) {
     return OrderItem.brandNew()
         .orderId(orderId)
-        .productId(validProductId())
-        .productName(validProductName())
-        .price(validPrice())
+        .product(validProduct())
         .quantity(validQuantity());
+  }
+
+  public static Product validProduct() {
+    return Product.builder()
+        .id(validProductId())
+        .name(validProductName())
+        .price(validPrice())
+        .inStock(true)
+        .build();
+  }
+
+  public static Product productWith(ProductName name, Money price) {
+    return Product.builder()
+        .id(new ProductId())
+        .name(name)
+        .price(price)
+        .inStock(true)
+        .build();
   }
 
   public static ProductId validProductId() {
