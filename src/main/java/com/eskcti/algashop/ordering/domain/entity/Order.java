@@ -1,11 +1,7 @@
 package com.eskcti.algashop.ordering.domain.entity;
 
-import com.eskcti.algashop.ordering.domain.exception.OrderCannotBePlacedException;
-import com.eskcti.algashop.ordering.domain.exception.OrderDoesNotContainOrderItemException;
-import com.eskcti.algashop.ordering.domain.exception.OrderInvalidShippingDeliveryDateException;
-import com.eskcti.algashop.ordering.domain.exception.OrderStatusCannotBeChangedException;
+import com.eskcti.algashop.ordering.domain.exception.*;
 import com.eskcti.algashop.ordering.domain.valueobject.*;
-import com.eskcti.algashop.ordering.domain.valueobject.Product;
 import com.eskcti.algashop.ordering.domain.valueobject.id.CustomerId;
 import com.eskcti.algashop.ordering.domain.valueobject.id.OrderId;
 import com.eskcti.algashop.ordering.domain.valueobject.id.OrderItemId;
