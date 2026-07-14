@@ -13,7 +13,7 @@ import com.eskcti.algashop.ordering.domain.exception.OrderDoesNotContainOrderIte
 import com.eskcti.algashop.ordering.domain.exception.OrderInvalidShippingDeliveryDateException;
 import com.eskcti.algashop.ordering.domain.exception.OrderStatusCannotBeChangedException;
 import com.eskcti.algashop.ordering.domain.exception.ProductOutOfStockException;
-import com.eskcti.algashop.ordering.domain.valueobject.BillingInfo;
+import com.eskcti.algashop.ordering.domain.valueobject.Billing;
 import com.eskcti.algashop.ordering.domain.valueobject.Money;
 import com.eskcti.algashop.ordering.domain.valueobject.Product;
 import com.eskcti.algashop.ordering.domain.valueobject.Quantity;
@@ -291,10 +291,11 @@ class OrderTest {
   @Test
   void given_order_whenChangeBilling_shouldUpdateField() {
     Order order = OrderTestDataBuilder.aPlacedOrder().build();
-    BillingInfo billing = BillingInfo.builder()
+    Billing billing = Billing.builder()
         .fullName(ValueObjectTestFixtures.validFullName())
         .document(ValueObjectTestFixtures.validDocument())
         .phone(ValueObjectTestFixtures.validPhone())
+        .email(ValueObjectTestFixtures.validEmail())
         .address(ValueObjectTestFixtures.validAddress().toBuilder()
             .street("Billing Street")
             .number("123")
@@ -325,7 +326,7 @@ class OrderTest {
         .placedAt(now)
         .paidAt(now)
         .readyAt(now)
-        .billing(OrderTestDataBuilder.aBillingInfo())
+        .billing(OrderTestDataBuilder.aBilling())
         .shipping(OrderTestDataBuilder.aShipping())
         .status(OrderStatus.PAID)
         .paymentMethod(PaymentMethod.GATEWAY_BALANCE)
@@ -346,7 +347,7 @@ class OrderTest {
         .customerId(new CustomerId())
         .totalAmount(Money.ZERO)
         .totalItems(Quantity.ZERO)
-        .billing(OrderTestDataBuilder.aBillingInfo())
+        .billing(OrderTestDataBuilder.aBilling())
         .shipping(OrderTestDataBuilder.aShipping())
         .status(OrderStatus.DRAFT)
         .items(new HashSet<>())
@@ -356,7 +357,7 @@ class OrderTest {
         .customerId(new CustomerId())
         .totalAmount(Money.ZERO)
         .totalItems(Quantity.ZERO)
-        .billing(OrderTestDataBuilder.aBillingInfo())
+        .billing(OrderTestDataBuilder.aBilling())
         .shipping(OrderTestDataBuilder.aShipping())
         .status(OrderStatus.DRAFT)
         .items(new HashSet<>())
@@ -373,7 +374,7 @@ class OrderTest {
         .customerId(new CustomerId())
         .totalAmount(Money.ZERO)
         .totalItems(Quantity.ZERO)
-        .billing(OrderTestDataBuilder.aBillingInfo())
+        .billing(OrderTestDataBuilder.aBilling())
         .shipping(OrderTestDataBuilder.aShipping())
         .status(OrderStatus.DRAFT)
         .items(new HashSet<>())
@@ -383,7 +384,7 @@ class OrderTest {
         .customerId(new CustomerId())
         .totalAmount(Money.ZERO)
         .totalItems(Quantity.ZERO)
-        .billing(OrderTestDataBuilder.aBillingInfo())
+        .billing(OrderTestDataBuilder.aBilling())
         .shipping(OrderTestDataBuilder.aShipping())
         .status(OrderStatus.DRAFT)
         .items(new HashSet<>())
@@ -524,7 +525,7 @@ class OrderTest {
   private Order aDraftOrderWithSingleItem() {
     Order order = OrderTestDataBuilder.draftOrder();
     order.changeShipping(OrderTestDataBuilder.aShipping());
-    order.changeBilling(OrderTestDataBuilder.aBillingInfo());
+    order.changeBilling(OrderTestDataBuilder.aBilling());
     order.changePaymentMethod(PaymentMethod.CREDIT_CARD);
     order.addItem(OrderItemTestDataBuilder.validProduct(), OrderItemTestDataBuilder.validQuantity());
     return order;
@@ -533,7 +534,7 @@ class OrderTest {
   private Order aPlaceableDraftOrderWithoutShipping() {
     Order order = OrderTestDataBuilder.draftOrder();
     order.addItem(ProductTestDataBuilder.aProduct().build(), new Quantity(1));
-    order.changeBilling(OrderTestDataBuilder.aBillingInfo());
+    order.changeBilling(OrderTestDataBuilder.aBilling());
     order.changePaymentMethod(PaymentMethod.CREDIT_CARD);
     return order;
   }
@@ -549,7 +550,7 @@ class OrderTest {
   private Order aPlaceableDraftOrderWithoutPaymentMethod() {
     Order order = OrderTestDataBuilder.draftOrder();
     order.addItem(ProductTestDataBuilder.aProduct().build(), new Quantity(1));
-    order.changeBilling(OrderTestDataBuilder.aBillingInfo());
+    order.changeBilling(OrderTestDataBuilder.aBilling());
     order.changeShipping(OrderTestDataBuilder.aShipping());
     return order;
   }

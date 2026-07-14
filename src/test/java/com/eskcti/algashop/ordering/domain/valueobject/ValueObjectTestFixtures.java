@@ -28,4 +28,8 @@ public final class ValueObjectTestFixtures {
         .complement("Apt. 114")
         .build();
   }
+
+  public static Email validEmail() {
+    return new Email("john.doe@example.com");
+  }
 }
