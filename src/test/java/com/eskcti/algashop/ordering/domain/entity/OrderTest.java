@@ -198,6 +198,16 @@ class OrderTest {
   }
 
   @Test
+  void given_orderWithNullItems_whenGetItems_shouldReturnEmptyCollection() throws Exception {
+    Order order = OrderTestDataBuilder.draftOrder();
+    Field itemsField = Order.class.getDeclaredField("items");
+    itemsField.setAccessible(true);
+    itemsField.set(order, null);
+
+    assertThat(order.items()).isEmpty();
+  }
+
+  @Test
   void given_orderWithNullItems_whenAddItem_shouldInitializeCollection() throws Exception {
     Order order = OrderTestDataBuilder.draftOrder();
     Field itemsField = Order.class.getDeclaredField("items");

@@ -246,7 +246,7 @@ public class Order {
     if (this.paymentMethod() == null) {
       throw OrderCannotBePlacedException.noPaymentMethod(this.id());
     }
-    if (this.items() == null || this.items().isEmpty()) {
+    if (this.items == null || this.items.isEmpty()) {
       throw OrderCannotBePlacedException.noItems(this.id());
     }
   }
