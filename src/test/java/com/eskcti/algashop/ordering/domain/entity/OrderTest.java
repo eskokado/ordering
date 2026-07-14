@@ -3,6 +3,7 @@ package com.eskcti.algashop.ordering.domain.entity;
 import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.util.HashSet;
 
 import org.junit.jupiter.api.Test;
 import org.assertj.core.api.Assertions;
@@ -11,16 +12,17 @@ import com.eskcti.algashop.ordering.domain.exception.OrderCannotBePlacedExceptio
 import com.eskcti.algashop.ordering.domain.exception.OrderDoesNotContainOrderItemException;
 import com.eskcti.algashop.ordering.domain.exception.OrderInvalidShippingDeliveryDateException;
 import com.eskcti.algashop.ordering.domain.exception.OrderStatusCannotBeChangedException;
+import com.eskcti.algashop.ordering.domain.exception.ProductOutOfStockException;
 import com.eskcti.algashop.ordering.domain.valueobject.BillingInfo;
 import com.eskcti.algashop.ordering.domain.valueobject.Money;
 import com.eskcti.algashop.ordering.domain.valueobject.Product;
 import com.eskcti.algashop.ordering.domain.valueobject.Quantity;
-import com.eskcti.algashop.ordering.domain.valueobject.ShippingInfo;
+import com.eskcti.algashop.ordering.domain.valueobject.Recipient;
+import com.eskcti.algashop.ordering.domain.valueobject.Shipping;
 import com.eskcti.algashop.ordering.domain.valueobject.ValueObjectTestFixtures;
 import com.eskcti.algashop.ordering.domain.valueobject.id.CustomerId;
 import com.eskcti.algashop.ordering.domain.valueobject.id.OrderId;
 import com.eskcti.algashop.ordering.domain.valueobject.id.OrderItemId;
-import com.eskcti.algashop.ordering.domain.valueobject.ProductName;
 
 import static com.eskcti.algashop.ordering.domain.exception.ErrorMessages.*;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -29,7 +31,7 @@ class OrderTest {
 
   @Test
   void given_draftOrder_whenPlace_shouldChangeStatusToPlaced() {
-    Order order = aPlaceableDraftOrder();
+    Order order = OrderTestDataBuilder.anOrder().build();
 
     assertThat(order.isDraft()).isTrue();
     assertThat(order.isPlaced()).isFalse();
@@ -45,13 +47,7 @@ class OrderTest {
 
   @Test
   void given_draftOrderWithoutItems_whenPlace_shouldGenerateException() {
-    Order order = OrderTestDataBuilder.draftOrder();
-    order.changeBilling(OrderTestDataBuilder.existingOrder().build().billing());
-    order.changePaymentMethod(PaymentMethod.CREDIT_CARD);
-    order.changeShipping(
-        OrderTestDataBuilder.existingOrder().build().shipping(),
-        new Money("10.00"),
-        LocalDate.now().plusDays(5));
+    Order order = OrderTestDataBuilder.anOrder().withItems(false).build();
 
     Assertions.assertThatExceptionOfType(OrderCannotBePlacedException.class)
         .isThrownBy(order::place)
@@ -60,7 +56,7 @@ class OrderTest {
 
   @Test
   void given_placedOrder_whenPlace_shouldGenerateException() {
-    Order order = OrderTestDataBuilder.existingOrder().build();
+    Order order = OrderTestDataBuilder.aPlacedOrder().build();
 
     Assertions.assertThatExceptionOfType(OrderStatusCannotBeChangedException.class)
         .isThrownBy(order::place)
@@ -73,7 +69,7 @@ class OrderTest {
 
   @Test
   void given_canceledOrder_whenPlace_shouldGenerateException() {
-    Order order = OrderTestDataBuilder.existingOrder()
+    Order order = OrderTestDataBuilder.anOrder()
         .status(OrderStatus.CANCELED)
         .build();
 
@@ -102,16 +98,14 @@ class OrderTest {
     assertThat(order.billing()).isNull();
     assertThat(order.shipping()).isNull();
     assertThat(order.paymentMethod()).isNull();
-    assertThat(order.shippingCost()).isNull();
-    assertThat(order.expectedDeliveryDate()).isNull();
     assertThat(order.items()).isEmpty();
   }
 
   @Test
   void given_draftOrder_whenAddItem_shouldIncludeBrandNewOrderItem() {
     Order order = OrderTestDataBuilder.draftOrder();
-    Product product = OrderTestDataBuilder.validProduct();
-    Quantity quantity = OrderTestDataBuilder.validQuantity();
+    Product product = ProductTestDataBuilder.aProduct().build();
+    Quantity quantity = new Quantity(2);
 
     order.addItem(product, quantity);
 
@@ -122,8 +116,8 @@ class OrderTest {
     assertThat(addedItem.productName()).isEqualTo(product.name());
     assertThat(addedItem.price()).isEqualTo(product.price());
     assertThat(addedItem.quantity()).isEqualTo(quantity);
-    assertThat(addedItem.totalAmount()).isEqualTo(new Money("100.00"));
-    assertThat(order.totalAmount()).isEqualTo(new Money("100.00"));
+    assertThat(addedItem.totalAmount()).isEqualTo(new Money("6000.00"));
+    assertThat(order.totalAmount()).isEqualTo(new Money("6000.00"));
     assertThat(order.totalItems()).isEqualTo(new Quantity(2));
   }
 
@@ -131,38 +125,33 @@ class OrderTest {
   void given_draftOrder_whenAddMultipleItems_shouldRecalculateTotals() {
     Order order = OrderTestDataBuilder.draftOrder();
 
-    order.addItem(OrderTestDataBuilder.validProduct(), OrderTestDataBuilder.validQuantity());
-    order.addItem(
-        OrderTestDataBuilder.productWith(new ProductName("Mouse"), new Money("25.00")),
-        new Quantity(1));
+    order.addItem(ProductTestDataBuilder.aProduct().build(), new Quantity(2));
+    order.addItem(ProductTestDataBuilder.aProductAltMousePad().build(), new Quantity(1));
 
     assertThat(order.items()).hasSize(2);
-    assertThat(order.totalAmount()).isEqualTo(new Money("125.00"));
+    assertThat(order.totalAmount()).isEqualTo(new Money("6100.00"));
     assertThat(order.totalItems()).isEqualTo(new Quantity(3));
   }
 
   @Test
   void given_existingOrderWithShippingCost_whenAddItem_shouldRecalculateTotalsIncludingShipping() {
-    Order order = OrderTestDataBuilder.existingOrder().build();
+    Order order = OrderTestDataBuilder.anOrder().build();
 
-    order.addItem(
-        OrderTestDataBuilder.productWith(new ProductName("Keyboard"), new Money("120.00")),
-        new Quantity(1));
+    order.addItem(ProductTestDataBuilder.aProductAltMousePad().build(), new Quantity(1));
 
-    assertThat(order.items()).hasSize(2);
-    assertThat(order.totalAmount()).isEqualTo(new Money("230.00"));
-    assertThat(order.totalItems()).isEqualTo(new Quantity(3));
+    assertThat(order.items()).hasSize(3);
+    assertThat(order.totalAmount()).isEqualTo(new Money("6310.00"));
+    assertThat(order.totalItems()).isEqualTo(new Quantity(4));
   }
 
   @Test
   void given_existingOrder_whenAddItem_shouldAppendToExistingItems() {
-    Order order = OrderTestDataBuilder.existingOrder().build();
+    Order order = OrderTestDataBuilder.anOrder().build();
+    int initialSize = order.items().size();
 
-    order.addItem(
-        OrderTestDataBuilder.productWith(new ProductName("Keyboard"), new Money("120.00")),
-        new Quantity(1));
+    order.addItem(ProductTestDataBuilder.aProductAltMousePad().build(), new Quantity(1));
 
-    assertThat(order.items()).hasSize(2);
+    assertThat(order.items()).hasSize(initialSize + 1);
   }
 
   @Test
@@ -170,19 +159,27 @@ class OrderTest {
     Order order = OrderTestDataBuilder.draftOrder();
 
     Assertions.assertThatNullPointerException()
-        .isThrownBy(() -> order.addItem(null, OrderTestDataBuilder.validQuantity()));
+        .isThrownBy(() -> order.addItem(null, new Quantity(1)));
 
     Assertions.assertThatNullPointerException()
-        .isThrownBy(() -> order.addItem(OrderTestDataBuilder.validProduct(), null));
+        .isThrownBy(() -> order.addItem(ProductTestDataBuilder.aProduct().build(), null));
+  }
+
+  @Test
+  void given_outOfStockProduct_whenAddItem_shouldGenerateException() {
+    Order order = OrderTestDataBuilder.draftOrder();
+
+    Assertions.assertThatExceptionOfType(ProductOutOfStockException.class)
+        .isThrownBy(() -> order.addItem(ProductTestDataBuilder.aProductUnavailable().build(), new Quantity(1)));
   }
 
   @Test
   void given_order_whenGetItems_shouldReturnUnmodifiableCollection() {
     Order order = OrderTestDataBuilder.draftOrder();
-    order.addItem(OrderTestDataBuilder.validProduct(), OrderTestDataBuilder.validQuantity());
+    order.addItem(ProductTestDataBuilder.aProduct().build(), new Quantity(1));
 
     Assertions.assertThatThrownBy(() -> order.items().add(
-        OrderTestDataBuilder.brandNewOrderItem(order.id()).build()))
+        OrderItemTestDataBuilder.brandNewOrderItem(order.id()).build()))
         .isInstanceOf(UnsupportedOperationException.class);
 
     Assertions.assertThatThrownBy(() -> order.items().clear())
@@ -195,7 +192,7 @@ class OrderTest {
 
     assertThat(order.items()).isEmpty();
 
-    order.addItem(OrderTestDataBuilder.validProduct(), OrderTestDataBuilder.validQuantity());
+    order.addItem(ProductTestDataBuilder.aProduct().build(), new Quantity(1));
 
     assertThat(order.items()).hasSize(1);
   }
@@ -207,21 +204,21 @@ class OrderTest {
     itemsField.setAccessible(true);
     itemsField.set(order, null);
 
-    order.addItem(OrderTestDataBuilder.validProduct(), OrderTestDataBuilder.validQuantity());
+    order.addItem(ProductTestDataBuilder.aProduct().build(), new Quantity(2));
 
     assertThat(order.items()).hasSize(1);
-    assertThat(order.totalAmount()).isEqualTo(new Money("100.00"));
+    assertThat(order.totalAmount()).isEqualTo(new Money("6000.00"));
     assertThat(order.totalItems()).isEqualTo(new Quantity(2));
   }
 
   @Test
   void given_existingOrder_whenBuild_shouldExposeFields() {
-    Order order = OrderTestDataBuilder.existingOrder().build();
+    Order order = OrderTestDataBuilder.aPlacedOrder().build();
 
     assertThat(order.id()).isNotNull();
     assertThat(order.customerId()).isNotNull();
-    assertThat(order.totalAmount()).isEqualTo(new Money("100.00"));
-    assertThat(order.totalItems()).isEqualTo(new Quantity(2));
+    assertThat(order.totalAmount()).isEqualTo(new Money("6210.00"));
+    assertThat(order.totalItems()).isEqualTo(new Quantity(3));
     assertThat(order.placedAt()).isNotNull();
     assertThat(order.paidAt()).isNull();
     assertThat(order.canceledAt()).isNull();
@@ -230,65 +227,53 @@ class OrderTest {
     assertThat(order.shipping()).isNotNull();
     assertThat(order.status()).isEqualTo(OrderStatus.PLACED);
     assertThat(order.paymentMethod()).isEqualTo(PaymentMethod.CREDIT_CARD);
-    assertThat(order.shippingCost()).isEqualTo(new Money("10.00"));
-    assertThat(order.expectedDeliveryDate()).isNotNull();
-    assertThat(order.items()).hasSize(1);
+    assertThat(order.shipping().cost()).isEqualTo(new Money("10.00"));
+    assertThat(order.shipping().expectedDate()).isNotNull();
+    assertThat(order.items()).hasSize(2);
   }
 
   @Test
-  void given_order_whenChangeShipping_shouldUpdateFieldsAndRecalculateTotal() {
-    Order order = OrderTestDataBuilder.existingOrder().build();
-    ShippingInfo shipping = ShippingInfo.builder()
-        .fullName(ValueObjectTestFixtures.validFullName())
-        .document(ValueObjectTestFixtures.validDocument())
-        .phone(ValueObjectTestFixtures.validPhone())
-        .address(ValueObjectTestFixtures.validAddress().toBuilder()
-            .street("Shipping Street")
-            .number("999")
-            .build())
-        .build();
-    Money shippingCost = new Money("25.00");
-    LocalDate expectedDeliveryDate = LocalDate.now().plusDays(7);
+  void given_order_whenChangeShipping_shouldUpdateShipping() {
+    Order order = OrderTestDataBuilder.aPlacedOrder().build();
+    Shipping shipping = OrderTestDataBuilder.aShippingAlt();
 
-    order.changeShipping(shipping, shippingCost, expectedDeliveryDate);
+    order.changeShipping(shipping);
 
     assertThat(order.shipping()).isEqualTo(shipping);
-    assertThat(order.shippingCost()).isEqualTo(shippingCost);
-    assertThat(order.expectedDeliveryDate()).isEqualTo(expectedDeliveryDate);
-    assertThat(order.totalAmount()).isEqualTo(new Money("125.00"));
+    assertThat(order.shipping().cost()).isEqualTo(new Money("20.00"));
+    assertThat(order.shipping().expectedDate()).isEqualTo(shipping.expectedDate());
   }
 
   @Test
   void given_order_whenChangeShippingWithPastExpectedDate_shouldGenerateException() {
-    Order order = OrderTestDataBuilder.existingOrder().build();
-    ShippingInfo shipping = OrderTestDataBuilder.existingOrder().build().shipping();
-    LocalDate expectedDeliveryDate = LocalDate.now().minusDays(1);
+    Order order = OrderTestDataBuilder.aPlacedOrder().build();
+    Shipping shipping = Shipping.builder()
+        .cost(new Money("25.00"))
+        .expectedDate(LocalDate.now().minusDays(1))
+        .recipient(Recipient.builder()
+            .fullName(ValueObjectTestFixtures.validFullName())
+            .document(ValueObjectTestFixtures.validDocument())
+            .phone(ValueObjectTestFixtures.validPhone())
+            .build())
+        .address(OrderTestDataBuilder.anAddress())
+        .build();
 
     Assertions.assertThatExceptionOfType(OrderInvalidShippingDeliveryDateException.class)
-        .isThrownBy(() -> order.changeShipping(shipping, new Money("25.00"), expectedDeliveryDate))
+        .isThrownBy(() -> order.changeShipping(shipping))
         .withMessage(String.format(ERROR_ORDER_DELIVERY_DATE_CANNOT_BE_IN_THE_PAST, order.id()));
   }
 
   @Test
   void given_order_whenChangeShippingWithNullRequiredFields_shouldGenerateException() {
-    Order order = OrderTestDataBuilder.existingOrder().build();
-    ShippingInfo shipping = OrderTestDataBuilder.existingOrder().build().shipping();
-    Money shippingCost = new Money("25.00");
-    LocalDate expectedDeliveryDate = LocalDate.now().plusDays(7);
+    Order order = OrderTestDataBuilder.aPlacedOrder().build();
 
     Assertions.assertThatNullPointerException()
-        .isThrownBy(() -> order.changeShipping(null, shippingCost, expectedDeliveryDate));
-
-    Assertions.assertThatNullPointerException()
-        .isThrownBy(() -> order.changeShipping(shipping, null, expectedDeliveryDate));
-
-    Assertions.assertThatNullPointerException()
-        .isThrownBy(() -> order.changeShipping(shipping, shippingCost, null));
+        .isThrownBy(() -> order.changeShipping(null));
   }
 
   @Test
   void given_order_whenChangePaymentMethod_shouldUpdateField() {
-    Order order = OrderTestDataBuilder.existingOrder().build();
+    Order order = OrderTestDataBuilder.aPlacedOrder().build();
 
     order.changePaymentMethod(PaymentMethod.GATEWAY_BALANCE);
 
@@ -297,7 +282,7 @@ class OrderTest {
 
   @Test
   void given_order_whenChangePaymentMethodWithNull_shouldGenerateException() {
-    Order order = OrderTestDataBuilder.existingOrder().build();
+    Order order = OrderTestDataBuilder.aPlacedOrder().build();
 
     Assertions.assertThatNullPointerException()
         .isThrownBy(() -> order.changePaymentMethod(null));
@@ -305,7 +290,7 @@ class OrderTest {
 
   @Test
   void given_order_whenChangeBilling_shouldUpdateField() {
-    Order order = OrderTestDataBuilder.existingOrder().build();
+    Order order = OrderTestDataBuilder.aPlacedOrder().build();
     BillingInfo billing = BillingInfo.builder()
         .fullName(ValueObjectTestFixtures.validFullName())
         .document(ValueObjectTestFixtures.validDocument())
@@ -323,7 +308,7 @@ class OrderTest {
 
   @Test
   void given_order_whenChangeBillingWithNull_shouldGenerateException() {
-    Order order = OrderTestDataBuilder.existingOrder().build();
+    Order order = OrderTestDataBuilder.aPlacedOrder().build();
 
     Assertions.assertThatNullPointerException()
         .isThrownBy(() -> order.changeBilling(null));
@@ -332,11 +317,19 @@ class OrderTest {
   @Test
   void given_paidOrder_whenBuild_shouldAllowOptionalTimestamps() {
     OffsetDateTime now = OffsetDateTime.now();
-    Order order = OrderTestDataBuilder.existingOrder()
+    Order order = Order.existing()
+        .id(new OrderId(1L))
+        .customerId(new CustomerId())
+        .totalAmount(new Money("100.00"))
+        .totalItems(new Quantity(2))
+        .placedAt(now)
         .paidAt(now)
         .readyAt(now)
+        .billing(OrderTestDataBuilder.aBillingInfo())
+        .shipping(OrderTestDataBuilder.aShipping())
         .status(OrderStatus.PAID)
         .paymentMethod(PaymentMethod.GATEWAY_BALANCE)
+        .items(new HashSet<>())
         .build();
 
     assertThat(order.paidAt()).isEqualTo(now);
@@ -348,8 +341,26 @@ class OrderTest {
   @Test
   void given_ordersWithSameId_whenCompare_shouldBeEqual() {
     OrderId orderId = new OrderId(99L);
-    Order first = OrderTestDataBuilder.existingOrder().id(orderId).build();
-    Order second = OrderTestDataBuilder.existingOrder().id(orderId).build();
+    Order first = Order.existing()
+        .id(orderId)
+        .customerId(new CustomerId())
+        .totalAmount(Money.ZERO)
+        .totalItems(Quantity.ZERO)
+        .billing(OrderTestDataBuilder.aBillingInfo())
+        .shipping(OrderTestDataBuilder.aShipping())
+        .status(OrderStatus.DRAFT)
+        .items(new HashSet<>())
+        .build();
+    Order second = Order.existing()
+        .id(orderId)
+        .customerId(new CustomerId())
+        .totalAmount(Money.ZERO)
+        .totalItems(Quantity.ZERO)
+        .billing(OrderTestDataBuilder.aBillingInfo())
+        .shipping(OrderTestDataBuilder.aShipping())
+        .status(OrderStatus.DRAFT)
+        .items(new HashSet<>())
+        .build();
 
     assertThat(first).isEqualTo(second);
     assertThat(first.hashCode()).isEqualTo(second.hashCode());
@@ -357,8 +368,26 @@ class OrderTest {
 
   @Test
   void given_ordersWithDifferentId_whenCompare_shouldNotBeEqual() {
-    Order first = OrderTestDataBuilder.existingOrder().id(new OrderId(1L)).build();
-    Order second = OrderTestDataBuilder.existingOrder().id(new OrderId(2L)).build();
+    Order first = Order.existing()
+        .id(new OrderId(1L))
+        .customerId(new CustomerId())
+        .totalAmount(Money.ZERO)
+        .totalItems(Quantity.ZERO)
+        .billing(OrderTestDataBuilder.aBillingInfo())
+        .shipping(OrderTestDataBuilder.aShipping())
+        .status(OrderStatus.DRAFT)
+        .items(new HashSet<>())
+        .build();
+    Order second = Order.existing()
+        .id(new OrderId(2L))
+        .customerId(new CustomerId())
+        .totalAmount(Money.ZERO)
+        .totalItems(Quantity.ZERO)
+        .billing(OrderTestDataBuilder.aBillingInfo())
+        .shipping(OrderTestDataBuilder.aShipping())
+        .status(OrderStatus.DRAFT)
+        .items(new HashSet<>())
+        .build();
 
     assertThat(first).isNotEqualTo(second);
     assertThat(first).isNotEqualTo(null);
@@ -374,27 +403,33 @@ class OrderTest {
   @Test
   void given_nullRequiredFields_whenBuildExistingOrder_shouldGenerateException() {
     Assertions.assertThatNullPointerException()
-        .isThrownBy(() -> OrderTestDataBuilder.existingOrder().id(null).build());
+        .isThrownBy(() -> Order.existing().id(null).customerId(new CustomerId()).totalAmount(Money.ZERO)
+            .totalItems(Quantity.ZERO).status(OrderStatus.DRAFT).items(new HashSet<>()).build());
 
     Assertions.assertThatNullPointerException()
-        .isThrownBy(() -> OrderTestDataBuilder.existingOrder().customerId(null).build());
+        .isThrownBy(() -> Order.existing().id(new OrderId(1L)).customerId(null).totalAmount(Money.ZERO)
+            .totalItems(Quantity.ZERO).status(OrderStatus.DRAFT).items(new HashSet<>()).build());
 
     Assertions.assertThatNullPointerException()
-        .isThrownBy(() -> OrderTestDataBuilder.existingOrder().totalAmount(null).build());
+        .isThrownBy(() -> Order.existing().id(new OrderId(1L)).customerId(new CustomerId()).totalAmount(null)
+            .totalItems(Quantity.ZERO).status(OrderStatus.DRAFT).items(new HashSet<>()).build());
 
     Assertions.assertThatNullPointerException()
-        .isThrownBy(() -> OrderTestDataBuilder.existingOrder().totalItems(null).build());
+        .isThrownBy(() -> Order.existing().id(new OrderId(1L)).customerId(new CustomerId()).totalAmount(Money.ZERO)
+            .totalItems(null).status(OrderStatus.DRAFT).items(new HashSet<>()).build());
 
     Assertions.assertThatNullPointerException()
-        .isThrownBy(() -> OrderTestDataBuilder.existingOrder().status(null).build());
+        .isThrownBy(() -> Order.existing().id(new OrderId(1L)).customerId(new CustomerId()).totalAmount(Money.ZERO)
+            .totalItems(Quantity.ZERO).status(null).items(new HashSet<>()).build());
 
     Assertions.assertThatNullPointerException()
-        .isThrownBy(() -> OrderTestDataBuilder.existingOrder().items(null).build());
+        .isThrownBy(() -> Order.existing().id(new OrderId(1L)).customerId(new CustomerId()).totalAmount(Money.ZERO)
+            .totalItems(Quantity.ZERO).status(OrderStatus.DRAFT).items(null).build());
   }
 
   @Test
   void given_placedOrder_whenMarkAsPaid_shouldSetPaidAtAndStatusToPaid() {
-    Order order = OrderTestDataBuilder.existingOrder().status(OrderStatus.PLACED).build();
+    Order order = OrderTestDataBuilder.aPlacedOrder().build();
     assertThat(order.isPaid()).isFalse();
     assertThat(order.paidAt()).isNull();
 
@@ -413,10 +448,7 @@ class OrderTest {
 
   @Test
   void given_draftOrderWithoutShippingInfo_whenPlace_shouldGenerateException() {
-    Order order = OrderTestDataBuilder.draftOrder();
-    order.addItem(OrderTestDataBuilder.validProduct(), OrderTestDataBuilder.validQuantity());
-    order.changeBilling(OrderTestDataBuilder.existingOrder().build().billing());
-    order.changePaymentMethod(PaymentMethod.CREDIT_CARD);
+    Order order = aPlaceableDraftOrderWithoutShipping();
 
     Assertions.assertThatExceptionOfType(OrderCannotBePlacedException.class)
         .isThrownBy(order::place)
@@ -425,13 +457,7 @@ class OrderTest {
 
   @Test
   void given_draftOrderWithoutBillingInfo_whenPlace_shouldGenerateException() {
-    Order order = OrderTestDataBuilder.draftOrder();
-    order.addItem(OrderTestDataBuilder.validProduct(), OrderTestDataBuilder.validQuantity());
-    order.changePaymentMethod(PaymentMethod.CREDIT_CARD);
-    order.changeShipping(
-        OrderTestDataBuilder.existingOrder().build().shipping(),
-        new Money("10.00"),
-        LocalDate.now().plusDays(5));
+    Order order = aPlaceableDraftOrderWithoutBilling();
 
     Assertions.assertThatExceptionOfType(OrderCannotBePlacedException.class)
         .isThrownBy(order::place)
@@ -440,13 +466,7 @@ class OrderTest {
 
   @Test
   void given_draftOrderWithoutPaymentMethod_whenPlace_shouldGenerateException() {
-    Order order = OrderTestDataBuilder.draftOrder();
-    order.addItem(OrderTestDataBuilder.validProduct(), OrderTestDataBuilder.validQuantity());
-    order.changeBilling(OrderTestDataBuilder.existingOrder().build().billing());
-    order.changeShipping(
-        OrderTestDataBuilder.existingOrder().build().shipping(),
-        new Money("10.00"),
-        LocalDate.now().plusDays(5));
+    Order order = aPlaceableDraftOrderWithoutPaymentMethod();
 
     Assertions.assertThatExceptionOfType(OrderCannotBePlacedException.class)
         .isThrownBy(order::place)
@@ -454,34 +474,8 @@ class OrderTest {
   }
 
   @Test
-  void given_draftOrderWithoutShippingCost_whenPlace_shouldGenerateException() {
-    Order order = OrderTestDataBuilder.existingOrder()
-        .status(OrderStatus.DRAFT)
-        .shippingCost(null)
-        .build();
-
-    Assertions.assertThatExceptionOfType(OrderCannotBePlacedException.class)
-        .isThrownBy(order::place)
-        .withMessage(String.format(ERROR_ORDER_CANNOT_BE_PLACED_INVALID_SHIPPING_COST, order.id()));
-  }
-
-  @Test
-  void given_draftOrderWithoutExpectedDeliveryDate_whenPlace_shouldGenerateException() {
-    Order order = OrderTestDataBuilder.existingOrder()
-        .status(OrderStatus.DRAFT)
-        .expectedDeliveryDate(null)
-        .build();
-
-    Assertions.assertThatExceptionOfType(OrderCannotBePlacedException.class)
-        .isThrownBy(order::place)
-        .withMessage(String.format(ERROR_ORDER_CANNOT_BE_PLACED_INVALID_DELIVERY_DATE, order.id()));
-  }
-
-  @Test
   void given_draftOrderWithNullItems_whenPlace_shouldGenerateException() throws Exception {
-    Order order = OrderTestDataBuilder.existingOrder()
-        .status(OrderStatus.DRAFT)
-        .build();
+    Order order = OrderTestDataBuilder.anOrder().build();
     Field itemsField = Order.class.getDeclaredField("items");
     itemsField.setAccessible(true);
     itemsField.set(order, null);
@@ -493,21 +487,21 @@ class OrderTest {
 
   @Test
   void given_orderWithItem_whenChangeItemQuantity_shouldUpdateQuantityAndRecalculateTotals() {
-    Order order = OrderTestDataBuilder.existingOrder().build();
-    OrderItem item = order.items().iterator().next();
+    Order order = aDraftOrderWithSingleItem();
 
+    OrderItem item = order.items().iterator().next();
     assertThat(item.quantity()).isEqualTo(new Quantity(2));
-    assertThat(order.totalAmount()).isEqualTo(new Money("100.00")); // builder hardcodes totalAmount to 100.00
+    assertThat(order.totalAmount()).isEqualTo(new Money("110.00"));
 
     order.changeItemQuantity(item.id(), new Quantity(5));
 
     assertThat(item.quantity()).isEqualTo(new Quantity(5));
-    assertThat(order.totalAmount()).isEqualTo(new Money("260.00")); // items: 250.00 + shipping: 10.00
+    assertThat(order.totalAmount()).isEqualTo(new Money("260.00"));
   }
 
   @Test
   void given_orderWithItem_whenChangeItemQuantityWithNulls_shouldThrowNullPointerException() {
-    Order order = OrderTestDataBuilder.existingOrder().build();
+    Order order = aDraftOrderWithSingleItem();
     OrderItem item = order.items().iterator().next();
 
     Assertions.assertThatNullPointerException()
@@ -519,7 +513,7 @@ class OrderTest {
 
   @Test
   void given_orderWithoutItem_whenChangeItemQuantity_shouldThrowOrderDoesNotContainOrderItemException() {
-    Order order = OrderTestDataBuilder.existingOrder().build();
+    Order order = OrderTestDataBuilder.aPlacedOrder().build();
     OrderItemId nonExistingItemId = new OrderItemId(999L);
 
     Assertions.assertThatExceptionOfType(OrderDoesNotContainOrderItemException.class)
@@ -527,15 +521,36 @@ class OrderTest {
         .withMessage(String.format(ERROR_ORDER_DOES_NOT_CONTAIN_ITEM, order.id(), nonExistingItemId));
   }
 
-  private Order aPlaceableDraftOrder() {
+  private Order aDraftOrderWithSingleItem() {
     Order order = OrderTestDataBuilder.draftOrder();
-    order.addItem(OrderTestDataBuilder.validProduct(), OrderTestDataBuilder.validQuantity());
-    order.changeBilling(OrderTestDataBuilder.existingOrder().build().billing());
+    order.changeShipping(OrderTestDataBuilder.aShipping());
+    order.changeBilling(OrderTestDataBuilder.aBillingInfo());
     order.changePaymentMethod(PaymentMethod.CREDIT_CARD);
-    order.changeShipping(
-        OrderTestDataBuilder.existingOrder().build().shipping(),
-        new Money("10.00"),
-        LocalDate.now().plusDays(5));
+    order.addItem(OrderItemTestDataBuilder.validProduct(), OrderItemTestDataBuilder.validQuantity());
+    return order;
+  }
+
+  private Order aPlaceableDraftOrderWithoutShipping() {
+    Order order = OrderTestDataBuilder.draftOrder();
+    order.addItem(ProductTestDataBuilder.aProduct().build(), new Quantity(1));
+    order.changeBilling(OrderTestDataBuilder.aBillingInfo());
+    order.changePaymentMethod(PaymentMethod.CREDIT_CARD);
+    return order;
+  }
+
+  private Order aPlaceableDraftOrderWithoutBilling() {
+    Order order = OrderTestDataBuilder.draftOrder();
+    order.addItem(ProductTestDataBuilder.aProduct().build(), new Quantity(1));
+    order.changeShipping(OrderTestDataBuilder.aShipping());
+    order.changePaymentMethod(PaymentMethod.CREDIT_CARD);
+    return order;
+  }
+
+  private Order aPlaceableDraftOrderWithoutPaymentMethod() {
+    Order order = OrderTestDataBuilder.draftOrder();
+    order.addItem(ProductTestDataBuilder.aProduct().build(), new Quantity(1));
+    order.changeBilling(OrderTestDataBuilder.aBillingInfo());
+    order.changeShipping(OrderTestDataBuilder.aShipping());
     return order;
   }
 }

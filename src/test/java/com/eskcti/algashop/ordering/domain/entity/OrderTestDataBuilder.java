@@ -1,110 +1,166 @@
 package com.eskcti.algashop.ordering.domain.entity;
 
 import java.time.LocalDate;
-import java.time.OffsetDateTime;
-import java.util.HashSet;
-import java.util.Set;
 
-import com.eskcti.algashop.ordering.domain.valueobject.BillingInfo;
-import com.eskcti.algashop.ordering.domain.valueobject.Money;
-import com.eskcti.algashop.ordering.domain.valueobject.Product;
-import com.eskcti.algashop.ordering.domain.valueobject.ProductName;
-import com.eskcti.algashop.ordering.domain.valueobject.Quantity;
-import com.eskcti.algashop.ordering.domain.valueobject.ShippingInfo;
-import com.eskcti.algashop.ordering.domain.valueobject.ValueObjectTestFixtures;
+import com.eskcti.algashop.ordering.domain.valueobject.*;
 import com.eskcti.algashop.ordering.domain.valueobject.id.CustomerId;
-import com.eskcti.algashop.ordering.domain.valueobject.id.OrderId;
-import com.eskcti.algashop.ordering.domain.valueobject.id.OrderItemId;
-import com.eskcti.algashop.ordering.domain.valueobject.id.ProductId;
 
-public final class OrderTestDataBuilder {
+public class OrderTestDataBuilder {
+
+  private CustomerId customerId = new CustomerId();
+
+  private PaymentMethod paymentMethod = PaymentMethod.GATEWAY_BALANCE;
+
+  private Shipping shipping = aShipping();
+  private BillingInfo billingInfo = aBillingInfo();
+
+  private boolean withItems = true;
+
+  private OrderStatus status = OrderStatus.DRAFT;
 
   private OrderTestDataBuilder() {
+
+  }
+
+  public static OrderTestDataBuilder anOrder() {
+    return new OrderTestDataBuilder();
   }
 
   public static Order draftOrder() {
     return Order.draft(new CustomerId());
   }
 
-  public static Order.ExistingOrderBuilder existingOrder() {
-    OrderId orderId = new OrderId(1L);
-    return Order.existing()
-        .id(orderId)
-        .customerId(new CustomerId())
-        .totalAmount(new Money("100.00"))
-        .totalItems(new Quantity(2))
-        .placedAt(OffsetDateTime.now())
-        .paidAt(null)
-        .canceledAt(null)
-        .readyAt(null)
-        .billing(BillingInfo.builder()
-            .fullName(ValueObjectTestFixtures.validFullName())
-            .document(ValueObjectTestFixtures.validDocument())
-            .phone(ValueObjectTestFixtures.validPhone())
-            .address(ValueObjectTestFixtures.validAddress())
-            .build())
-        .shipping(ShippingInfo.builder()
-            .fullName(ValueObjectTestFixtures.validFullName())
-            .document(ValueObjectTestFixtures.validDocument())
-            .phone(ValueObjectTestFixtures.validPhone())
-            .address(ValueObjectTestFixtures.validAddress())
-            .build())
-        .status(OrderStatus.PLACED)
+  public static OrderTestDataBuilder aPlacedOrder() {
+    return anOrder()
         .paymentMethod(PaymentMethod.CREDIT_CARD)
-        .shippingCost(new Money("10.00"))
-        .expectedDeliveryDate(LocalDate.now().plusDays(5))
-        .items(new HashSet<>(Set.of(existingOrderItem(orderId).build())));
+        .status(OrderStatus.PLACED);
   }
 
-  public static OrderItem.ExistingOrderItemBuilder existingOrderItem(OrderId orderId) {
-    return OrderItem.existing()
-        .id(new OrderItemId(1L))
-        .orderId(orderId)
-        .productId(validProductId())
-        .productName(validProductName())
-        .price(validPrice())
-        .quantity(validQuantity())
-        .totalAmount(new Money("100.00"));
+  public Order build() {
+    Order order = Order.draft(customerId);
+    order.changeShipping(shipping);
+    order.changeBilling(billingInfo);
+    order.changePaymentMethod(paymentMethod);
+
+    if (withItems) {
+      order.addItem(ProductTestDataBuilder.aProduct().build(),
+          new Quantity(2));
+
+      order.addItem(ProductTestDataBuilder.aProductAltRamMemory().build(),
+          new Quantity(1));
+    }
+
+    switch (this.status) {
+      case DRAFT -> {
+      }
+      case PLACED -> {
+        order.place();
+      }
+      case PAID -> {
+        order.place();
+        order.markAsPaid();
+      }
+      case CANCELED -> setStatus(order, OrderStatus.CANCELED);
+      case READY -> setStatus(order, OrderStatus.READY);
+    }
+
+    return order;
   }
 
-  public static OrderItem.BrandNewOrderItemBuilder brandNewOrderItem(OrderId orderId) {
-    return OrderItem.brandNew()
-        .orderId(orderId)
-        .product(validProduct())
-        .quantity(validQuantity());
+  public static BillingInfo aBillingInfo() {
+    return BillingInfo.builder()
+        .address(anAddress())
+        .document(new Document("225-09-1992"))
+        .phone(new Phone("123-111-9911"))
+        .fullName(new FullName("John", "Doe")).build();
   }
 
-  public static Product validProduct() {
-    return Product.builder()
-        .id(validProductId())
-        .name(validProductName())
-        .price(validPrice())
-        .inStock(true)
+  public static Shipping aShipping() {
+    return Shipping.builder()
+        .cost(new Money("10"))
+        .expectedDate(LocalDate.now().plusWeeks(1))
+        .address(anAddress())
+        .recipient(Recipient.builder()
+            .fullName(new FullName("John", "Doe"))
+            .document(new Document("112-33-2321"))
+            .phone(new Phone("111-441-1244"))
+            .build())
         .build();
   }
 
-  public static Product productWith(ProductName name, Money price) {
-    return Product.builder()
-        .id(new ProductId())
-        .name(name)
-        .price(price)
-        .inStock(true)
+  public static Address anAddress() {
+    return Address.builder()
+        .street("Bourbon Street")
+        .number("1234")
+        .neighborhood("North Ville")
+        .complement("apt. 11")
+        .city("Montfort")
+        .state("South Carolina")
+        .zipCode(new ZipCode("79911")).build();
+  }
+
+  public static Shipping aShippingAlt() {
+    return Shipping.builder()
+        .cost(new Money("20.00"))
+        .expectedDate(LocalDate.now().plusWeeks(2))
+        .address(anAddressAlt())
+        .recipient(Recipient.builder()
+            .fullName(new FullName("Mary", "Jones"))
+            .document(new Document("552-11-4333"))
+            .phone(new Phone("54-454-1144"))
+            .build())
         .build();
   }
 
-  public static ProductId validProductId() {
-    return new ProductId();
+  public static Address anAddressAlt() {
+    return Address.builder()
+        .street("Sansome Street")
+        .number("875")
+        .neighborhood("Sansome")
+        .city("San Francisco")
+        .state("California")
+        .zipCode(new ZipCode("08040"))
+        .build();
   }
 
-  public static ProductName validProductName() {
-    return new ProductName("Notebook");
+  public OrderTestDataBuilder customerId(CustomerId customerId) {
+    this.customerId = customerId;
+    return this;
   }
 
-  public static Money validPrice() {
-    return new Money("50.00");
+  public OrderTestDataBuilder paymentMethod(PaymentMethod paymentMethod) {
+    this.paymentMethod = paymentMethod;
+    return this;
   }
 
-  public static Quantity validQuantity() {
-    return new Quantity(2);
+  public OrderTestDataBuilder shippingInfo(Shipping shipping) {
+    this.shipping = shipping;
+    return this;
   }
+
+  public OrderTestDataBuilder billingInfo(BillingInfo billingInfo) {
+    this.billingInfo = billingInfo;
+    return this;
+  }
+
+  public OrderTestDataBuilder withItems(boolean withItems) {
+    this.withItems = withItems;
+    return this;
+  }
+
+  public OrderTestDataBuilder status(OrderStatus status) {
+    this.status = status;
+    return this;
+  }
+
+  private static void setStatus(Order order, OrderStatus status) {
+    try {
+      var field = Order.class.getDeclaredField("status");
+      field.setAccessible(true);
+      field.set(order, status);
+    } catch (ReflectiveOperationException e) {
+      throw new IllegalStateException(e);
+    }
+  }
+
 }

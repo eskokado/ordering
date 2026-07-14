@@ -33,20 +33,6 @@ class OrderCannotBePlacedExceptionTest {
   }
 
   @Test
-  void shouldCreateWithInvalidShippingCostMessage() {
-    OrderCannotBePlacedException exception = OrderCannotBePlacedException.invalidShippingCost(orderId);
-    Assertions.assertThat(exception.getMessage())
-        .isEqualTo(String.format(ERROR_ORDER_CANNOT_BE_PLACED_INVALID_SHIPPING_COST, orderId));
-  }
-
-  @Test
-  void shouldCreateWithInvalidExpectedDeliveryDateMessage() {
-    OrderCannotBePlacedException exception = OrderCannotBePlacedException.invalidExpectedDeliveryDate(orderId);
-    Assertions.assertThat(exception.getMessage())
-        .isEqualTo(String.format(ERROR_ORDER_CANNOT_BE_PLACED_INVALID_DELIVERY_DATE, orderId));
-  }
-
-  @Test
   void shouldCreateWithNoPaymentMethodMessage() {
     OrderCannotBePlacedException exception = OrderCannotBePlacedException.noPaymentMethod(orderId);
     Assertions.assertThat(exception.getMessage())
