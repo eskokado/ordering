@@ -26,5 +26,7 @@ class ErrorMessagesTest {
         .isEqualTo("Cannot change order %s status from %s to %s");
     assertThat(ErrorMessages.ERROR_ORDER_DELIVERY_DATE_CANNOT_BE_IN_THE_PAST)
         .isEqualTo("Order %s expected delivery date cannot be in the past");
+    assertThat(ErrorMessages.ERROR_PRODUCT_IS_OUT_OF_STOCK)
+        .isEqualTo("Product %s is out of stock");
   }
 }
