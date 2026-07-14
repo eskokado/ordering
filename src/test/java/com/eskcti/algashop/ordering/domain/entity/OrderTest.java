@@ -8,6 +8,7 @@ import java.util.HashSet;
 import org.junit.jupiter.api.Test;
 import org.assertj.core.api.Assertions;
 
+import com.eskcti.algashop.ordering.domain.exception.OrderCannotBeEditedException;
 import com.eskcti.algashop.ordering.domain.exception.OrderCannotBePlacedException;
 import com.eskcti.algashop.ordering.domain.exception.OrderDoesNotContainOrderItemException;
 import com.eskcti.algashop.ordering.domain.exception.OrderInvalidShippingDeliveryDateException;
@@ -198,30 +199,6 @@ class OrderTest {
   }
 
   @Test
-  void given_orderWithNullItems_whenGetItems_shouldReturnEmptyCollection() throws Exception {
-    Order order = OrderTestDataBuilder.draftOrder();
-    Field itemsField = Order.class.getDeclaredField("items");
-    itemsField.setAccessible(true);
-    itemsField.set(order, null);
-
-    assertThat(order.items()).isEmpty();
-  }
-
-  @Test
-  void given_orderWithNullItems_whenAddItem_shouldInitializeCollection() throws Exception {
-    Order order = OrderTestDataBuilder.draftOrder();
-    Field itemsField = Order.class.getDeclaredField("items");
-    itemsField.setAccessible(true);
-    itemsField.set(order, null);
-
-    order.addItem(ProductTestDataBuilder.aProduct().build(), new Quantity(2));
-
-    assertThat(order.items()).hasSize(1);
-    assertThat(order.totalAmount()).isEqualTo(new Money("6000.00"));
-    assertThat(order.totalItems()).isEqualTo(new Quantity(2));
-  }
-
-  @Test
   void given_existingOrder_whenBuild_shouldExposeFields() {
     Order order = OrderTestDataBuilder.aPlacedOrder().build();
 
@@ -244,7 +221,7 @@ class OrderTest {
 
   @Test
   void given_order_whenChangeShipping_shouldUpdateShipping() {
-    Order order = OrderTestDataBuilder.aPlacedOrder().build();
+    Order order = OrderTestDataBuilder.draftOrder();
     Shipping shipping = OrderTestDataBuilder.aShippingAlt();
 
     order.changeShipping(shipping);
@@ -256,7 +233,7 @@ class OrderTest {
 
   @Test
   void given_order_whenChangeShippingWithPastExpectedDate_shouldGenerateException() {
-    Order order = OrderTestDataBuilder.aPlacedOrder().build();
+    Order order = OrderTestDataBuilder.draftOrder();
     Shipping shipping = Shipping.builder()
         .cost(new Money("25.00"))
         .expectedDate(LocalDate.now().minusDays(1))
@@ -275,7 +252,7 @@ class OrderTest {
 
   @Test
   void given_order_whenChangeShippingWithNullRequiredFields_shouldGenerateException() {
-    Order order = OrderTestDataBuilder.aPlacedOrder().build();
+    Order order = OrderTestDataBuilder.draftOrder();
 
     Assertions.assertThatNullPointerException()
         .isThrownBy(() -> order.changeShipping(null));
@@ -283,7 +260,7 @@ class OrderTest {
 
   @Test
   void given_order_whenChangePaymentMethod_shouldUpdateField() {
-    Order order = OrderTestDataBuilder.aPlacedOrder().build();
+    Order order = OrderTestDataBuilder.draftOrder();
 
     order.changePaymentMethod(PaymentMethod.GATEWAY_BALANCE);
 
@@ -292,7 +269,7 @@ class OrderTest {
 
   @Test
   void given_order_whenChangePaymentMethodWithNull_shouldGenerateException() {
-    Order order = OrderTestDataBuilder.aPlacedOrder().build();
+    Order order = OrderTestDataBuilder.draftOrder();
 
     Assertions.assertThatNullPointerException()
         .isThrownBy(() -> order.changePaymentMethod(null));
@@ -300,7 +277,7 @@ class OrderTest {
 
   @Test
   void given_order_whenChangeBilling_shouldUpdateField() {
-    Order order = OrderTestDataBuilder.aPlacedOrder().build();
+    Order order = OrderTestDataBuilder.draftOrder();
     Billing billing = Billing.builder()
         .fullName(ValueObjectTestFixtures.validFullName())
         .document(ValueObjectTestFixtures.validDocument())
@@ -319,7 +296,7 @@ class OrderTest {
 
   @Test
   void given_order_whenChangeBillingWithNull_shouldGenerateException() {
-    Order order = OrderTestDataBuilder.aPlacedOrder().build();
+    Order order = OrderTestDataBuilder.draftOrder();
 
     Assertions.assertThatNullPointerException()
         .isThrownBy(() -> order.changeBilling(null));
@@ -485,18 +462,6 @@ class OrderTest {
   }
 
   @Test
-  void given_draftOrderWithNullItems_whenPlace_shouldGenerateException() throws Exception {
-    Order order = OrderTestDataBuilder.anOrder().build();
-    Field itemsField = Order.class.getDeclaredField("items");
-    itemsField.setAccessible(true);
-    itemsField.set(order, null);
-
-    Assertions.assertThatExceptionOfType(OrderCannotBePlacedException.class)
-        .isThrownBy(order::place)
-        .withMessage(String.format(ERROR_ORDER_CANNOT_BE_PLACED_HAS_NO_ITEMS, order.id()));
-  }
-
-  @Test
   void given_orderWithItem_whenChangeItemQuantity_shouldUpdateQuantityAndRecalculateTotals() {
     Order order = aDraftOrderWithSingleItem();
 
@@ -524,7 +489,7 @@ class OrderTest {
 
   @Test
   void given_orderWithoutItem_whenChangeItemQuantity_shouldThrowOrderDoesNotContainOrderItemException() {
-    Order order = OrderTestDataBuilder.aPlacedOrder().build();
+    Order order = OrderTestDataBuilder.draftOrder();
     OrderItemId nonExistingItemId = new OrderItemId(999L);
 
     Assertions.assertThatExceptionOfType(OrderDoesNotContainOrderItemException.class)
@@ -563,5 +528,204 @@ class OrderTest {
     order.changeBilling(OrderTestDataBuilder.aBilling());
     order.changeShipping(OrderTestDataBuilder.aShipping());
     return order;
+  }
+
+  @Test
+  void given_placedOrder_whenMarkAsReady_shouldSetReadyAtAndStatusToReady() {
+    Order order = OrderTestDataBuilder.aPlacedOrder().build();
+    order.markAsPaid();
+    assertThat(order.isReady()).isFalse();
+    assertThat(order.readyAt()).isNull();
+
+    order.markAsReady();
+
+    assertThat(order.isReady()).isTrue();
+    assertThat(order.readyAt()).isNotNull();
+    assertThat(order.status()).isEqualTo(OrderStatus.READY);
+  }
+
+  @Test
+  void given_placedOrder_whenCancel_shouldSetCanceledAtAndStatusToCanceled() {
+    Order order = OrderTestDataBuilder.aPlacedOrder().build();
+    assertThat(order.isCanceled()).isFalse();
+    assertThat(order.canceledAt()).isNull();
+
+    order.cancel();
+
+    assertThat(order.isCanceled()).isTrue();
+    assertThat(order.canceledAt()).isNotNull();
+    assertThat(order.status()).isEqualTo(OrderStatus.CANCELED);
+  }
+
+  @Test
+  void given_paidOrder_whenCancel_shouldSetCanceledAtAndStatusToCanceled() {
+    Order order = OrderTestDataBuilder.aPlacedOrder().build();
+    order.markAsPaid();
+    assertThat(order.isCanceled()).isFalse();
+    assertThat(order.canceledAt()).isNull();
+
+    order.cancel();
+
+    assertThat(order.isCanceled()).isTrue();
+    assertThat(order.canceledAt()).isNotNull();
+    assertThat(order.status()).isEqualTo(OrderStatus.CANCELED);
+  }
+
+  @Test
+  void given_readyOrder_whenCancel_shouldSetCanceledAtAndStatusToCanceled() {
+    Order order = OrderTestDataBuilder.aPlacedOrder().build();
+    order.markAsPaid();
+    order.markAsReady();
+    assertThat(order.isCanceled()).isFalse();
+    assertThat(order.canceledAt()).isNull();
+
+    order.cancel();
+
+    assertThat(order.isCanceled()).isTrue();
+    assertThat(order.canceledAt()).isNotNull();
+    assertThat(order.status()).isEqualTo(OrderStatus.CANCELED);
+  }
+
+  @Test
+  void given_draftOrderWithItem_whenRemoveItem_shouldRemoveItemAndRecalculateTotals() {
+    Order order = OrderTestDataBuilder.draftOrder();
+    order.addItem(OrderItemTestDataBuilder.validProduct(), OrderItemTestDataBuilder.validQuantity());
+    OrderItem item = order.items().iterator().next();
+
+    order.removeItem(item.id());
+
+    assertThat(order.items()).isEmpty();
+    assertThat(order.totalAmount()).isEqualTo(Money.ZERO);
+    assertThat(order.totalItems()).isEqualTo(Quantity.ZERO);
+  }
+
+  @Test
+  void given_draftOrder_whenRemoveItemWithNullOrderItemId_shouldThrowNullPointerException() {
+    Order order = aDraftOrderWithSingleItem();
+
+    Assertions.assertThatNullPointerException()
+        .isThrownBy(() -> order.removeItem(null));
+  }
+
+  @Test
+  void given_draftOrderWithoutItem_whenRemoveItem_shouldThrowOrderDoesNotContainOrderItemException() {
+    Order order = OrderTestDataBuilder.draftOrder();
+    OrderItemId nonExistingItemId = new OrderItemId(999L);
+
+    Assertions.assertThatExceptionOfType(OrderDoesNotContainOrderItemException.class)
+        .isThrownBy(() -> order.removeItem(nonExistingItemId))
+        .withMessage(String.format(ERROR_ORDER_DOES_NOT_CONTAIN_ITEM, order.id(), nonExistingItemId));
+  }
+
+  @Test
+  void given_placedOrder_whenAddItem_shouldThrowOrderCannotBeEditedException() {
+    Order order = OrderTestDataBuilder.aPlacedOrder().build();
+    Product product = ProductTestDataBuilder.aProduct().build();
+    Quantity quantity = new Quantity(1);
+
+    Assertions.assertThatExceptionOfType(OrderCannotBeEditedException.class)
+        .isThrownBy(() -> order.addItem(product, quantity));
+  }
+
+  @Test
+  void given_paidOrder_whenAddItem_shouldThrowOrderCannotBeEditedException() {
+    Order order = OrderTestDataBuilder.aPlacedOrder().build();
+    order.markAsPaid();
+    Product product = ProductTestDataBuilder.aProduct().build();
+    Quantity quantity = new Quantity(1);
+
+    Assertions.assertThatExceptionOfType(OrderCannotBeEditedException.class)
+        .isThrownBy(() -> order.addItem(product, quantity));
+  }
+
+  @Test
+  void given_readyOrder_whenAddItem_shouldThrowOrderCannotBeEditedException() {
+    Order order = OrderTestDataBuilder.aPlacedOrder().build();
+    order.markAsPaid();
+    order.markAsReady();
+    Product product = ProductTestDataBuilder.aProduct().build();
+    Quantity quantity = new Quantity(1);
+
+    Assertions.assertThatExceptionOfType(OrderCannotBeEditedException.class)
+        .isThrownBy(() -> order.addItem(product, quantity));
+  }
+
+  @Test
+  void given_canceledOrder_whenAddItem_shouldThrowOrderCannotBeEditedException() {
+    Order order = OrderTestDataBuilder.aPlacedOrder().build();
+    order.cancel();
+    Product product = ProductTestDataBuilder.aProduct().build();
+    Quantity quantity = new Quantity(1);
+
+    Assertions.assertThatExceptionOfType(OrderCannotBeEditedException.class)
+        .isThrownBy(() -> order.addItem(product, quantity));
+  }
+
+  @Test
+  void given_placedOrder_whenChangePaymentMethod_shouldThrowOrderCannotBeEditedException() {
+    Order order = OrderTestDataBuilder.aPlacedOrder().build();
+
+    Assertions.assertThatExceptionOfType(OrderCannotBeEditedException.class)
+        .isThrownBy(() -> order.changePaymentMethod(PaymentMethod.GATEWAY_BALANCE));
+  }
+
+  @Test
+  void given_placedOrder_whenChangeBilling_shouldThrowOrderCannotBeEditedException() {
+    Order order = OrderTestDataBuilder.aPlacedOrder().build();
+    Billing billing = OrderTestDataBuilder.aBilling();
+
+    Assertions.assertThatExceptionOfType(OrderCannotBeEditedException.class)
+        .isThrownBy(() -> order.changeBilling(billing));
+  }
+
+  @Test
+  void given_placedOrder_whenChangeShipping_shouldThrowOrderCannotBeEditedException() {
+    Order order = OrderTestDataBuilder.aPlacedOrder().build();
+    Shipping shipping = OrderTestDataBuilder.aShipping();
+
+    Assertions.assertThatExceptionOfType(OrderCannotBeEditedException.class)
+        .isThrownBy(() -> order.changeShipping(shipping));
+  }
+
+  @Test
+  void given_placedOrder_whenChangeItemQuantity_shouldThrowOrderCannotBeEditedException() {
+    Order order = aDraftOrderWithSingleItem();
+    order.changeShipping(OrderTestDataBuilder.aShipping());
+    order.changeBilling(OrderTestDataBuilder.aBilling());
+    order.changePaymentMethod(PaymentMethod.CREDIT_CARD);
+    order.place();
+    OrderItem item = order.items().iterator().next();
+
+    Assertions.assertThatExceptionOfType(OrderCannotBeEditedException.class)
+        .isThrownBy(() -> order.changeItemQuantity(item.id(), new Quantity(5)));
+  }
+
+  @Test
+  void given_placedOrder_whenRemoveItem_shouldThrowOrderCannotBeEditedException() {
+    Order order = aDraftOrderWithSingleItem();
+    order.changeShipping(OrderTestDataBuilder.aShipping());
+    order.changeBilling(OrderTestDataBuilder.aBilling());
+    order.changePaymentMethod(PaymentMethod.CREDIT_CARD);
+    order.place();
+    OrderItem item = order.items().iterator().next();
+
+    Assertions.assertThatExceptionOfType(OrderCannotBeEditedException.class)
+        .isThrownBy(() -> order.removeItem(item.id()));
+  }
+
+  @Test
+  void given_draftOrderWithItemsNull_whenAddItem_shouldInitializeItemsSet() throws Exception {
+    Order order = OrderTestDataBuilder.draftOrder();
+    Field itemsField = Order.class.getDeclaredField("items");
+    itemsField.setAccessible(true);
+    itemsField.set(order, null);
+    Product product = ProductTestDataBuilder.aProduct().build();
+    Quantity quantity = new Quantity(1);
+
+    order.addItem(product, quantity);
+
+    assertThat(order.items()).hasSize(1);
+    assertThat(order.totalAmount()).isEqualTo(new Money("3000.00"));
+    assertThat(order.totalItems()).isEqualTo(new Quantity(1));
   }
 }
