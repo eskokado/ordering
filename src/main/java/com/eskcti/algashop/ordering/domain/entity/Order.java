@@ -1,24 +1,24 @@
 package com.eskcti.algashop.ordering.domain.entity;
 
+import com.eskcti.algashop.ordering.domain.exception.OrderCannotBePlacedException;
+import com.eskcti.algashop.ordering.domain.exception.OrderDoesNotContainOrderItemException;
+import com.eskcti.algashop.ordering.domain.exception.OrderInvalidShippingDeliveryDateException;
+import com.eskcti.algashop.ordering.domain.exception.OrderStatusCannotBeChangedException;
+import com.eskcti.algashop.ordering.domain.valueobject.*;
+import com.eskcti.algashop.ordering.domain.valueobject.Product;
+import com.eskcti.algashop.ordering.domain.valueobject.id.CustomerId;
+import com.eskcti.algashop.ordering.domain.valueobject.id.OrderId;
+import com.eskcti.algashop.ordering.domain.valueobject.id.OrderItemId;
+import com.eskcti.algashop.ordering.domain.valueobject.id.ProductId;
+import lombok.Builder;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
-import java.time.OffsetDateTime;
-import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Collections;
-import java.math.BigDecimal;
-import lombok.Builder;
-import com.eskcti.algashop.ordering.domain.valueobject.id.OrderId;
-import com.eskcti.algashop.ordering.domain.valueobject.id.CustomerId;
-import com.eskcti.algashop.ordering.domain.valueobject.Money;
-import com.eskcti.algashop.ordering.domain.valueobject.Quantity;
-import com.eskcti.algashop.ordering.domain.valueobject.BillingInfo;
-import com.eskcti.algashop.ordering.domain.valueobject.ShippingInfo;
-import com.eskcti.algashop.ordering.domain.valueobject.id.ProductId;
-import com.eskcti.algashop.ordering.domain.valueobject.ProductName;
-import com.eskcti.algashop.ordering.domain.exception.OrderStatusCannotBeChangedException;
-import com.eskcti.algashop.ordering.domain.exception.OrderCannotBePlacedException;
-import com.eskcti.algashop.ordering.domain.exception.OrderInvalidShippingDeliveryDateException;
 
 public class Order {
 
@@ -89,15 +89,14 @@ public class Order {
         new HashSet<>());
   }
 
-  public void addItem(ProductId productId, ProductName productName,
-      Money price, Quantity quantity) {
+  public void addItem(Product product, Quantity quantity) {
+    Objects.requireNonNull(product);
+    Objects.requireNonNull(quantity);
 
     OrderItem orderItem = OrderItem.brandNew()
         .orderId(this.id())
-        .price(price)
+        .product(product)
         .quantity(quantity)
-        .productName(productName)
-        .productId(productId)
         .build();
 
     if (this.items == null) {
@@ -110,19 +109,14 @@ public class Order {
   }
 
   public void place() {
-    Objects.requireNonNull(this.shipping());
-    Objects.requireNonNull(this.billing());
-    Objects.requireNonNull(this.expectedDeliveryDate());
-    Objects.requireNonNull(this.shippingCost());
-    Objects.requireNonNull(this.paymentMethod());
-    Objects.requireNonNull(this.items());
-
-    if (this.items().isEmpty()) {
-      throw new OrderCannotBePlacedException(this.id());
-    }
-
+    this.verifyIfCanChangeToPlaced();
     this.setPlacedAt(OffsetDateTime.now());
     this.changeStatus(OrderStatus.PLACED);
+  }
+
+  public void markAsPaid() {
+    this.setPaidAt(OffsetDateTime.now());
+    this.changeStatus(OrderStatus.PAID);
   }
 
   public void changePaymentMethod(PaymentMethod paymentMethod) {
@@ -150,12 +144,26 @@ public class Order {
     this.recalculateTotals();
   }
 
+  public void changeItemQuantity(OrderItemId orderItemId, Quantity quantity) {
+    Objects.requireNonNull(orderItemId);
+    Objects.requireNonNull(quantity);
+
+    OrderItem orderItem = this.findOrderItem(orderItemId);
+    orderItem.changeQuantity(quantity);
+
+    this.recalculateTotals();
+  }
+
   public boolean isDraft() {
     return OrderStatus.DRAFT.equals(this.status());
   }
 
   public boolean isPlaced() {
     return OrderStatus.PLACED.equals(this.status());
+  }
+
+  public boolean isPaid() {
+    return OrderStatus.PAID.equals(this.status());
   }
 
   public OrderId id() {
@@ -246,6 +254,35 @@ public class Order {
     this.setStatus(newStatus);
   }
 
+  private void verifyIfCanChangeToPlaced() {
+    if (this.shipping() == null) {
+      throw OrderCannotBePlacedException.noShippingInfo(this.id());
+    }
+    if (this.billing() == null) {
+      throw OrderCannotBePlacedException.noBillingInfo(this.id());
+    }
+    if (this.paymentMethod() == null) {
+      throw OrderCannotBePlacedException.noPaymentMethod(this.id());
+    }
+    if (this.shippingCost() == null) {
+      throw OrderCannotBePlacedException.invalidShippingCost(this.id());
+    }
+    if (this.expectedDeliveryDate() == null) {
+      throw OrderCannotBePlacedException.invalidExpectedDeliveryDate(this.id());
+    }
+    if (this.items == null || this.items.isEmpty()) {
+      throw OrderCannotBePlacedException.noItems(this.id());
+    }
+  }
+
+  private OrderItem findOrderItem(OrderItemId orderItemId) {
+    Objects.requireNonNull(orderItemId);
+    return this.items().stream()
+        .filter(i -> i.id().equals(orderItemId))
+        .findFirst()
+        .orElseThrow(() -> new OrderDoesNotContainOrderItemException(this.id(), orderItemId));
+  }
+
   private void setId(OrderId id) {
     Objects.requireNonNull(id);
     this.id = id;
@@ -324,4 +361,5 @@ public class Order {
   public int hashCode() {
     return Objects.hashCode(id);
   }
+
 }

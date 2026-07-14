@@ -2,6 +2,7 @@ package com.eskcti.algashop.ordering.domain.entity;
 
 import java.util.Objects;
 import lombok.Builder;
+import com.eskcti.algashop.ordering.domain.valueobject.Product;
 import com.eskcti.algashop.ordering.domain.valueobject.id.OrderItemId;
 import com.eskcti.algashop.ordering.domain.valueobject.id.OrderId;
 import com.eskcti.algashop.ordering.domain.valueobject.id.ProductId;
@@ -38,20 +39,29 @@ public class OrderItem {
 
   @Builder(builderClassName = "BrandNewOrderItemBuilder", builderMethodName = "brandNew")
   private static OrderItem createBrandNew(OrderId orderId,
-      ProductId productId, ProductName productName,
-      Money price, Quantity quantity) {
+      Product product, Quantity quantity) {
+    Objects.requireNonNull(orderId);
+    Objects.requireNonNull(product);
+    Objects.requireNonNull(quantity);
+
     OrderItem orderItem = new OrderItem(
         new OrderItemId(),
         orderId,
-        productId,
-        productName,
-        price,
+        product.id(),
+        product.name(),
+        product.price(),
         quantity,
         Money.ZERO);
 
     orderItem.recalculateTotals();
 
     return orderItem;
+  }
+
+  void changeQuantity(Quantity quantity) {
+    Objects.requireNonNull(quantity);
+    this.setQuantity(quantity);
+    this.recalculateTotals();
   }
 
   public OrderItemId id() {
@@ -133,4 +143,5 @@ public class OrderItem {
   public int hashCode() {
     return Objects.hashCode(id);
   }
+
 }
