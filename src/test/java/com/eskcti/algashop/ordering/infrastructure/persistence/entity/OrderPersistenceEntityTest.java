@@ -20,7 +20,7 @@ class OrderPersistenceEntityTest {
     final var paymentMethod = "CREDIT_CARD";
     final var placedAt = OffsetDateTime.now();
     final var paidAt = OffsetDateTime.now().plusHours(1);
-    final var canceledAt = null;
+    final OffsetDateTime canceledAt = null;
     final var readyAt = OffsetDateTime.now().plusHours(2);
 
     final var entity = OrderPersistenceEntity.builder()
