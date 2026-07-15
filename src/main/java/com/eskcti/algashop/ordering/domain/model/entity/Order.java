@@ -20,7 +20,7 @@ import com.eskcti.algashop.ordering.domain.model.valueobject.id.CustomerId;
 import com.eskcti.algashop.ordering.domain.model.valueobject.id.OrderId;
 import com.eskcti.algashop.ordering.domain.model.valueobject.id.OrderItemId;
 
-public class Order {
+public class Order implements AggregateRoot<OrderId> {
 
   private OrderId id;
   private CustomerId customerId;

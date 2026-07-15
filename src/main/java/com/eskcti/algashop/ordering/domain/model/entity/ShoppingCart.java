@@ -8,13 +8,10 @@ import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.Set;
 
-import com.eskcti.algashop.ordering.domain.model.exception.ProductOutOfStockException;
 import com.eskcti.algashop.ordering.domain.model.exception.ShoppingCartDoesNotContainItemException;
 import com.eskcti.algashop.ordering.domain.model.exception.ShoppingCartDoesNotContainProductException;
-import com.eskcti.algashop.ordering.domain.model.exception.ShoppingCartItemIncompatibleProductException;
 import com.eskcti.algashop.ordering.domain.model.valueobject.Money;
 import com.eskcti.algashop.ordering.domain.model.valueobject.Product;
-import com.eskcti.algashop.ordering.domain.model.valueobject.ProductName;
 import com.eskcti.algashop.ordering.domain.model.valueobject.Quantity;
 import com.eskcti.algashop.ordering.domain.model.valueobject.id.CustomerId;
 import com.eskcti.algashop.ordering.domain.model.valueobject.id.ProductId;
@@ -24,7 +21,7 @@ import com.eskcti.algashop.ordering.domain.model.valueobject.id.ShoppingCartItem
 import java.util.Collections;
 import java.util.HashSet;
 
-public class ShoppingCart {
+public class ShoppingCart implements AggregateRoot<ShoppingCartId> {
   private ShoppingCartId id;
   private CustomerId customerId;
   private Money totalAmount;

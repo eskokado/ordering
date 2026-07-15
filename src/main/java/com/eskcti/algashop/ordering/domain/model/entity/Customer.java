@@ -12,7 +12,7 @@ import com.eskcti.algashop.ordering.domain.model.valueobject.id.CustomerId;
 
 import lombok.Builder;
 
-public class Customer {
+public class Customer implements AggregateRoot<CustomerId> {
   private CustomerId id;
   private FullName fullName;
   private BirthDate birthDate;
