@@ -14,6 +14,12 @@ java {
 	}
 }
 
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
 repositories {
 	mavenCentral()
 }
@@ -24,6 +30,8 @@ dependencies {
 	implementation 'commons-validator:commons-validator:1.9.0'
 	implementation 'io.hypersistence:hypersistence-tsid:2.1.4'
   implementation 'org.junit.jupiter:junit-jupiter:5.8.1'
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	runtimeOnly 'com.h2database:h2'
   compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
@@ -38,8 +46,42 @@ tasks.named('test') {
 	finalizedBy jacocoTestReport
 }
 
+test {
+	filter {
+		excludeTestsMatching("*IT")
+	}
+}
+
+tasks.named('check') {
+	dependsOn(test, integrationTest)
+}
+
+tasks.register('integrationTest', Test) {
+  description = 'Run integration tests.'
+  group = 'verification'
+
+  testClassesDirs = sourceSets.test.output.classesDirs
+  classpath = sourceSets.test.runtimeClasspath
+
+  shouldRunAfter test
+
+  useJUnitPlatform()
+
+  testLogging {
+    events "passed"
+  }
+
+  filter {
+    includeTestsMatching "*IT"
+    excludeTestsMatching "*Test"
+  }
+
+  finalizedBy jacocoTestReport
+}
+
 jacocoTestReport {
-	dependsOn test
+	dependsOn test, integrationTest
+	executionData(test, integrationTest)
 	reports {
 		xml.required = true
 		html.required = true
@@ -55,10 +97,11 @@ jacocoTestReport {
 
 jacocoTestCoverageVerification {
 	dependsOn jacocoTestReport
+	executionData(test, integrationTest)
 	violationRules {
 		rule {
 			limit {
-				minimum = 0.95
+				minimum = 1.0
 			}
 		}
 	}
