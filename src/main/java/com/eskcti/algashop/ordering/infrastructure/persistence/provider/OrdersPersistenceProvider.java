@@ -34,8 +34,15 @@ public class OrdersPersistenceProvider implements Orders {
 
   @Override
   public void add(Order aggregateRoot) {
-    var persistenceEntity = persistenceRepository.findById(aggregateRoot.id().value().toLong())
-        .orElseGet(() -> new OrderPersistenceEntity());
+    OrderPersistenceEntity persistenceEntity;
+    if (aggregateRoot.version() != null) {
+      // If the domain entity has a version, use that for optimistic locking
+      persistenceEntity = new OrderPersistenceEntity();
+    } else {
+      // Else, check if the entity exists in the database
+      persistenceEntity = persistenceRepository.findById(aggregateRoot.id().value().toLong())
+          .orElseGet(() -> new OrderPersistenceEntity());
+    }
     persistenceEntity = assembler.merge(persistenceEntity, aggregateRoot);
     persistenceRepository.saveAndFlush(persistenceEntity);
   }

@@ -19,6 +19,7 @@ public class OrderPersistenceEntityDisassembler {
     return Order.existing()
         .id(new OrderId(persistenceEntity.getId()))
         .customerId(new CustomerId(persistenceEntity.getCustomerId()))
+        .version(persistenceEntity.getVersion())
         .totalAmount(
             persistenceEntity.getTotalAmount() != null ? new Money(persistenceEntity.getTotalAmount()) : Money.ZERO)
         .totalItems(

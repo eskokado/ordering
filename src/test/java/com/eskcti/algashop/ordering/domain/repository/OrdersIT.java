@@ -17,25 +17,32 @@ import com.eskcti.algashop.ordering.domain.model.valueobject.Quantity;
 import com.eskcti.algashop.ordering.domain.model.valueobject.id.CustomerId;
 import com.eskcti.algashop.ordering.domain.model.valueobject.id.OrderId;
 import com.eskcti.algashop.ordering.infrastructure.persistence.assembler.OrderPersistenceEntityAssembler;
+import com.eskcti.algashop.ordering.infrastructure.persistence.config.SpringDataAuditingConfig;
 import com.eskcti.algashop.ordering.infrastructure.persistence.disassembler.OrderPersistenceEntityDisassembler;
 import com.eskcti.algashop.ordering.infrastructure.persistence.entity.OrderPersistenceEntity;
 import com.eskcti.algashop.ordering.infrastructure.persistence.provider.OrdersPersistenceProvider;
 import com.eskcti.algashop.ordering.infrastructure.persistence.repository.OrderPersistenceEntityRepository;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+import jakarta.persistence.EntityManager;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 
 @DataJpaTest
 @Import({ OrdersPersistenceProvider.class, OrderPersistenceEntityAssembler.class,
-    OrderPersistenceEntityDisassembler.class })
+    OrderPersistenceEntityDisassembler.class, SpringDataAuditingConfig.class })
 class OrdersIT {
 
   private Orders orders;
   private OrderPersistenceEntityRepository entityRepository;
+  private EntityManager entityManager;
 
   @Autowired
-  public OrdersIT(Orders orders, OrderPersistenceEntityRepository entityRepository) {
+  public OrdersIT(Orders orders, OrderPersistenceEntityRepository entityRepository, EntityManager entityManager) {
     this.orders = orders;
     this.entityRepository = entityRepository;
+    this.entityManager = entityManager;
   }
 
   @Test
@@ -137,5 +144,32 @@ class OrdersIT {
     assertThat(order.paidAt()).isNull();
     assertThat(order.canceledAt()).isNull();
     assertThat(order.readyAt()).isNull();
+  }
+
+  @Test
+  public void shouldNotAllowStaleUpdate() {
+    Order order = OrderTestDataBuilder.anOrder().status(OrderStatus.PLACED).build();
+    orders.add(order);
+
+    // Retrieve the same order twice to simulate two concurrent reads
+    Order firstOrder = orders.ofId(order.id()).orElseThrow();
+    Order secondOrder = orders.ofId(order.id()).orElseThrow();
+
+    // Clear the persistence context, so that secondOrder is detached and doesn't
+    // interfere
+    entityManager.clear();
+
+    // First update
+    firstOrder.markAsPaid();
+    orders.add(firstOrder);
+
+    // Clear persistence context again
+    entityManager.clear();
+
+    // Second update: let's try to cancel (since that's allowed from PLACED, but the
+    // order is now PAID)
+    secondOrder.cancel();
+    assertThatThrownBy(() -> orders.add(secondOrder))
+        .isInstanceOf(ObjectOptimisticLockingFailureException.class);
   }
 }

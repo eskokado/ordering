@@ -1,6 +1,7 @@
 package com.eskcti.algashop.ordering.infrastructure.persistence.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.eskcti.algashop.ordering.domain.model.utility.IdGenerator;
 import com.eskcti.algashop.ordering.infrastructure.persistence.config.SpringDataAuditingConfig;
@@ -14,6 +15,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
+
+import jakarta.persistence.EntityManager;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
@@ -21,10 +25,13 @@ import org.springframework.context.annotation.Import;
 class OrderPersistenceEntityRepositoryIT {
 
     private final OrderPersistenceEntityRepository orderPersistenceEntityRepository;
+    private final EntityManager entityManager;
 
     @Autowired
-    public OrderPersistenceEntityRepositoryIT(OrderPersistenceEntityRepository orderPersistenceEntityRepository) {
+    public OrderPersistenceEntityRepositoryIT(OrderPersistenceEntityRepository orderPersistenceEntityRepository,
+            EntityManager entityManager) {
         this.orderPersistenceEntityRepository = orderPersistenceEntityRepository;
+        this.entityManager = entityManager;
     }
 
     @Test
@@ -109,6 +116,37 @@ class OrderPersistenceEntityRepositoryIT {
         assertThat(updatedEntity.getLastModifiedAt()).isNotNull();
         assertThat(updatedEntity.getLastModifiedAt()).isAfterOrEqualTo(firstLastModifiedAt);
         assertThat(updatedEntity.getStatus()).isEqualTo("PAID");
+    }
+
+    @Test
+    public void shouldPreventStaleUpdates() {
+        long orderId = IdGenerator.gererateTSID().toLong();
+        OrderPersistenceEntity entity1 = OrderPersistenceEntity.builder()
+                .id(orderId)
+                .customerId(IdGenerator.generateTimeBasedUUID())
+                .totalItems(2)
+                .totalAmount(new BigDecimal("1000.00"))
+                .status("DRAFT")
+                .paymentMethod("CREDIT_CARD")
+                .placedAt(OffsetDateTime.now())
+                .build();
+        orderPersistenceEntityRepository.saveAndFlush(entity1);
+
+        // Now simulate two concurrent users get the same entity with same version
+        OrderPersistenceEntity user1Entity = orderPersistenceEntityRepository.findById(orderId).orElseThrow();
+        OrderPersistenceEntity user2Entity = orderPersistenceEntityRepository.findById(orderId).orElseThrow();
+
+        // Detach user2Entity so it's not in the persistence context
+        entityManager.detach(user2Entity);
+
+        // user1 updates and saves first
+        user1Entity.setStatus("PLACED");
+        orderPersistenceEntityRepository.saveAndFlush(user1Entity);
+
+        // user2 tries to save with stale version
+        user2Entity.setStatus("PAID");
+        assertThatThrownBy(() -> orderPersistenceEntityRepository.saveAndFlush(user2Entity))
+                .isInstanceOf(ObjectOptimisticLockingFailureException.class);
     }
 
 }

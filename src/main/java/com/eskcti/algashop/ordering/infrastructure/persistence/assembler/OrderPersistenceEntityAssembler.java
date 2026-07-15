@@ -15,6 +15,7 @@ public class OrderPersistenceEntityAssembler {
   public OrderPersistenceEntity merge(OrderPersistenceEntity orderPersistenceEntity, Order order) {
     orderPersistenceEntity.setId(order.id().value().toLong());
     orderPersistenceEntity.setCustomerId(order.customerId().value());
+    orderPersistenceEntity.setVersion(order.version());
     orderPersistenceEntity.setTotalAmount(order.totalAmount().value());
     orderPersistenceEntity.setTotalItems(order.totalItems().value());
     orderPersistenceEntity.setStatus(order.status().name());

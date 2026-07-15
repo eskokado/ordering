@@ -24,6 +24,7 @@ public class Order implements AggregateRoot<OrderId> {
 
   private OrderId id;
   private CustomerId customerId;
+  private Long version;
 
   private Money totalAmount;
   private Quantity totalItems;
@@ -43,6 +44,7 @@ public class Order implements AggregateRoot<OrderId> {
 
   @Builder(builderClassName = "ExistingOrderBuilder", builderMethodName = "existing")
   public Order(OrderId id, CustomerId customerId,
+      Long version,
       Money totalAmount, Quantity totalItems,
       OffsetDateTime placedAt, OffsetDateTime paidAt,
       OffsetDateTime canceledAt, OffsetDateTime readyAt,
@@ -51,6 +53,7 @@ public class Order implements AggregateRoot<OrderId> {
       Set<OrderItem> items) {
     this.setId(id);
     this.setCustomerId(customerId);
+    this.setVersion(version);
     this.setTotalAmount(totalAmount);
     this.setTotalItems(totalItems);
     this.setPlacedAt(placedAt);
@@ -68,6 +71,7 @@ public class Order implements AggregateRoot<OrderId> {
     return new Order(
         new OrderId(),
         customerId,
+        null,
         Money.ZERO,
         Quantity.ZERO,
         null,
@@ -79,6 +83,14 @@ public class Order implements AggregateRoot<OrderId> {
         OrderStatus.DRAFT,
         null,
         new HashSet<>());
+  }
+
+  public Long version() {
+    return this.version;
+  }
+
+  private void setVersion(Long version) {
+    this.version = version;
   }
 
   public void addItem(Product product, Quantity quantity) {
