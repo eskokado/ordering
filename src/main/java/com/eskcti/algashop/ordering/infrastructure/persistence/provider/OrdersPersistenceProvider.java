@@ -5,6 +5,7 @@ import com.eskcti.algashop.ordering.domain.model.repository.Orders;
 import com.eskcti.algashop.ordering.domain.model.valueobject.id.OrderId;
 import com.eskcti.algashop.ordering.infrastructure.persistence.assembler.OrderPersistenceEntityAssembler;
 import com.eskcti.algashop.ordering.infrastructure.persistence.disassembler.OrderPersistenceEntityDisassembler;
+import com.eskcti.algashop.ordering.infrastructure.persistence.entity.OrderPersistenceEntity;
 import com.eskcti.algashop.ordering.infrastructure.persistence.repository.OrderPersistenceEntityRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -33,7 +34,9 @@ public class OrdersPersistenceProvider implements Orders {
 
   @Override
   public void add(Order aggregateRoot) {
-    var persistenceEntity = assembler.fromDomain(aggregateRoot);
+    var persistenceEntity = persistenceRepository.findById(aggregateRoot.id().value().toLong())
+        .orElseGet(() -> new OrderPersistenceEntity());
+    persistenceEntity = assembler.merge(persistenceEntity, aggregateRoot);
     persistenceRepository.saveAndFlush(persistenceEntity);
   }
 
