@@ -16,6 +16,8 @@ import com.eskcti.algashop.ordering.domain.model.valueobject.Money;
 import com.eskcti.algashop.ordering.domain.model.valueobject.Quantity;
 import com.eskcti.algashop.ordering.domain.model.valueobject.id.CustomerId;
 import com.eskcti.algashop.ordering.domain.model.valueobject.id.OrderId;
+import com.eskcti.algashop.ordering.infrastructure.persistence.assembler.OrderPersistenceEntityAssembler;
+import com.eskcti.algashop.ordering.infrastructure.persistence.disassembler.OrderPersistenceEntityDisassembler;
 import com.eskcti.algashop.ordering.infrastructure.persistence.entity.OrderPersistenceEntity;
 import com.eskcti.algashop.ordering.infrastructure.persistence.provider.OrdersPersistenceProvider;
 import com.eskcti.algashop.ordering.infrastructure.persistence.repository.OrderPersistenceEntityRepository;
@@ -23,7 +25,8 @@ import com.eskcti.algashop.ordering.infrastructure.persistence.repository.OrderP
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
-@Import(OrdersPersistenceProvider.class)
+@Import({ OrdersPersistenceProvider.class, OrderPersistenceEntityAssembler.class,
+    OrderPersistenceEntityDisassembler.class })
 class OrdersIT {
 
   private Orders orders;
