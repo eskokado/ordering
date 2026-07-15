@@ -2,7 +2,9 @@ package com.eskcti.algashop.ordering.domain.repository;
 
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Supplier;
 
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -24,10 +26,10 @@ import com.eskcti.algashop.ordering.infrastructure.persistence.provider.OrdersPe
 import com.eskcti.algashop.ordering.infrastructure.persistence.repository.OrderPersistenceEntityRepository;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-
-import jakarta.persistence.EntityManager;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.support.TransactionTemplate;
 
 @DataJpaTest
 @Import({ OrdersPersistenceProvider.class, OrderPersistenceEntityAssembler.class,
@@ -36,13 +38,15 @@ class OrdersIT {
 
   private Orders orders;
   private OrderPersistenceEntityRepository entityRepository;
-  private EntityManager entityManager;
+  private final TransactionTemplate newTransaction;
 
   @Autowired
-  public OrdersIT(Orders orders, OrderPersistenceEntityRepository entityRepository, EntityManager entityManager) {
+  public OrdersIT(Orders orders, OrderPersistenceEntityRepository entityRepository,
+      PlatformTransactionManager transactionManager) {
     this.orders = orders;
     this.entityRepository = entityRepository;
-    this.entityManager = entityManager;
+    this.newTransaction = new TransactionTemplate(transactionManager);
+    this.newTransaction.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
   }
 
   @Test
@@ -147,29 +151,43 @@ class OrdersIT {
   }
 
   @Test
-  public void shouldNotAllowStaleUpdate() {
-    Order order = OrderTestDataBuilder.anOrder().status(OrderStatus.PLACED).build();
-    orders.add(order);
+  public void shouldNotAllowStaleUpdates() {
+    // T0: insere o pedido em transação própria
+    OrderId orderId = inNewTransaction(() -> {
+      Order order = OrderTestDataBuilder.anOrder().status(OrderStatus.PLACED).build();
+      orders.add(order);
+      return order.id();
+    });
 
-    // Retrieve the same order twice to simulate two concurrent reads
-    Order firstOrder = orders.ofId(order.id()).orElseThrow();
-    Order secondOrder = orders.ofId(order.id()).orElseThrow();
+    Assertions.assertThatExceptionOfType(ObjectOptimisticLockingFailureException.class)
+        .isThrownBy(() -> inNewTransaction(() -> {
+          // T1: carrega o pedido em sua própria transação
+          Order orderT1 = orders.ofId(orderId).orElseThrow();
 
-    // Clear the persistence context, so that secondOrder is detached and doesn't
-    // interfere
-    entityManager.clear();
+          // T2: em outra transação separada, salva primeiro
+          inNewTransaction(() -> {
+            Order orderT2 = orders.ofId(orderId).orElseThrow();
+            orderT2.markAsPaid();
+            orders.add(orderT2);
+          });
 
-    // First update
-    firstOrder.markAsPaid();
-    orders.add(firstOrder);
+          // T1 tenta salvar com versão obsoleta
+          orderT1.cancel();
+          orders.add(orderT1);
+        }));
 
-    // Clear persistence context again
-    entityManager.clear();
-
-    // Second update: let's try to cancel (since that's allowed from PLACED, but the
-    // order is now PAID)
-    secondOrder.cancel();
-    assertThatThrownBy(() -> orders.add(secondOrder))
-        .isInstanceOf(ObjectOptimisticLockingFailureException.class);
+    // Verifica que a atualização de T2 prevaleceu
+    Order savedOrder = orders.ofId(orderId).orElseThrow();
+    Assertions.assertThat(savedOrder.canceledAt()).isNull();
+    Assertions.assertThat(savedOrder.paidAt()).isNotNull();
   }
+
+  private <T> T inNewTransaction(Supplier<T> callback) {
+    return newTransaction.execute(status -> callback.get());
+  }
+
+  private void inNewTransaction(Runnable callback) {
+    newTransaction.executeWithoutResult(status -> callback.run());
+  }
+
 }
