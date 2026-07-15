@@ -2,7 +2,6 @@ package com.eskcti.algashop.ordering.infrastructure.persistence.repository;
 
 import com.eskcti.algashop.ordering.domain.model.utility.IdGenerator;
 import com.eskcti.algashop.ordering.infrastructure.persistence.entity.OrderPersistenceEntity;
-import com.eskcti.algashop.ordering.infrastructure.persistence.repository.OrderPersistenceEntityRepository;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
@@ -10,11 +9,11 @@ import java.time.OffsetDateTime;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
-@SpringBootTest
-@Transactional
+@DataJpaTest
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 class OrderPersistenceEntityRepositoryIT {
 
     private final OrderPersistenceEntityRepository orderPersistenceEntityRepository;
