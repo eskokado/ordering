@@ -49,7 +49,7 @@ public class OrderPersistenceEntityAssembler {
   private Set<OrderItemPersistenceEntity> mergeItems(Order order, OrderPersistenceEntity orderPersistenceEntity) {
     Set<OrderItem> newOrUpdatedItems = order.items();
 
-    if (newOrUpdatedItems == null || newOrUpdatedItems.isEmpty()) {
+    if (newOrUpdatedItems.isEmpty()) {
       return new HashSet<>();
     }
 
@@ -102,9 +102,6 @@ public class OrderPersistenceEntityAssembler {
   }
 
   private AddressEmbeddable toAddressEmbeddable(Address address) {
-    if (address == null) {
-      return null;
-    }
     return AddressEmbeddable.builder()
         .city(address.city())
         .state(address.state())
@@ -123,17 +120,14 @@ public class OrderPersistenceEntityAssembler {
     var builder = ShippingEmbeddable.builder()
         .expectedDate(shipping.expectedDate())
         .cost(shipping.cost().value())
-        .address(toAddressEmbeddable(shipping.address()));
-    Recipient recipient = shipping.recipient();
-    if (recipient != null) {
-      builder.recipient(
-          RecipientEmbeddable.builder()
-              .firstName(recipient.fullName().firstName())
-              .lastName(recipient.fullName().lastName())
-              .document(recipient.document().value())
-              .phone(recipient.phone().value())
-              .build());
-    }
+        .address(toAddressEmbeddable(shipping.address()))
+        .recipient(
+            RecipientEmbeddable.builder()
+                .firstName(shipping.recipient().fullName().firstName())
+                .lastName(shipping.recipient().fullName().lastName())
+                .document(shipping.recipient().document().value())
+                .phone(shipping.recipient().phone().value())
+                .build());
     return builder.build();
   }
 

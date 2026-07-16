@@ -124,4 +124,16 @@ class OrderPersistenceEntityAssemblerTest {
     Assertions.assertThat(persistenceEntity.getItems().size()).isEqualTo(order.items().size());
   }
 
+  @Test
+  void givenExistingEntityWithNullItems_shouldHandleCorrectly() throws Exception {
+    Order order = OrderTestDataBuilder.anOrder().withItems(true).build();
+    OrderPersistenceEntity persistenceEntity = OrderPersistenceEntityTestDataBuilder.existingOrder().build();
+    var itemsField = OrderPersistenceEntity.class.getDeclaredField("items");
+    itemsField.setAccessible(true);
+    itemsField.set(persistenceEntity, null);
+
+    assembler.merge(persistenceEntity, order);
+    assertThat(persistenceEntity.getItems()).isNotEmpty();
+  }
+
 }

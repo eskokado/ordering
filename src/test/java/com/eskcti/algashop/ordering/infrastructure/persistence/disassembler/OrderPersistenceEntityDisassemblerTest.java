@@ -41,6 +41,7 @@ class OrderPersistenceEntityDisassemblerTest {
     assertThat(order.shipping()).isNotNull();
     assertThat(order.shipping().recipient().document().value())
         .isEqualTo(entity.getShipping().getRecipient().getDocument());
+    assertThat(order.items()).isNotEmpty();
   }
 
   @Test
@@ -62,6 +63,17 @@ class OrderPersistenceEntityDisassemblerTest {
     assertThat(order.readyAt()).isNull();
     assertThat(order.billing()).isNull();
     assertThat(order.shipping()).isNull();
+    assertThat(order.items()).isEmpty();
   }
 
+  @Test
+  void shouldDisassembleWithNullItems() throws Exception {
+    OrderPersistenceEntity entity = OrderPersistenceEntityTestDataBuilder.existingOrder().build();
+    var itemsField = OrderPersistenceEntity.class.getDeclaredField("items");
+    itemsField.setAccessible(true);
+    itemsField.set(entity, null);
+
+    Order order = disassembler.toDomainEntity(entity);
+    assertThat(order.items()).isEmpty();
+  }
 }
