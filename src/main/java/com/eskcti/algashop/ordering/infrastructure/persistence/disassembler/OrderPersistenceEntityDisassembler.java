@@ -60,12 +60,12 @@ public class OrderPersistenceEntityDisassembler {
         return Shipping.builder()
                 .cost(new Money(shippingEmbeddable.getCost()))
                 .expectedDate(shippingEmbeddable.getExpectedDate())
-                .recipient(recipientEmbeddable != null ? Recipient.builder()
+                .recipient(Recipient.builder()
                         .fullName(new FullName(recipientEmbeddable.getFirstName(),
                                 recipientEmbeddable.getLastName()))
                         .document(new Document(recipientEmbeddable.getDocument()))
                         .phone(new Phone(recipientEmbeddable.getPhone()))
-                        .build() : null)
+                        .build())
                 .address(toAddressValueObject(shippingEmbeddable.getAddress()))
                 .build();
     }
@@ -84,9 +84,6 @@ public class OrderPersistenceEntityDisassembler {
     }
 
     private Address toAddressValueObject(AddressEmbeddable address) {
-        if (address == null) {
-            return null;
-        }
         return Address.builder()
                 .street(address.getStreet())
                 .number(address.getNumber())

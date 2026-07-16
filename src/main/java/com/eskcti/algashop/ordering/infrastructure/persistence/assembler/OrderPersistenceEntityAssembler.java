@@ -5,7 +5,6 @@ import org.springframework.stereotype.Component;
 import com.eskcti.algashop.ordering.domain.model.entity.Order;
 import com.eskcti.algashop.ordering.domain.model.valueobject.Address;
 import com.eskcti.algashop.ordering.domain.model.valueobject.Billing;
-import com.eskcti.algashop.ordering.domain.model.valueobject.Recipient;
 import com.eskcti.algashop.ordering.domain.model.valueobject.Shipping;
 import com.eskcti.algashop.ordering.infrastructure.persistence.embeddable.AddressEmbeddable;
 import com.eskcti.algashop.ordering.infrastructure.persistence.embeddable.BillingEmbeddable;
@@ -52,9 +51,6 @@ public class OrderPersistenceEntityAssembler {
   }
 
   private AddressEmbeddable toAddressEmbeddable(Address address) {
-    if (address == null) {
-      return null;
-    }
     return AddressEmbeddable.builder()
         .city(address.city())
         .state(address.state())
@@ -73,17 +69,14 @@ public class OrderPersistenceEntityAssembler {
     var builder = ShippingEmbeddable.builder()
         .expectedDate(shipping.expectedDate())
         .cost(shipping.cost().value())
-        .address(toAddressEmbeddable(shipping.address()));
-    Recipient recipient = shipping.recipient();
-    if (recipient != null) {
-      builder.recipient(
-          RecipientEmbeddable.builder()
-              .firstName(recipient.fullName().firstName())
-              .lastName(recipient.fullName().lastName())
-              .document(recipient.document().value())
-              .phone(recipient.phone().value())
-              .build());
-    }
+        .address(toAddressEmbeddable(shipping.address()))
+        .recipient(
+            RecipientEmbeddable.builder()
+                .firstName(shipping.recipient().fullName().firstName())
+                .lastName(shipping.recipient().fullName().lastName())
+                .document(shipping.recipient().document().value())
+                .phone(shipping.recipient().phone().value())
+                .build());
     return builder.build();
   }
 

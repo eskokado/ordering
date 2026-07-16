@@ -3,11 +3,10 @@ package com.eskcti.algashop.ordering.infrastructure.persistence.repository;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import com.eskcti.algashop.ordering.domain.model.utility.IdGenerator;
 import com.eskcti.algashop.ordering.infrastructure.persistence.config.SpringDataAuditingConfig;
 import com.eskcti.algashop.ordering.infrastructure.persistence.entity.OrderPersistenceEntity;
+import com.eskcti.algashop.ordering.infrastructure.persistence.entity.OrderPersistenceEntityTestDataBuilder;
 
-import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 
 import org.junit.jupiter.api.Test;
@@ -36,16 +35,10 @@ class OrderPersistenceEntityRepositoryIT {
 
     @Test
     public void shouldPersist() {
-        long orderId = com.eskcti.algashop.ordering.domain.model.utility.IdGenerator.gererateTSID().toLong();
-        OrderPersistenceEntity entity = OrderPersistenceEntity.builder()
-                .id(orderId)
-                .customerId(IdGenerator.generateTimeBasedUUID())
-                .totalItems(2)
-                .totalAmount(new BigDecimal(1000))
-                .status("DRAFT")
-                .paymentMethod("CREDIT_CARD")
-                .placedAt(OffsetDateTime.now())
+        OrderPersistenceEntity entity = OrderPersistenceEntityTestDataBuilder.existingOrder()
+                .items(null)
                 .build();
+        long orderId = entity.getId();
 
         orderPersistenceEntityRepository.saveAndFlush(entity);
 
@@ -65,16 +58,10 @@ class OrderPersistenceEntityRepositoryIT {
 
     @Test
     public void shouldPopulateAuditingFieldsWhenPersisting() {
-        long orderId = IdGenerator.gererateTSID().toLong();
-        OrderPersistenceEntity entity = OrderPersistenceEntity.builder()
-                .id(orderId)
-                .customerId(IdGenerator.generateTimeBasedUUID())
-                .totalItems(2)
-                .totalAmount(new BigDecimal("1000.00"))
-                .status("DRAFT")
-                .paymentMethod("CREDIT_CARD")
-                .placedAt(OffsetDateTime.now())
+        OrderPersistenceEntity entity = OrderPersistenceEntityTestDataBuilder.existingOrder()
+                .items(null)
                 .build();
+        long orderId = entity.getId();
 
         orderPersistenceEntityRepository.saveAndFlush(entity);
 
@@ -87,16 +74,10 @@ class OrderPersistenceEntityRepositoryIT {
 
     @Test
     public void shouldUpdateLastModifiedFieldsWhenUpdatingEntity() throws Exception {
-        long orderId = IdGenerator.gererateTSID().toLong();
-        OrderPersistenceEntity entity = OrderPersistenceEntity.builder()
-                .id(orderId)
-                .customerId(IdGenerator.generateTimeBasedUUID())
-                .totalItems(2)
-                .totalAmount(new BigDecimal("1000.00"))
-                .status("DRAFT")
-                .paymentMethod("CREDIT_CARD")
-                .placedAt(OffsetDateTime.now())
+        OrderPersistenceEntity entity = OrderPersistenceEntityTestDataBuilder.existingOrder()
+                .items(null)
                 .build();
+        long orderId = entity.getId();
 
         orderPersistenceEntityRepository.saveAndFlush(entity);
 
@@ -120,16 +101,10 @@ class OrderPersistenceEntityRepositoryIT {
 
     @Test
     public void shouldPreventStaleUpdates() {
-        long orderId = IdGenerator.gererateTSID().toLong();
-        OrderPersistenceEntity entity1 = OrderPersistenceEntity.builder()
-                .id(orderId)
-                .customerId(IdGenerator.generateTimeBasedUUID())
-                .totalItems(2)
-                .totalAmount(new BigDecimal("1000.00"))
-                .status("DRAFT")
-                .paymentMethod("CREDIT_CARD")
-                .placedAt(OffsetDateTime.now())
+        OrderPersistenceEntity entity1 = OrderPersistenceEntityTestDataBuilder.existingOrder()
+                .items(null)
                 .build();
+        long orderId = entity1.getId();
         orderPersistenceEntityRepository.saveAndFlush(entity1);
 
         // Now simulate two concurrent users get the same entity with same version

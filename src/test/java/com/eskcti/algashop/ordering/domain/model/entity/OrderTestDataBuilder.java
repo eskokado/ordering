@@ -2,9 +2,6 @@ package com.eskcti.algashop.ordering.domain.model.entity;
 
 import java.time.LocalDate;
 
-import com.eskcti.algashop.ordering.domain.model.entity.Order;
-import com.eskcti.algashop.ordering.domain.model.entity.OrderStatus;
-import com.eskcti.algashop.ordering.domain.model.entity.PaymentMethod;
 import com.eskcti.algashop.ordering.domain.model.valueobject.*;
 import com.eskcti.algashop.ordering.domain.model.valueobject.id.CustomerId;
 

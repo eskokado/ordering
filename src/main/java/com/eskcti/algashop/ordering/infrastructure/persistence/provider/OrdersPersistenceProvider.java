@@ -9,8 +9,8 @@ import com.eskcti.algashop.ordering.infrastructure.persistence.entity.OrderPersi
 import com.eskcti.algashop.ordering.infrastructure.persistence.repository.OrderPersistenceEntityRepository;
 
 import jakarta.persistence.EntityManager;
-import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import lombok.RequiredArgsConstructor;
 
 import org.springframework.stereotype.Component;
 import org.springframework.util.ReflectionUtils;

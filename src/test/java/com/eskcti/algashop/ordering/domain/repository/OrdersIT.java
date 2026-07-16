@@ -22,6 +22,7 @@ import com.eskcti.algashop.ordering.infrastructure.persistence.assembler.OrderPe
 import com.eskcti.algashop.ordering.infrastructure.persistence.config.SpringDataAuditingConfig;
 import com.eskcti.algashop.ordering.infrastructure.persistence.disassembler.OrderPersistenceEntityDisassembler;
 import com.eskcti.algashop.ordering.infrastructure.persistence.entity.OrderPersistenceEntity;
+import com.eskcti.algashop.ordering.infrastructure.persistence.entity.OrderPersistenceEntityTestDataBuilder;
 import com.eskcti.algashop.ordering.infrastructure.persistence.provider.OrdersPersistenceProvider;
 import com.eskcti.algashop.ordering.infrastructure.persistence.repository.OrderPersistenceEntityRepository;
 
@@ -120,17 +121,9 @@ class OrdersIT {
 
   @Test
   public void shouldMapEntityWithNullFields() {
-    OrderPersistenceEntity entityWithNulls = OrderPersistenceEntity.builder()
+    OrderPersistenceEntity entityWithNulls = OrderPersistenceEntityTestDataBuilder.existingOrderWithNullFields()
         .id(999L)
         .customerId(UUID.randomUUID())
-        .totalAmount(null)
-        .totalItems(null)
-        .status(null)
-        .paymentMethod(null)
-        .placedAt(null)
-        .paidAt(null)
-        .canceledAt(null)
-        .readyAt(null)
         .build();
 
     entityRepository.saveAndFlush(entityWithNulls);
