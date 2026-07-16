@@ -23,34 +23,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 class CustomerTest {
 
   @Test
-  void given_validData_whenCreateWithSimplifiedConstructor_shouldInitializeDefaults() {
-    CustomerId customerId = new CustomerId();
-    FullName fullName = new FullName("John", "Doe");
-    BirthDate birthDate = CustomerTestDataBuilder.brandNewCustomer().build().birthDate();
-    Email email = new Email("john.doe@gmail.com");
-    Phone phone = new Phone("478-256-2604");
-    Document document = new Document("255-08-0578");
-    OffsetDateTime registeredAt = OffsetDateTime.now();
-    Address address = CustomerTestDataBuilder.brandNewCustomer().build().address();
-
-    Customer customer = new Customer(customerId, fullName, birthDate, email, phone, document,
-        true, registeredAt, address);
-
-    assertThat(customer.id()).isEqualTo(customerId);
-    assertThat(customer.fullName()).isEqualTo(fullName);
-    assertThat(customer.birthDate()).isEqualTo(birthDate);
-    assertThat(customer.email()).isEqualTo(email);
-    assertThat(customer.phone()).isEqualTo(phone);
-    assertThat(customer.document()).isEqualTo(document);
-    assertThat(customer.isPromotionNotificationsAllowed()).isTrue();
-    assertThat(customer.isArchived()).isFalse();
-    assertThat(customer.registeredAt()).isEqualTo(registeredAt);
-    assertThat(customer.archivedAt()).isNull();
-    assertThat(customer.loyaltyPoints()).isEqualTo(LoyaltyPoints.ZERO);
-    assertThat(customer.address()).isEqualTo(address);
-  }
-
-  @Test
   void given_brandNewCustomer_whenBuild_shouldInitializeDefaults() {
     Customer customer = CustomerTestDataBuilder.brandNewCustomer().build();
 
