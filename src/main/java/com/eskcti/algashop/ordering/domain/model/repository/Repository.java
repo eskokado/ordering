@@ -11,5 +11,5 @@ public interface Repository<T extends AggregateRoot<ID>, ID> {
 
   void add(T aggregateRoot);
 
-  int count();
+  long count();
 }

@@ -94,10 +94,10 @@ class OrdersIT {
     assertThat(orders.count()).isZero();
 
     orders.add(OrderTestDataBuilder.anOrder().build());
-    assertThat(orders.count()).isEqualTo(1);
+    assertThat(orders.count()).isEqualTo(1L);
 
     orders.add(OrderTestDataBuilder.anOrder().build());
-    assertThat(orders.count()).isEqualTo(2);
+    assertThat(orders.count()).isEqualTo(2L);
   }
 
   @Test

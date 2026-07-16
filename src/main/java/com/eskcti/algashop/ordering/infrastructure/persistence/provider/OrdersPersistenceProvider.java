@@ -13,6 +13,7 @@ import lombok.SneakyThrows;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ReflectionUtils;
 
 import java.lang.reflect.Field;
@@ -20,6 +21,7 @@ import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class OrdersPersistenceProvider implements Orders {
 
   private final OrderPersistenceEntityRepository persistenceRepository;
@@ -40,6 +42,7 @@ public class OrdersPersistenceProvider implements Orders {
   }
 
   @Override
+  @Transactional(readOnly = false)
   public void add(Order aggregateRoot) {
     long orderId = aggregateRoot.id().value().toLong();
 
@@ -75,7 +78,7 @@ public class OrdersPersistenceProvider implements Orders {
   }
 
   @Override
-  public int count() {
-    return (int) persistenceRepository.count();
+  public long count() {
+    return persistenceRepository.count();
   }
 }
