@@ -19,9 +19,15 @@ import com.eskcti.algashop.ordering.infrastructure.persistence.embeddable.Recipi
 import com.eskcti.algashop.ordering.infrastructure.persistence.embeddable.ShippingEmbeddable;
 import com.eskcti.algashop.ordering.infrastructure.persistence.entity.OrderItemPersistenceEntity;
 import com.eskcti.algashop.ordering.infrastructure.persistence.entity.OrderPersistenceEntity;
+import com.eskcti.algashop.ordering.infrastructure.persistence.repository.CustomerPersistenceEntityRepository;
+
+import lombok.RequiredArgsConstructor;
 
 @Component
+@RequiredArgsConstructor
 public class OrderPersistenceEntityAssembler {
+
+  private final CustomerPersistenceEntityRepository customerPersistenceEntityRepository;
 
   public OrderPersistenceEntity fromDomain(Order order) {
     return merge(new OrderPersistenceEntity(), order);
@@ -29,7 +35,6 @@ public class OrderPersistenceEntityAssembler {
 
   public OrderPersistenceEntity merge(OrderPersistenceEntity orderPersistenceEntity, Order order) {
     orderPersistenceEntity.setId(order.id().value().toLong());
-    orderPersistenceEntity.setCustomerId(order.customerId().value());
     orderPersistenceEntity.setTotalAmount(order.totalAmount().value());
     orderPersistenceEntity.setTotalItems(order.totalItems().value());
     orderPersistenceEntity.setStatus(order.status().name());
@@ -41,15 +46,21 @@ public class OrderPersistenceEntityAssembler {
     orderPersistenceEntity.setVersion(order.version());
     orderPersistenceEntity.setBilling(toBillingEmbeddable(order.billing()));
     orderPersistenceEntity.setShipping(toShippingEmbeddable(order.shipping()));
+
     Set<OrderItemPersistenceEntity> mergedItems = mergeItems(order, orderPersistenceEntity);
     orderPersistenceEntity.replaceItems(mergedItems);
+
+    var customerPersistenceEntity = customerPersistenceEntityRepository
+        .getReferenceById(order.customerId().value());
+    orderPersistenceEntity.setCustomer(customerPersistenceEntity);
+
     return orderPersistenceEntity;
   }
 
   private Set<OrderItemPersistenceEntity> mergeItems(Order order, OrderPersistenceEntity orderPersistenceEntity) {
     Set<OrderItem> newOrUpdatedItems = order.items();
 
-    if (newOrUpdatedItems.isEmpty()) {
+    if (newOrUpdatedItems == null || newOrUpdatedItems.isEmpty()) {
       return new HashSet<>();
     }
 
@@ -102,6 +113,9 @@ public class OrderPersistenceEntityAssembler {
   }
 
   private AddressEmbeddable toAddressEmbeddable(Address address) {
+    if (address == null) {
+      return null;
+    }
     return AddressEmbeddable.builder()
         .city(address.city())
         .state(address.state())
@@ -120,14 +134,17 @@ public class OrderPersistenceEntityAssembler {
     var builder = ShippingEmbeddable.builder()
         .expectedDate(shipping.expectedDate())
         .cost(shipping.cost().value())
-        .address(toAddressEmbeddable(shipping.address()))
-        .recipient(
-            RecipientEmbeddable.builder()
-                .firstName(shipping.recipient().fullName().firstName())
-                .lastName(shipping.recipient().fullName().lastName())
-                .document(shipping.recipient().document().value())
-                .phone(shipping.recipient().phone().value())
-                .build());
+        .address(toAddressEmbeddable(shipping.address()));
+    Recipient recipient = shipping.recipient();
+    if (recipient != null) {
+      builder.recipient(
+          RecipientEmbeddable.builder()
+              .firstName(recipient.fullName().firstName())
+              .lastName(recipient.fullName().lastName())
+              .document(recipient.document().value())
+              .phone(recipient.phone().value())
+              .build());
+    }
     return builder.build();
   }
 

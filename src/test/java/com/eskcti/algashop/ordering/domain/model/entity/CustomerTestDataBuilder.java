@@ -2,7 +2,6 @@ package com.eskcti.algashop.ordering.domain.model.entity;
 
 import java.time.OffsetDateTime;
 
-import com.eskcti.algashop.ordering.domain.model.entity.Customer;
 import com.eskcti.algashop.ordering.domain.model.valueobject.Address;
 import com.eskcti.algashop.ordering.domain.model.valueobject.BirthDate;
 import com.eskcti.algashop.ordering.domain.model.valueobject.Document;
@@ -16,6 +15,8 @@ import com.eskcti.algashop.ordering.domain.model.valueobject.id.CustomerId;
 import java.time.LocalDate;
 
 public class CustomerTestDataBuilder {
+
+  public static final CustomerId DEFAULT_CUSTOMER_ID = new CustomerId();
 
   private CustomerTestDataBuilder() {
   }

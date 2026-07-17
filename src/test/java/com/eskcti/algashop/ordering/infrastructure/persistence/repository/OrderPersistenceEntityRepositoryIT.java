@@ -4,6 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.eskcti.algashop.ordering.infrastructure.persistence.config.SpringDataAuditingConfig;
+import com.eskcti.algashop.ordering.infrastructure.persistence.entity.CustomerPersistenceEntity;
+import com.eskcti.algashop.ordering.infrastructure.persistence.entity.CustomerPersistenceEntityTestDataBuilder;
 import com.eskcti.algashop.ordering.infrastructure.persistence.entity.OrderPersistenceEntity;
 import com.eskcti.algashop.ordering.infrastructure.persistence.entity.OrderPersistenceEntityTestDataBuilder;
 
@@ -24,18 +26,24 @@ import jakarta.persistence.EntityManager;
 class OrderPersistenceEntityRepositoryIT {
 
     private final OrderPersistenceEntityRepository orderPersistenceEntityRepository;
+    private final CustomerPersistenceEntityRepository customerPersistenceEntityRepository;
     private final EntityManager entityManager;
 
     @Autowired
     public OrderPersistenceEntityRepositoryIT(OrderPersistenceEntityRepository orderPersistenceEntityRepository,
+            CustomerPersistenceEntityRepository customerPersistenceEntityRepository,
             EntityManager entityManager) {
         this.orderPersistenceEntityRepository = orderPersistenceEntityRepository;
+        this.customerPersistenceEntityRepository = customerPersistenceEntityRepository;
         this.entityManager = entityManager;
     }
 
     @Test
     public void shouldPersist() {
+        CustomerPersistenceEntity customer = CustomerPersistenceEntityTestDataBuilder.existingCustomer().build();
+        customerPersistenceEntityRepository.saveAndFlush(customer);
         OrderPersistenceEntity entity = OrderPersistenceEntityTestDataBuilder.existingOrder()
+                .customer(customer)
                 .items(null)
                 .build();
         long orderId = entity.getId();
@@ -58,7 +66,10 @@ class OrderPersistenceEntityRepositoryIT {
 
     @Test
     public void shouldPopulateAuditingFieldsWhenPersisting() {
+        CustomerPersistenceEntity customer = CustomerPersistenceEntityTestDataBuilder.existingCustomer().build();
+        customerPersistenceEntityRepository.saveAndFlush(customer);
         OrderPersistenceEntity entity = OrderPersistenceEntityTestDataBuilder.existingOrder()
+                .customer(customer)
                 .items(null)
                 .build();
         long orderId = entity.getId();
@@ -74,7 +85,10 @@ class OrderPersistenceEntityRepositoryIT {
 
     @Test
     public void shouldUpdateLastModifiedFieldsWhenUpdatingEntity() throws Exception {
+        CustomerPersistenceEntity customer = CustomerPersistenceEntityTestDataBuilder.existingCustomer().build();
+        customerPersistenceEntityRepository.saveAndFlush(customer);
         OrderPersistenceEntity entity = OrderPersistenceEntityTestDataBuilder.existingOrder()
+                .customer(customer)
                 .items(null)
                 .build();
         long orderId = entity.getId();
@@ -101,7 +115,10 @@ class OrderPersistenceEntityRepositoryIT {
 
     @Test
     public void shouldPreventStaleUpdates() {
+        CustomerPersistenceEntity customer = CustomerPersistenceEntityTestDataBuilder.existingCustomer().build();
+        customerPersistenceEntityRepository.saveAndFlush(customer);
         OrderPersistenceEntity entity1 = OrderPersistenceEntityTestDataBuilder.existingOrder()
+                .customer(customer)
                 .items(null)
                 .build();
         long orderId = entity1.getId();

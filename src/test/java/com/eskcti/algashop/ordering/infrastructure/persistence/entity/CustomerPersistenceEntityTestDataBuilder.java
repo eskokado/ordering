@@ -5,14 +5,21 @@ import java.time.OffsetDateTime;
 import java.util.UUID;
 
 import com.eskcti.algashop.ordering.infrastructure.persistence.embeddable.AddressEmbeddable;
+import static com.eskcti.algashop.ordering.domain.model.entity.CustomerTestDataBuilder.DEFAULT_CUSTOMER_ID;
 
 public class CustomerPersistenceEntityTestDataBuilder {
+
     private CustomerPersistenceEntityTestDataBuilder() {
+
     }
 
-    public static CustomerPersistenceEntity.CustomerPersistenceEntityBuilder existingCustomer() {
+    public static CustomerPersistenceEntity.CustomerPersistenceEntityBuilder aCustomer() {
         return CustomerPersistenceEntity.builder()
-                .id(UUID.randomUUID())
+                .id(DEFAULT_CUSTOMER_ID.value())
+                .registeredAt(OffsetDateTime.now())
+                .promotionNotificationsAllowed(true)
+                .archived(false)
+                .archivedAt(null)
                 .firstName("John")
                 .lastName("Doe")
                 .birthDate(LocalDate.of(1991, 7, 5))
@@ -20,43 +27,30 @@ public class CustomerPersistenceEntityTestDataBuilder {
                 .phone("478-256-2604")
                 .document("255-08-0578")
                 .promotionNotificationsAllowed(true)
-                .archived(false)
-                .registeredAt(OffsetDateTime.now())
-                .archivedAt(null)
                 .loyaltyPoints(0)
                 .address(AddressEmbeddable.builder()
                         .street("Bourbon Street")
                         .number("1134")
-                        .complement("Apt. 114")
                         .neighborhood("North Ville")
                         .city("York")
                         .state("South California")
                         .zipCode("12345")
+                        .complement("Apt. 114")
                         .build());
     }
 
+    public static CustomerPersistenceEntity.CustomerPersistenceEntityBuilder existingCustomer() {
+        return aCustomer();
+    }
+
     public static CustomerPersistenceEntity.CustomerPersistenceEntityBuilder existingAnonymizedCustomer() {
-        return CustomerPersistenceEntity.builder()
-                .id(UUID.randomUUID())
-                .firstName("Anonymous")
-                .lastName("Anonymous")
-                .birthDate(null)
-                .email("anonymous@anonymous.com")
-                .phone("000-000-0000")
+        return aCustomer()
+                .firstName("Anonymized")
+                .lastName("User")
+                .email("anonymized@example.com")
                 .document("000-00-0000")
-                .promotionNotificationsAllowed(false)
-                .archived(true)
-                .registeredAt(OffsetDateTime.now())
-                .archivedAt(OffsetDateTime.now())
-                .loyaltyPoints(10)
-                .address(AddressEmbeddable.builder()
-                        .street("Bourbon Street")
-                        .number("1134")
-                        .complement("Apt. 114")
-                        .neighborhood("North Ville")
-                        .city("York")
-                        .state("South California")
-                        .zipCode("12345")
-                        .build());
+                .birthDate(null)
+                .phone("000-000-0000")
+                .promotionNotificationsAllowed(false);
     }
 }

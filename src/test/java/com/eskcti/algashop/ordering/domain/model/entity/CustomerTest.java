@@ -70,8 +70,8 @@ class CustomerTest {
 
   @Test
   void given_customersWithDifferentId_whenCompare_shouldNotBeEqual() {
-    Customer first = CustomerTestDataBuilder.existingCustomer().build();
-    Customer second = CustomerTestDataBuilder.existingCustomer().build();
+    Customer first = CustomerTestDataBuilder.existingCustomer().id(new CustomerId()).build();
+    Customer second = CustomerTestDataBuilder.existingCustomer().id(new CustomerId()).build();
 
     assertThat(first).isNotEqualTo(second);
     assertThat(first).isNotEqualTo(null);

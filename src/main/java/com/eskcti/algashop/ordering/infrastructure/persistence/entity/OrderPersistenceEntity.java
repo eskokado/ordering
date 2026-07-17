@@ -9,6 +9,8 @@ import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
@@ -38,7 +40,10 @@ public class OrderPersistenceEntity {
   @Id
   @EqualsAndHashCode.Include
   private Long id;
-  private UUID customerId;
+
+  @JoinColumn
+  @ManyToOne(optional = false)
+  private CustomerPersistenceEntity customer;
 
   private BigDecimal totalAmount;
   private Integer totalItems;
@@ -52,10 +57,13 @@ public class OrderPersistenceEntity {
 
   @CreatedBy
   private UUID createdByUserId;
+
   @LastModifiedDate
   private OffsetDateTime lastModifiedAt;
+
   @LastModifiedBy
   private UUID lastModifiedByUserId;
+
   @Version
   private Long version;
 
@@ -65,14 +73,13 @@ public class OrderPersistenceEntity {
       @AttributeOverride(name = "lastName", column = @Column(name = "billing_last_name")),
       @AttributeOverride(name = "document", column = @Column(name = "billing_document")),
       @AttributeOverride(name = "phone", column = @Column(name = "billing_phone")),
-      @AttributeOverride(name = "email", column = @Column(name = "billing_email")),
       @AttributeOverride(name = "address.street", column = @Column(name = "billing_address_street")),
       @AttributeOverride(name = "address.number", column = @Column(name = "billing_address_number")),
       @AttributeOverride(name = "address.complement", column = @Column(name = "billing_address_complement")),
       @AttributeOverride(name = "address.neighborhood", column = @Column(name = "billing_address_neighborhood")),
       @AttributeOverride(name = "address.city", column = @Column(name = "billing_address_city")),
       @AttributeOverride(name = "address.state", column = @Column(name = "billing_address_state")),
-      @AttributeOverride(name = "address.zipCode", column = @Column(name = "billing_address_zip_code"))
+      @AttributeOverride(name = "address.zipCode", column = @Column(name = "billing_address_zipCode"))
   })
   private BillingEmbeddable billing;
 
@@ -94,16 +101,16 @@ public class OrderPersistenceEntity {
   })
   private ShippingEmbeddable shipping;
 
-  @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+  @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
   private Set<OrderItemPersistenceEntity> items = new HashSet<>();
 
   @Builder
-  public OrderPersistenceEntity(Long id, UUID customerId, BigDecimal totalAmount, Integer totalItems, String status,
-      String paymentMethod, OffsetDateTime placedAt, OffsetDateTime paidAt, OffsetDateTime canceledAt,
+  public OrderPersistenceEntity(Long id, CustomerPersistenceEntity customer, BigDecimal totalAmount, Integer totalItems,
+      String status, String paymentMethod, OffsetDateTime placedAt, OffsetDateTime paidAt, OffsetDateTime canceledAt,
       OffsetDateTime readyAt, UUID createdByUserId, OffsetDateTime lastModifiedAt, UUID lastModifiedByUserId,
       Long version, BillingEmbeddable billing, ShippingEmbeddable shipping, Set<OrderItemPersistenceEntity> items) {
     this.id = id;
-    this.customerId = customerId;
+    this.customer = customer;
     this.totalAmount = totalAmount;
     this.totalItems = totalItems;
     this.status = status;
@@ -144,4 +151,10 @@ public class OrderPersistenceEntity {
     this.getItems().add(item);
   }
 
+  public UUID getCustomerId() {
+    if (this.customer == null) {
+      return null;
+    }
+    return this.customer.getId();
+  }
 }

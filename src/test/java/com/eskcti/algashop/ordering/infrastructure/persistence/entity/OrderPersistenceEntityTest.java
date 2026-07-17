@@ -58,7 +58,7 @@ class OrderPersistenceEntityTest {
 
   @Test
   void given_itemsIsNull_whenAddItem_shouldInitializeItemsAndAdd() {
-    final var entity = OrderPersistenceEntity.builder().id(1L).customerId(java.util.UUID.randomUUID()).build();
+    final var entity = OrderPersistenceEntity.builder().id(1L).customer(CustomerPersistenceEntityTestDataBuilder.existingCustomer().build()).build();
     entity.setItems(null);
     final var item = OrderItemPersistenceEntity.builder().id(2L).build();
     entity.addItem(item);
