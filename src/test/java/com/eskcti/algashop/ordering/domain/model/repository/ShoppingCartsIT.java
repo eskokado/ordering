@@ -1,4 +1,4 @@
-package com.eskcti.algashop.ordering.domain.repository;
+package com.eskcti.algashop.ordering.domain.model.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

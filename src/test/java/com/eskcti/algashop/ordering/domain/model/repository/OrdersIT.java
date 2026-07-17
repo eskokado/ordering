@@ -1,4 +1,4 @@
-package com.eskcti.algashop.ordering.domain.repository;
+package com.eskcti.algashop.ordering.domain.model.repository;
 
 import java.time.Year;
 import java.time.OffsetDateTime;
