@@ -135,17 +135,20 @@ public class OrderPersistenceEntityAssembler {
         .expectedDate(shipping.expectedDate())
         .cost(shipping.cost().value())
         .address(toAddressEmbeddable(shipping.address()));
-    Recipient recipient = shipping.recipient();
-    if (recipient != null) {
-      builder.recipient(
-          RecipientEmbeddable.builder()
-              .firstName(recipient.fullName().firstName())
-              .lastName(recipient.fullName().lastName())
-              .document(recipient.document().value())
-              .phone(recipient.phone().value())
-              .build());
-    }
+    builder.recipient(toRecipientEmbeddable(shipping.recipient()));
     return builder.build();
+  }
+
+  private RecipientEmbeddable toRecipientEmbeddable(Recipient recipient) {
+    if (recipient == null) {
+      return null;
+    }
+    return RecipientEmbeddable.builder()
+        .firstName(recipient.fullName().firstName())
+        .lastName(recipient.fullName().lastName())
+        .document(recipient.document().value())
+        .phone(recipient.phone().value())
+        .build();
   }
 
 }

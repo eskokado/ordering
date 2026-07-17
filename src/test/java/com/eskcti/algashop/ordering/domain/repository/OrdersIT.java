@@ -1,5 +1,8 @@
 package com.eskcti.algashop.ordering.domain.repository;
 
+import java.time.Year;
+import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -18,7 +21,6 @@ import com.eskcti.algashop.ordering.domain.model.repository.Customers;
 import com.eskcti.algashop.ordering.domain.model.repository.Orders;
 import com.eskcti.algashop.ordering.domain.model.valueobject.Money;
 import com.eskcti.algashop.ordering.domain.model.valueobject.Quantity;
-import com.eskcti.algashop.ordering.domain.model.valueobject.id.CustomerId;
 import com.eskcti.algashop.ordering.domain.model.valueobject.id.OrderId;
 import com.eskcti.algashop.ordering.infrastructure.persistence.assembler.CustomerPersistenceEntityAssembler;
 import com.eskcti.algashop.ordering.infrastructure.persistence.assembler.OrderPersistenceEntityAssembler;
@@ -219,6 +221,91 @@ class OrdersIT {
 
   private void inNewTransaction(Runnable callback) {
     newTransaction.executeWithoutResult(status -> callback.run());
+  }
+
+  private void setField(Object obj, String fieldName, Object value) {
+    try {
+      var field = obj.getClass().getDeclaredField(fieldName);
+      field.setAccessible(true);
+      field.set(obj, value);
+    } catch (ReflectiveOperationException e) {
+      throw new IllegalStateException(e);
+    }
+  }
+
+  @Test
+  public void shouldGetPlacedOrdersByCustomerInYear() {
+    Customer customer = CustomerTestDataBuilder.existingCustomer().build();
+    customers.add(customer);
+
+    Order order1 = OrderTestDataBuilder.anOrder().customerId(customer.id()).status(OrderStatus.PLACED).build();
+    setField(order1, "placedAt", OffsetDateTime.now().withYear(2024));
+    orders.add(order1);
+
+    Order order2 = OrderTestDataBuilder.anOrder().customerId(customer.id()).status(OrderStatus.PLACED).build();
+    setField(order2, "placedAt", OffsetDateTime.now().withYear(2024));
+    orders.add(order2);
+
+    Order order3 = OrderTestDataBuilder.anOrder().customerId(customer.id()).status(OrderStatus.PLACED).build();
+    setField(order3, "placedAt", OffsetDateTime.now().withYear(2023));
+    orders.add(order3);
+
+    List<Order> orders2024 = orders.placedByCustomerInYear(customer.id(), Year.of(2024));
+
+    Assertions.assertThat(orders2024).hasSize(2);
+    Assertions.assertThat(orders2024).extracting(Order::id).containsExactlyInAnyOrder(order1.id(), order2.id());
+  }
+
+  @Test
+  public void shouldGetSalesQuantityByCustomerInYear() {
+    Customer customer = CustomerTestDataBuilder.existingCustomer().build();
+    customers.add(customer);
+
+    // Paid order in 2024
+    Order order1 = OrderTestDataBuilder.anOrder().customerId(customer.id()).status(OrderStatus.PAID).build();
+    setField(order1, "placedAt", OffsetDateTime.now().withYear(2024));
+    orders.add(order1);
+
+    // Paid order in 2024
+    Order order2 = OrderTestDataBuilder.anOrder().customerId(customer.id()).status(OrderStatus.PAID).build();
+    setField(order2, "placedAt", OffsetDateTime.now().withYear(2024));
+    orders.add(order2);
+
+    // Canceled order in 2024 (should not count)
+    Order order3 = OrderTestDataBuilder.anOrder().customerId(customer.id()).status(OrderStatus.PLACED).build();
+    setField(order3, "placedAt", OffsetDateTime.now().withYear(2024));
+    order3.cancel();
+    orders.add(order3);
+
+    // Paid order in 2023 (should not count)
+    Order order4 = OrderTestDataBuilder.anOrder().customerId(customer.id()).status(OrderStatus.PAID).build();
+    setField(order4, "placedAt", OffsetDateTime.now().withYear(2023));
+    orders.add(order4);
+
+    long salesCount = orders.salesQuantityByCustomerInYear(customer.id(), Year.of(2024));
+
+    Assertions.assertThat(salesCount).isEqualTo(2);
+  }
+
+  @Test
+  public void shouldGetTotalSoldForCustomer() {
+    Customer customer = CustomerTestDataBuilder.existingCustomer().build();
+    customers.add(customer);
+
+    // Paid order (counts)
+    Order order1 = OrderTestDataBuilder.anOrder().customerId(customer.id()).status(OrderStatus.PAID).withItems(true)
+        .build();
+    orders.add(order1);
+
+    // Canceled order (doesn't count)
+    Order order2 = OrderTestDataBuilder.anOrder().customerId(customer.id()).status(OrderStatus.PLACED).withItems(true)
+        .build();
+    order2.cancel();
+    orders.add(order2);
+
+    Money totalSold = orders.totalSoldForCustomer(customer.id());
+
+    Assertions.assertThat(totalSold).isEqualTo(order1.totalAmount());
   }
 
 }

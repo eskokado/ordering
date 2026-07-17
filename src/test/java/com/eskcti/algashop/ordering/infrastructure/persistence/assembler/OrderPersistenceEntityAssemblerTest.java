@@ -36,7 +36,7 @@ class OrderPersistenceEntityAssemblerTest {
 
   @BeforeEach
   public void setup() {
-    Mockito.when(customerPersistenceEntityRepository.getReferenceById(Mockito.any(UUID.class)))
+    Mockito.lenient().when(customerPersistenceEntityRepository.getReferenceById(Mockito.any(UUID.class)))
         .then(a -> {
           UUID customerId = a.getArgument(0, UUID.class);
           return CustomerPersistenceEntityTestDataBuilder.aCustomer().id(customerId).build();
@@ -157,6 +157,77 @@ class OrderPersistenceEntityAssemblerTest {
 
     assembler.merge(persistenceEntity, order);
     assertThat(persistenceEntity.getItems()).isNotEmpty();
+  }
+
+  @Test
+  void givenNullAddress_whenInvokeToAddressEmbeddable_shouldReturnNull() throws Exception {
+    var method = OrderPersistenceEntityAssembler.class
+        .getDeclaredMethod("toAddressEmbeddable", com.eskcti.algashop.ordering.domain.model.valueobject.Address.class);
+    method.setAccessible(true);
+
+    Object result = method.invoke(assembler, new Object[] { null });
+
+    assertThat(result).isNull();
+  }
+
+  @Test
+  void givenNullRecipient_whenInvokeToRecipientEmbeddable_shouldReturnNull() throws Exception {
+    var method = OrderPersistenceEntityAssembler.class
+        .getDeclaredMethod("toRecipientEmbeddable",
+            com.eskcti.algashop.ordering.domain.model.valueobject.Recipient.class);
+    method.setAccessible(true);
+
+    Object result = method.invoke(assembler, new Object[] { null });
+
+    assertThat(result).isNull();
+  }
+
+  @Test
+  void givenOrderWithExtraItem_whenMerge_shouldCreateMissingPersistenceItem() {
+    Order order = OrderTestDataBuilder.anOrder().withItems(true).build();
+
+    OrderItemPersistenceEntity existingItem = assembler.fromDomain(order.items().iterator().next());
+    OrderPersistenceEntity persistenceEntity = OrderPersistenceEntityTestDataBuilder.existingOrder()
+        .items(new HashSet<>(Set.of(existingItem)))
+        .build();
+
+    assembler.merge(persistenceEntity, order);
+
+    Assertions.assertThat(persistenceEntity.getItems()).hasSize(order.items().size());
+    Assertions.assertThat(persistenceEntity.getItems())
+        .extracting(OrderItemPersistenceEntity::getId)
+        .containsExactlyInAnyOrderElementsOf(order.items().stream()
+            .map(item -> item.id().value().toLong())
+            .collect(Collectors.toSet()));
+  }
+
+  @Test
+  void givenOrderMockWithNullItems_whenMerge_shouldRemovePersistenceEntityItems() {
+    Order order = Mockito.mock(Order.class);
+    UUID customerId = UUID.randomUUID();
+
+    Mockito.when(order.id()).thenReturn(OrderTestDataBuilder.anOrder().build().id());
+    Mockito.when(order.customerId())
+        .thenReturn(new com.eskcti.algashop.ordering.domain.model.valueobject.id.CustomerId(customerId));
+    Mockito.when(order.totalAmount()).thenReturn(new com.eskcti.algashop.ordering.domain.model.valueobject.Money("0"));
+    Mockito.when(order.totalItems()).thenReturn(com.eskcti.algashop.ordering.domain.model.valueobject.Quantity.ZERO);
+    Mockito.when(order.status()).thenReturn(com.eskcti.algashop.ordering.domain.model.entity.OrderStatus.DRAFT);
+    Mockito.when(order.paymentMethod()).thenReturn(null);
+    Mockito.when(order.placedAt()).thenReturn(null);
+    Mockito.when(order.paidAt()).thenReturn(null);
+    Mockito.when(order.canceledAt()).thenReturn(null);
+    Mockito.when(order.readyAt()).thenReturn(null);
+    Mockito.when(order.version()).thenReturn(null);
+    Mockito.when(order.billing()).thenReturn(null);
+    Mockito.when(order.shipping()).thenReturn(null);
+    Mockito.when(order.items()).thenReturn(null);
+
+    OrderPersistenceEntity persistenceEntity = OrderPersistenceEntityTestDataBuilder.existingOrder().build();
+
+    assembler.merge(persistenceEntity, order);
+
+    Assertions.assertThat(persistenceEntity.getItems()).isEmpty();
+    Mockito.verify(customerPersistenceEntityRepository).getReferenceById(customerId);
   }
 
 }

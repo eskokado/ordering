@@ -78,4 +78,11 @@ class OrderPersistenceEntityTest {
     assertThat(entity.getItems()).contains(item);
     assertThat(item.getOrder()).isEqualTo(entity);
   }
+
+  @Test
+  void given_nullCustomer_whenGetCustomerId_shouldReturnNull() {
+    final var entity = new OrderPersistenceEntity();
+
+    assertThat(entity.getCustomerId()).isNull();
+  }
 }

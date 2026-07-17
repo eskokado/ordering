@@ -10,6 +10,7 @@ import org.springframework.util.ReflectionUtils;
 
 import com.eskcti.algashop.ordering.domain.model.entity.Customer;
 import com.eskcti.algashop.ordering.domain.model.repository.Customers;
+import com.eskcti.algashop.ordering.domain.model.valueobject.Email;
 import com.eskcti.algashop.ordering.domain.model.valueobject.id.CustomerId;
 import com.eskcti.algashop.ordering.infrastructure.persistence.assembler.CustomerPersistenceEntityAssembler;
 import com.eskcti.algashop.ordering.infrastructure.persistence.disassembler.CustomerPersistenceEntityDisassembler;
@@ -40,6 +41,17 @@ public class CustomersPersistenceProvider implements Customers {
   @Override
   public boolean exists(CustomerId customerId) {
     return persistenceRepository.existsById(customerId.value());
+  }
+
+  @Override
+  public Optional<Customer> ofEmail(Email email) {
+    return persistenceRepository.findByEmail(email.value())
+        .map(disassembler::toDomainEntity);
+  }
+
+  @Override
+  public boolean isEmailUnique(Email email, CustomerId exceptCustomerId) {
+    return !persistenceRepository.existsByEmailAndIdNot(email.value(), exceptCustomerId.value());
   }
 
   @Override

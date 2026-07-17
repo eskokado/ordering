@@ -2,13 +2,14 @@ package com.eskcti.algashop.ordering.domain.repository;
 
 import java.util.Optional;
 
+import com.eskcti.algashop.ordering.domain.model.valueobject.Email;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.assertj.core.api.Assertions;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.eskcti.algashop.ordering.domain.model.entity.Customer;
 import com.eskcti.algashop.ordering.domain.model.entity.CustomerTestDataBuilder;
@@ -109,6 +110,57 @@ class CustomersIT {
 
     Assertions.assertThat(customers.exists(customer.id())).isTrue();
     Assertions.assertThat(customers.exists(new CustomerId())).isFalse();
+  }
+
+  @Test
+  public void shouldFindCustomerByEmail() {
+    Customer customer = CustomerTestDataBuilder.brandNewCustomer().build();
+    customers.add(customer);
+
+    Optional<Customer> found = customers.ofEmail(customer.email());
+
+    Assertions.assertThat(found).isPresent();
+    Assertions.assertThat(found.get().id()).isEqualTo(customer.id());
+  }
+
+  @Test
+  public void shouldNotFindCustomerByNonExistentEmail() {
+    Optional<Customer> found = customers.ofEmail(new Email("nonexistent@example.com"));
+
+    Assertions.assertThat(found).isEmpty();
+  }
+
+  @Test
+  public void shouldReturnTrueWhenEmailIsUnique() {
+    Customer customer = CustomerTestDataBuilder.brandNewCustomer().build();
+    customers.add(customer);
+
+    boolean isUnique = customers.isEmailUnique(new Email("another@example.com"), customer.id());
+
+    Assertions.assertThat(isUnique).isTrue();
+  }
+
+  @Test
+  public void shouldReturnFalseWhenEmailExistsAndNotSameCustomer() {
+    Customer customer1 = CustomerTestDataBuilder.brandNewCustomer().build();
+    customers.add(customer1);
+
+    Customer customer2 = CustomerTestDataBuilder.brandNewCustomer().email(new Email("another@example.com")).build();
+    customers.add(customer2);
+
+    boolean isUnique = customers.isEmailUnique(customer2.email(), customer1.id());
+
+    Assertions.assertThat(isUnique).isFalse();
+  }
+
+  @Test
+  public void shouldReturnTrueWhenEmailExistsButSameCustomer() {
+    Customer customer = CustomerTestDataBuilder.brandNewCustomer().build();
+    customers.add(customer);
+
+    boolean isUnique = customers.isEmailUnique(customer.email(), customer.id());
+
+    Assertions.assertThat(isUnique).isTrue();
   }
 
 }
