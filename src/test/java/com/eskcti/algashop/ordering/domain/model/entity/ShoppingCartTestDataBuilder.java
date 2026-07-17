@@ -50,6 +50,7 @@ public final class ShoppingCartTestDataBuilder {
 
     return ShoppingCart.existing()
         .id(cartId)
+        .version(null)
         .customerId(customerId)
         .totalAmount(totalAmount)
         .totalItems(quantity)
