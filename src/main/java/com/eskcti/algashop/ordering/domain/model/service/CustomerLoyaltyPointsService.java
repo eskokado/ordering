@@ -6,9 +6,11 @@ import com.eskcti.algashop.ordering.domain.model.entity.Customer;
 import com.eskcti.algashop.ordering.domain.model.entity.Order;
 import com.eskcti.algashop.ordering.domain.model.exception.CantAddLoyaltyPointsOrderIsNotReady;
 import com.eskcti.algashop.ordering.domain.model.exception.OrderNotBelongsToCustomerException;
+import com.eskcti.algashop.ordering.domain.model.utility.DomainService;
 import com.eskcti.algashop.ordering.domain.model.valueobject.LoyaltyPoints;
 import com.eskcti.algashop.ordering.domain.model.valueobject.Money;
 
+@DomainService
 public class CustomerLoyaltyPointsService {
 
   private static final LoyaltyPoints basePoints = new LoyaltyPoints(5);
