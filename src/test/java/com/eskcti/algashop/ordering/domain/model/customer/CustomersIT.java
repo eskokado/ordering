@@ -15,9 +15,10 @@ import com.eskcti.algashop.ordering.domain.model.customer.Customer;
 import com.eskcti.algashop.ordering.domain.model.customer.CustomerId;
 import com.eskcti.algashop.ordering.domain.model.customer.Customers;
 import com.eskcti.algashop.ordering.domain.model.customer.CustomerTestDataBuilder;
-import com.eskcti.algashop.ordering.infrastructure.persistence.assembler.CustomerPersistenceEntityAssembler;
-import com.eskcti.algashop.ordering.infrastructure.persistence.disassembler.CustomerPersistenceEntityDisassembler;
-import com.eskcti.algashop.ordering.infrastructure.persistence.provider.CustomersPersistenceProvider;
+import com.eskcti.algashop.ordering.infrastructure.persistence.customer.CustomerPersistenceEntityAssembler;
+import com.eskcti.algashop.ordering.infrastructure.persistence.customer.CustomerPersistenceEntityDisassembler;
+import com.eskcti.algashop.ordering.infrastructure.persistence.customer.CustomersPersistenceProvider;
+
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @DataJpaTest

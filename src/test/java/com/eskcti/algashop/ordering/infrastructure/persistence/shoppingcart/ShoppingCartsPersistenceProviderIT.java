@@ -1,9 +1,6 @@
-package com.eskcti.algashop.ordering.domain.model.shoppingcart;
+package com.eskcti.algashop.ordering.infrastructure.persistence.shoppingcart;
 
 import static org.assertj.core.api.Assertions.assertThat;
-
-import com.eskcti.algashop.ordering.domain.model.shoppingcart.ShoppingCart;
-import com.eskcti.algashop.ordering.domain.model.shoppingcart.ShoppingCarts;
 
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -21,6 +18,8 @@ import com.eskcti.algashop.ordering.domain.model.customer.Customer;
 import com.eskcti.algashop.ordering.domain.model.customer.Customers;
 import com.eskcti.algashop.ordering.domain.model.customer.CustomerTestDataBuilder;
 import com.eskcti.algashop.ordering.domain.model.shoppingcart.ShoppingCartTestDataBuilder;
+import com.eskcti.algashop.ordering.domain.model.shoppingcart.ShoppingCart;
+import com.eskcti.algashop.ordering.domain.model.shoppingcart.ShoppingCarts;
 import com.eskcti.algashop.ordering.infrastructure.persistence.customer.CustomerPersistenceEntityAssembler;
 import com.eskcti.algashop.ordering.infrastructure.persistence.customer.CustomerPersistenceEntityDisassembler;
 import com.eskcti.algashop.ordering.infrastructure.persistence.customer.CustomerPersistenceEntityRepository;
@@ -34,7 +33,7 @@ import com.eskcti.algashop.ordering.infrastructure.persistence.shoppingcart.Shop
 @Import({ CustomersPersistenceProvider.class, CustomerPersistenceEntityAssembler.class,
     CustomerPersistenceEntityDisassembler.class, ShoppingCartsPersistenceProvider.class,
     ShoppingCartPersistenceEntityAssembler.class, ShoppingCartPersistenceEntityDisassembler.class })
-class ShoppingCartsIT {
+class ShoppingCartsPersistenceProviderIT {
 
   @Autowired
   private ShoppingCarts shoppingCarts;
@@ -86,38 +85,63 @@ class ShoppingCartsIT {
   }
 
   @Test
-  void givenNewShoppingCart_whenAdd_shouldPersistShoppingCart() {
+  void givenShoppingCart_whenAdd_shouldPersistShoppingCart() {
     Customer customer = CustomerTestDataBuilder.existingCustomer().build();
     customers.add(customer);
 
     ShoppingCart shoppingCart = ShoppingCart.startShopping(customer.id());
+
     shoppingCarts.add(shoppingCart);
 
     Optional<ShoppingCart> found = shoppingCarts.ofId(shoppingCart.id());
-
     assertThat(found).isPresent();
-    assertThat(found.get().id()).isEqualTo(shoppingCart.id());
   }
 
   @Test
-  void givenShoppingCart_whenCount_thenReturnCorrectCount() {
+  void givenShoppingCart_whenAddAndUpdate_shouldIncreaseVersion() {
+    Customer customer = CustomerTestDataBuilder.existingCustomer().build();
+    customers.add(customer);
+
+    ShoppingCart shoppingCart = ShoppingCart.startShopping(customer.id());
+    shoppingCarts.add(shoppingCart);
+    Long initialVersion = shoppingCart.version();
+
+    setField(shoppingCart, "totalItems", new com.eskcti.algashop.ordering.domain.model.commons.Quantity(5));
+    shoppingCarts.add(shoppingCart);
+    Long versionAfterUpdate = shoppingCart.version();
+
+    assertThat(versionAfterUpdate).isGreaterThan(initialVersion);
+  }
+
+  @Test
+  void givenShoppingCart_whenConcurrentUpdate_shouldThrowOptimisticLockingFailureException() {
     Customer customer = CustomerTestDataBuilder.existingCustomer().build();
     customers.add(customer);
 
     ShoppingCart shoppingCart = ShoppingCart.startShopping(customer.id());
     shoppingCarts.add(shoppingCart);
 
-    long count = shoppingCarts.count();
-    assertThat(count).isEqualTo(1);
+    ShoppingCart cartFromAnotherTransaction = inNewTransaction(
+        () -> shoppingCarts.ofId(shoppingCart.id()).orElseThrow());
+
+    setField(cartFromAnotherTransaction, "totalItems",
+        new com.eskcti.algashop.ordering.domain.model.commons.Quantity(5));
+
+    inNewTransaction(() -> shoppingCarts.add(shoppingCart));
+
+    org.assertj.core.api.Assertions
+        .assertThatThrownBy(() -> inNewTransaction(() -> shoppingCarts.add(cartFromAnotherTransaction)))
+        .isInstanceOf(ObjectOptimisticLockingFailureException.class);
   }
 
   @Test
-  void givenShoppingCart_whenRemove_thenShoppingCartShouldNotExist() {
+  void givenShoppingCart_whenRemove_shouldDeleteShoppingCart() {
     Customer customer = CustomerTestDataBuilder.existingCustomer().build();
     customers.add(customer);
 
     ShoppingCart shoppingCart = ShoppingCart.startShopping(customer.id());
     shoppingCarts.add(shoppingCart);
+
     shoppingCarts.remove(shoppingCart);
 
     Optional<ShoppingCart> found = shoppingCarts.ofId(shoppingCart.id());
@@ -125,34 +149,17 @@ class ShoppingCartsIT {
   }
 
   @Test
-  void givenShoppingCart_whenRemoveById_thenShoppingCartShouldNotExist() {
+  void givenShoppingCart_whenRemoveById_shouldDeleteShoppingCart() {
     Customer customer = CustomerTestDataBuilder.existingCustomer().build();
     customers.add(customer);
 
     ShoppingCart shoppingCart = ShoppingCart.startShopping(customer.id());
     shoppingCarts.add(shoppingCart);
+
     shoppingCarts.remove(shoppingCart.id());
 
     Optional<ShoppingCart> found = shoppingCarts.ofId(shoppingCart.id());
     assertThat(found).isEmpty();
-  }
-
-  @Test
-  void givenShoppingCart_whenUpdateWithOldVersion_thenThrowObjectOptimisticLockingFailureException() {
-    Customer customer = CustomerTestDataBuilder.existingCustomer().build();
-    customers.add(customer);
-
-    ShoppingCart shoppingCart = ShoppingCart.startShopping(customer.id());
-    shoppingCarts.add(shoppingCart);
-    ShoppingCart cartFromAnotherTransaction = inNewTransaction(
-        () -> shoppingCarts.ofId(shoppingCart.id()).orElseThrow());
-    setField(cartFromAnotherTransaction, "totalItems",
-        new com.eskcti.algashop.ordering.domain.model.commons.Quantity(5));
-    inNewTransaction(() -> shoppingCarts.add(shoppingCart));
-
-    org.assertj.core.api.Assertions
-        .assertThatThrownBy(() -> inNewTransaction(() -> shoppingCarts.add(cartFromAnotherTransaction)))
-        .isInstanceOf(ObjectOptimisticLockingFailureException.class);
   }
 
   @Test

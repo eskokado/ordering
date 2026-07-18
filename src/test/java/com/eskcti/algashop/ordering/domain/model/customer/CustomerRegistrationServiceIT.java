@@ -24,11 +24,11 @@ import com.eskcti.algashop.ordering.domain.model.customer.CustomerEmailIsInUseEx
 import com.eskcti.algashop.ordering.domain.model.customer.CustomerRegistrationService;
 import com.eskcti.algashop.ordering.domain.model.customer.Customers;
 import com.eskcti.algashop.ordering.domain.model.customer.CustomerTestDataBuilder;
-import com.eskcti.algashop.ordering.infrastructure.persistence.assembler.CustomerPersistenceEntityAssembler;
-import com.eskcti.algashop.ordering.infrastructure.persistence.config.SpringDataAuditingConfig;
-import com.eskcti.algashop.ordering.infrastructure.persistence.disassembler.CustomerPersistenceEntityDisassembler;
-import com.eskcti.algashop.ordering.infrastructure.persistence.provider.CustomersPersistenceProvider;
-import com.eskcti.algashop.ordering.infrastructure.persistence.repository.CustomerPersistenceEntityRepository;
+import com.eskcti.algashop.ordering.infrastructure.persistence.SpringDataAuditingConfig;
+import com.eskcti.algashop.ordering.infrastructure.persistence.customer.CustomerPersistenceEntityAssembler;
+import com.eskcti.algashop.ordering.infrastructure.persistence.customer.CustomerPersistenceEntityDisassembler;
+import com.eskcti.algashop.ordering.infrastructure.persistence.customer.CustomerPersistenceEntityRepository;
+import com.eskcti.algashop.ordering.infrastructure.persistence.customer.CustomersPersistenceProvider;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)

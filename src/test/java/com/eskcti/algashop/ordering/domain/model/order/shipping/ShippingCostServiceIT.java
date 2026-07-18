@@ -13,9 +13,9 @@ import com.eskcti.algashop.ordering.domain.model.commons.ZipCode;
 import com.eskcti.algashop.ordering.domain.model.order.shipping.OriginAddressService;
 import com.eskcti.algashop.ordering.domain.model.order.shipping.ShippingCostService;
 import com.eskcti.algashop.ordering.domain.model.order.shipping.ShippingCostService.CalculationRequest;
-import com.eskcti.algashop.ordering.infrastructure.client.rapidex.RapiDexAPIClientConfig;
-import com.eskcti.algashop.ordering.infrastructure.client.rapidex.ShippingCostServiceRapidexImpl;
-import com.eskcti.algashop.ordering.infrastructure.fake.FixedOriginAddressService;
+import com.eskcti.algashop.ordering.infrastructure.shipping.client.fake.FixedOriginAddressService;
+import com.eskcti.algashop.ordering.infrastructure.shipping.client.rapidex.RapiDexAPIClientConfig;
+import com.eskcti.algashop.ordering.infrastructure.shipping.client.rapidex.ShippingCostServiceRapidexImpl;
 
 @SpringBootTest(classes = {
     RapiDexAPIClientConfig.class,
