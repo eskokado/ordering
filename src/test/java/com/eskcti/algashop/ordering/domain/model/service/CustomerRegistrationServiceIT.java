@@ -23,7 +23,6 @@ import com.eskcti.algashop.ordering.domain.model.valueobject.Email;
 import com.eskcti.algashop.ordering.domain.model.valueobject.FullName;
 import com.eskcti.algashop.ordering.domain.model.valueobject.Phone;
 import com.eskcti.algashop.ordering.domain.model.valueobject.ZipCode;
-import com.eskcti.algashop.ordering.infrastructure.beans.DomainServiceScanConfig;
 import com.eskcti.algashop.ordering.infrastructure.persistence.assembler.CustomerPersistenceEntityAssembler;
 import com.eskcti.algashop.ordering.infrastructure.persistence.config.SpringDataAuditingConfig;
 import com.eskcti.algashop.ordering.infrastructure.persistence.disassembler.CustomerPersistenceEntityDisassembler;
@@ -33,7 +32,7 @@ import com.eskcti.algashop.ordering.infrastructure.persistence.repository.Custom
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Import({
-    DomainServiceScanConfig.class,
+    CustomerRegistrationService.class,
     CustomersPersistenceProvider.class,
     CustomerPersistenceEntityAssembler.class,
     CustomerPersistenceEntityDisassembler.class,
