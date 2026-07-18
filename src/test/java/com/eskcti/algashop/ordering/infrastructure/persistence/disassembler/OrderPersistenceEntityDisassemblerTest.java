@@ -5,11 +5,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;
 
-import com.eskcti.algashop.ordering.domain.model.entity.Order;
-import com.eskcti.algashop.ordering.domain.model.entity.OrderStatus;
-import com.eskcti.algashop.ordering.domain.model.entity.PaymentMethod;
-import com.eskcti.algashop.ordering.domain.model.valueobject.Money;
-import com.eskcti.algashop.ordering.domain.model.valueobject.Quantity;
+import com.eskcti.algashop.ordering.domain.model.commons.Money;
+import com.eskcti.algashop.ordering.domain.model.commons.Quantity;
+import com.eskcti.algashop.ordering.domain.model.order.Order;
+import com.eskcti.algashop.ordering.domain.model.order.OrderStatus;
+import com.eskcti.algashop.ordering.domain.model.order.PaymentMethod;
 import com.eskcti.algashop.ordering.infrastructure.persistence.entity.OrderPersistenceEntity;
 import com.eskcti.algashop.ordering.infrastructure.persistence.entity.OrderPersistenceEntityTestDataBuilder;
 

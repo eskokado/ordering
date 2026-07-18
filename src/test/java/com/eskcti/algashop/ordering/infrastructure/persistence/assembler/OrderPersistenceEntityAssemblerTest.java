@@ -16,9 +16,9 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.eskcti.algashop.ordering.domain.model.entity.Order;
-import com.eskcti.algashop.ordering.domain.model.entity.OrderItem;
-import com.eskcti.algashop.ordering.domain.model.entity.OrderTestDataBuilder;
+import com.eskcti.algashop.ordering.domain.model.order.OrderTestDataBuilder;
+import com.eskcti.algashop.ordering.domain.model.order.Order;
+import com.eskcti.algashop.ordering.domain.model.order.OrderItem;
 import com.eskcti.algashop.ordering.infrastructure.persistence.entity.CustomerPersistenceEntityTestDataBuilder;
 import com.eskcti.algashop.ordering.infrastructure.persistence.entity.OrderItemPersistenceEntity;
 import com.eskcti.algashop.ordering.infrastructure.persistence.entity.OrderPersistenceEntity;
@@ -162,7 +162,7 @@ class OrderPersistenceEntityAssemblerTest {
   @Test
   void givenNullAddress_whenInvokeToAddressEmbeddable_shouldReturnNull() throws Exception {
     var method = OrderPersistenceEntityAssembler.class
-        .getDeclaredMethod("toAddressEmbeddable", com.eskcti.algashop.ordering.domain.model.valueobject.Address.class);
+        .getDeclaredMethod("toAddressEmbeddable", com.eskcti.algashop.ordering.domain.model.commons.Address.class);
     method.setAccessible(true);
 
     Object result = method.invoke(assembler, new Object[] { null });
@@ -174,7 +174,7 @@ class OrderPersistenceEntityAssemblerTest {
   void givenNullRecipient_whenInvokeToRecipientEmbeddable_shouldReturnNull() throws Exception {
     var method = OrderPersistenceEntityAssembler.class
         .getDeclaredMethod("toRecipientEmbeddable",
-            com.eskcti.algashop.ordering.domain.model.valueobject.Recipient.class);
+            com.eskcti.algashop.ordering.domain.model.order.Recipient.class);
     method.setAccessible(true);
 
     Object result = method.invoke(assembler, new Object[] { null });
@@ -208,10 +208,10 @@ class OrderPersistenceEntityAssemblerTest {
 
     Mockito.when(order.id()).thenReturn(OrderTestDataBuilder.anOrder().build().id());
     Mockito.when(order.customerId())
-        .thenReturn(new com.eskcti.algashop.ordering.domain.model.valueobject.id.CustomerId(customerId));
-    Mockito.when(order.totalAmount()).thenReturn(new com.eskcti.algashop.ordering.domain.model.valueobject.Money("0"));
-    Mockito.when(order.totalItems()).thenReturn(com.eskcti.algashop.ordering.domain.model.valueobject.Quantity.ZERO);
-    Mockito.when(order.status()).thenReturn(com.eskcti.algashop.ordering.domain.model.entity.OrderStatus.DRAFT);
+        .thenReturn(new com.eskcti.algashop.ordering.domain.model.customer.CustomerId(customerId));
+    Mockito.when(order.totalAmount()).thenReturn(new com.eskcti.algashop.ordering.domain.model.commons.Money("0"));
+    Mockito.when(order.totalItems()).thenReturn(com.eskcti.algashop.ordering.domain.model.commons.Quantity.ZERO);
+    Mockito.when(order.status()).thenReturn(com.eskcti.algashop.ordering.domain.model.order.OrderStatus.DRAFT);
     Mockito.when(order.paymentMethod()).thenReturn(null);
     Mockito.when(order.placedAt()).thenReturn(null);
     Mockito.when(order.paidAt()).thenReturn(null);

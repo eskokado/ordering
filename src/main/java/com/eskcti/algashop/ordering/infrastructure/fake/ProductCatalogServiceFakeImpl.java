@@ -2,11 +2,11 @@ package com.eskcti.algashop.ordering.infrastructure.fake;
 
 import java.util.Optional;
 
-import com.eskcti.algashop.ordering.domain.model.service.ProductCatalogService;
-import com.eskcti.algashop.ordering.domain.model.valueobject.Money;
-import com.eskcti.algashop.ordering.domain.model.valueobject.Product;
-import com.eskcti.algashop.ordering.domain.model.valueobject.ProductName;
-import com.eskcti.algashop.ordering.domain.model.valueobject.id.ProductId;
+import com.eskcti.algashop.ordering.domain.model.commons.Money;
+import com.eskcti.algashop.ordering.domain.model.product.Product;
+import com.eskcti.algashop.ordering.domain.model.product.ProductCatalogService;
+import com.eskcti.algashop.ordering.domain.model.product.ProductId;
+import com.eskcti.algashop.ordering.domain.model.product.ProductName;
 
 public class ProductCatalogServiceFakeImpl implements ProductCatalogService {
   @Override

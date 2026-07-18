@@ -4,13 +4,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;
 
-import com.eskcti.algashop.ordering.domain.model.entity.Customer;
-import com.eskcti.algashop.ordering.domain.model.valueobject.BirthDate;
-import com.eskcti.algashop.ordering.domain.model.valueobject.Document;
-import com.eskcti.algashop.ordering.domain.model.valueobject.Email;
-import com.eskcti.algashop.ordering.domain.model.valueobject.FullName;
-import com.eskcti.algashop.ordering.domain.model.valueobject.LoyaltyPoints;
-import com.eskcti.algashop.ordering.domain.model.valueobject.Phone;
+import com.eskcti.algashop.ordering.domain.model.commons.Document;
+import com.eskcti.algashop.ordering.domain.model.commons.Email;
+import com.eskcti.algashop.ordering.domain.model.commons.FullName;
+import com.eskcti.algashop.ordering.domain.model.commons.Phone;
+import com.eskcti.algashop.ordering.domain.model.customer.BirthDate;
+import com.eskcti.algashop.ordering.domain.model.customer.Customer;
+import com.eskcti.algashop.ordering.domain.model.customer.LoyaltyPoints;
 import com.eskcti.algashop.ordering.infrastructure.persistence.entity.CustomerPersistenceEntity;
 import com.eskcti.algashop.ordering.infrastructure.persistence.entity.CustomerPersistenceEntityTestDataBuilder;
 
@@ -40,7 +40,8 @@ class CustomerPersistenceEntityDisassemblerTest {
 
     @Test
     void shouldDisassembleCustomerPersistenceEntityWithNullBirthDate() {
-        CustomerPersistenceEntity entity = CustomerPersistenceEntityTestDataBuilder.existingAnonymizedCustomer().build();
+        CustomerPersistenceEntity entity = CustomerPersistenceEntityTestDataBuilder.existingAnonymizedCustomer()
+                .build();
 
         Customer customer = disassembler.toDomainEntity(entity);
 

@@ -2,8 +2,8 @@ package com.eskcti.algashop.ordering.infrastructure.persistence.provider;
 
 import org.junit.jupiter.api.Test;
 
-import com.eskcti.algashop.ordering.domain.model.entity.Order;
-import com.eskcti.algashop.ordering.domain.model.entity.OrderTestDataBuilder;
+import com.eskcti.algashop.ordering.domain.model.order.OrderTestDataBuilder;
+import com.eskcti.algashop.ordering.domain.model.order.Order;
 import com.eskcti.algashop.ordering.infrastructure.persistence.entity.OrderPersistenceEntity;
 import com.eskcti.algashop.ordering.infrastructure.persistence.entity.OrderPersistenceEntityTestDataBuilder;
 

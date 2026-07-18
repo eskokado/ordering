@@ -5,8 +5,8 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 
-import com.eskcti.algashop.ordering.domain.model.entity.ShoppingCart;
-import com.eskcti.algashop.ordering.domain.model.entity.ShoppingCartItem;
+import com.eskcti.algashop.ordering.domain.model.shoppingcart.ShoppingCart;
+import com.eskcti.algashop.ordering.domain.model.shoppingcart.ShoppingCartItem;
 import com.eskcti.algashop.ordering.infrastructure.persistence.entity.ShoppingCartItemPersistenceEntity;
 import com.eskcti.algashop.ordering.infrastructure.persistence.entity.ShoppingCartPersistenceEntity;
 import com.eskcti.algashop.ordering.infrastructure.persistence.repository.CustomerPersistenceEntityRepository;

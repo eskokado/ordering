@@ -14,12 +14,12 @@ import org.springframework.context.annotation.Import;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import com.eskcti.algashop.ordering.domain.model.entity.Customer;
-import com.eskcti.algashop.ordering.domain.model.entity.CustomerTestDataBuilder;
-import com.eskcti.algashop.ordering.domain.model.entity.ShoppingCart;
-import com.eskcti.algashop.ordering.domain.model.entity.ShoppingCartTestDataBuilder;
-import com.eskcti.algashop.ordering.domain.model.repository.Customers;
-import com.eskcti.algashop.ordering.domain.model.repository.ShoppingCarts;
+import com.eskcti.algashop.ordering.domain.model.customer.Customer;
+import com.eskcti.algashop.ordering.domain.model.customer.Customers;
+import com.eskcti.algashop.ordering.domain.model.customer.CustomerTestDataBuilder;
+import com.eskcti.algashop.ordering.domain.model.shoppingcart.ShoppingCartTestDataBuilder;
+import com.eskcti.algashop.ordering.domain.model.shoppingcart.ShoppingCart;
+import com.eskcti.algashop.ordering.domain.model.shoppingcart.ShoppingCarts;
 import com.eskcti.algashop.ordering.infrastructure.persistence.assembler.CustomerPersistenceEntityAssembler;
 import com.eskcti.algashop.ordering.infrastructure.persistence.assembler.ShoppingCartPersistenceEntityAssembler;
 import com.eskcti.algashop.ordering.infrastructure.persistence.disassembler.CustomerPersistenceEntityDisassembler;
@@ -104,7 +104,7 @@ class ShoppingCartsPersistenceProviderIT {
     shoppingCarts.add(shoppingCart);
     Long initialVersion = shoppingCart.version();
 
-    setField(shoppingCart, "totalItems", new com.eskcti.algashop.ordering.domain.model.valueobject.Quantity(5));
+    setField(shoppingCart, "totalItems", new com.eskcti.algashop.ordering.domain.model.commons.Quantity(5));
     shoppingCarts.add(shoppingCart);
     Long versionAfterUpdate = shoppingCart.version();
 
@@ -123,7 +123,7 @@ class ShoppingCartsPersistenceProviderIT {
         () -> shoppingCarts.ofId(shoppingCart.id()).orElseThrow());
 
     setField(cartFromAnotherTransaction, "totalItems",
-        new com.eskcti.algashop.ordering.domain.model.valueobject.Quantity(5));
+        new com.eskcti.algashop.ordering.domain.model.commons.Quantity(5));
 
     inNewTransaction(() -> shoppingCarts.add(shoppingCart));
 

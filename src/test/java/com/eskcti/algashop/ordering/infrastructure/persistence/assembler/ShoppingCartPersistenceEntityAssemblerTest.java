@@ -11,8 +11,8 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.eskcti.algashop.ordering.domain.model.entity.ShoppingCart;
-import com.eskcti.algashop.ordering.domain.model.entity.ShoppingCartTestDataBuilder;
+import com.eskcti.algashop.ordering.domain.model.shoppingcart.ShoppingCartTestDataBuilder;
+import com.eskcti.algashop.ordering.domain.model.shoppingcart.ShoppingCart;
 import com.eskcti.algashop.ordering.infrastructure.persistence.entity.CustomerPersistenceEntity;
 import com.eskcti.algashop.ordering.infrastructure.persistence.entity.CustomerPersistenceEntityTestDataBuilder;
 import com.eskcti.algashop.ordering.infrastructure.persistence.entity.ShoppingCartPersistenceEntity;

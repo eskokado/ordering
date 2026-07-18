@@ -2,9 +2,9 @@ package com.eskcti.algashop.ordering.infrastructure.fake;
 
 import org.springframework.stereotype.Component;
 
-import com.eskcti.algashop.ordering.domain.model.service.OriginAddressService;
-import com.eskcti.algashop.ordering.domain.model.valueobject.Address;
-import com.eskcti.algashop.ordering.domain.model.valueobject.ZipCode;
+import com.eskcti.algashop.ordering.domain.model.commons.Address;
+import com.eskcti.algashop.ordering.domain.model.commons.ZipCode;
+import com.eskcti.algashop.ordering.domain.model.order.shipping.OriginAddressService;
 
 @Component
 public class FixedOriginAddressService implements OriginAddressService {

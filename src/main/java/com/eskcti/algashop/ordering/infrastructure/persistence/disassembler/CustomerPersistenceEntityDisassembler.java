@@ -1,15 +1,15 @@
 package com.eskcti.algashop.ordering.infrastructure.persistence.disassembler;
 
-import com.eskcti.algashop.ordering.domain.model.entity.Customer;
-import com.eskcti.algashop.ordering.domain.model.valueobject.Address;
-import com.eskcti.algashop.ordering.domain.model.valueobject.BirthDate;
-import com.eskcti.algashop.ordering.domain.model.valueobject.Document;
-import com.eskcti.algashop.ordering.domain.model.valueobject.Email;
-import com.eskcti.algashop.ordering.domain.model.valueobject.FullName;
-import com.eskcti.algashop.ordering.domain.model.valueobject.LoyaltyPoints;
-import com.eskcti.algashop.ordering.domain.model.valueobject.Phone;
-import com.eskcti.algashop.ordering.domain.model.valueobject.ZipCode;
-import com.eskcti.algashop.ordering.domain.model.valueobject.id.CustomerId;
+import com.eskcti.algashop.ordering.domain.model.commons.Address;
+import com.eskcti.algashop.ordering.domain.model.commons.Document;
+import com.eskcti.algashop.ordering.domain.model.commons.Email;
+import com.eskcti.algashop.ordering.domain.model.commons.FullName;
+import com.eskcti.algashop.ordering.domain.model.commons.Phone;
+import com.eskcti.algashop.ordering.domain.model.commons.ZipCode;
+import com.eskcti.algashop.ordering.domain.model.customer.BirthDate;
+import com.eskcti.algashop.ordering.domain.model.customer.Customer;
+import com.eskcti.algashop.ordering.domain.model.customer.CustomerId;
+import com.eskcti.algashop.ordering.domain.model.customer.LoyaltyPoints;
 import com.eskcti.algashop.ordering.infrastructure.persistence.embeddable.AddressEmbeddable;
 import com.eskcti.algashop.ordering.infrastructure.persistence.entity.CustomerPersistenceEntity;
 

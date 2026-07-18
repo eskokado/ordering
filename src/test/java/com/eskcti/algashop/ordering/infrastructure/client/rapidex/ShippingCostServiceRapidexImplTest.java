@@ -11,9 +11,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.eskcti.algashop.ordering.domain.model.service.ShippingCostService.CalculationRequest;
-import com.eskcti.algashop.ordering.domain.model.valueobject.Money;
-import com.eskcti.algashop.ordering.domain.model.valueobject.ZipCode;
+import com.eskcti.algashop.ordering.domain.model.commons.Money;
+import com.eskcti.algashop.ordering.domain.model.commons.ZipCode;
+import com.eskcti.algashop.ordering.domain.model.order.shipping.ShippingCostService.CalculationRequest;
 
 @ExtendWith(MockitoExtension.class)
 class ShippingCostServiceRapidexImplTest {

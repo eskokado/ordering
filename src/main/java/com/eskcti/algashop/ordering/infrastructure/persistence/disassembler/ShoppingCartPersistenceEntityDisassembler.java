@@ -5,15 +5,15 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 
-import com.eskcti.algashop.ordering.domain.model.entity.ShoppingCart;
-import com.eskcti.algashop.ordering.domain.model.entity.ShoppingCartItem;
-import com.eskcti.algashop.ordering.domain.model.valueobject.Money;
-import com.eskcti.algashop.ordering.domain.model.valueobject.ProductName;
-import com.eskcti.algashop.ordering.domain.model.valueobject.Quantity;
-import com.eskcti.algashop.ordering.domain.model.valueobject.id.CustomerId;
-import com.eskcti.algashop.ordering.domain.model.valueobject.id.ProductId;
-import com.eskcti.algashop.ordering.domain.model.valueobject.id.ShoppingCartId;
-import com.eskcti.algashop.ordering.domain.model.valueobject.id.ShoppingCartItemId;
+import com.eskcti.algashop.ordering.domain.model.commons.Money;
+import com.eskcti.algashop.ordering.domain.model.commons.Quantity;
+import com.eskcti.algashop.ordering.domain.model.customer.CustomerId;
+import com.eskcti.algashop.ordering.domain.model.product.ProductId;
+import com.eskcti.algashop.ordering.domain.model.product.ProductName;
+import com.eskcti.algashop.ordering.domain.model.shoppingcart.ShoppingCart;
+import com.eskcti.algashop.ordering.domain.model.shoppingcart.ShoppingCartId;
+import com.eskcti.algashop.ordering.domain.model.shoppingcart.ShoppingCartItem;
+import com.eskcti.algashop.ordering.domain.model.shoppingcart.ShoppingCartItemId;
 import com.eskcti.algashop.ordering.infrastructure.persistence.entity.ShoppingCartItemPersistenceEntity;
 import com.eskcti.algashop.ordering.infrastructure.persistence.entity.ShoppingCartPersistenceEntity;
 

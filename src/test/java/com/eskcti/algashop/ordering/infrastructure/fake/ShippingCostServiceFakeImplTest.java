@@ -4,9 +4,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;
 
-import com.eskcti.algashop.ordering.domain.model.service.ShippingCostService.CalculationRequest;
-import com.eskcti.algashop.ordering.domain.model.valueobject.Money;
-import com.eskcti.algashop.ordering.domain.model.valueobject.ZipCode;
+import com.eskcti.algashop.ordering.domain.model.commons.Money;
+import com.eskcti.algashop.ordering.domain.model.commons.ZipCode;
+import com.eskcti.algashop.ordering.domain.model.order.shipping.ShippingCostService.CalculationRequest;
 
 import java.time.LocalDate;
 

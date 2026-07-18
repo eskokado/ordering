@@ -1,10 +1,10 @@
 package com.eskcti.algashop.ordering.infrastructure.persistence.provider;
 
-import com.eskcti.algashop.ordering.domain.model.entity.Order;
-import com.eskcti.algashop.ordering.domain.model.repository.Orders;
-import com.eskcti.algashop.ordering.domain.model.valueobject.Money;
-import com.eskcti.algashop.ordering.domain.model.valueobject.id.CustomerId;
-import com.eskcti.algashop.ordering.domain.model.valueobject.id.OrderId;
+import com.eskcti.algashop.ordering.domain.model.commons.Money;
+import com.eskcti.algashop.ordering.domain.model.customer.CustomerId;
+import com.eskcti.algashop.ordering.domain.model.order.Order;
+import com.eskcti.algashop.ordering.domain.model.order.OrderId;
+import com.eskcti.algashop.ordering.domain.model.order.Orders;
 import com.eskcti.algashop.ordering.infrastructure.persistence.assembler.OrderPersistenceEntityAssembler;
 import com.eskcti.algashop.ordering.infrastructure.persistence.disassembler.OrderPersistenceEntityDisassembler;
 import com.eskcti.algashop.ordering.infrastructure.persistence.entity.OrderPersistenceEntity;

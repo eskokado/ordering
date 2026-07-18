@@ -4,10 +4,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;
 
-import com.eskcti.algashop.ordering.domain.model.valueobject.Money;
-import com.eskcti.algashop.ordering.domain.model.valueobject.Product;
-import com.eskcti.algashop.ordering.domain.model.valueobject.ProductName;
-import com.eskcti.algashop.ordering.domain.model.valueobject.id.ProductId;
+import com.eskcti.algashop.ordering.domain.model.commons.Money;
+import com.eskcti.algashop.ordering.domain.model.product.Product;
+import com.eskcti.algashop.ordering.domain.model.product.ProductId;
+import com.eskcti.algashop.ordering.domain.model.product.ProductName;
 
 class ProductCatalogServiceFakeImplTest {
 

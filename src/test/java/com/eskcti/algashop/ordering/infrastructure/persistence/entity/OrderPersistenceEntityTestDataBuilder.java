@@ -5,7 +5,7 @@ import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.Set;
 
-import com.eskcti.algashop.ordering.domain.model.utility.IdGenerator;
+import com.eskcti.algashop.ordering.domain.model.IdGenerator;
 import com.eskcti.algashop.ordering.infrastructure.persistence.embeddable.AddressEmbeddable;
 import com.eskcti.algashop.ordering.infrastructure.persistence.embeddable.BillingEmbeddable;
 import com.eskcti.algashop.ordering.infrastructure.persistence.embeddable.RecipientEmbeddable;

@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.Set;
 
-import com.eskcti.algashop.ordering.domain.model.utility.IdGenerator;
+import com.eskcti.algashop.ordering.domain.model.IdGenerator;
 import com.eskcti.algashop.ordering.infrastructure.persistence.entity.ShoppingCartPersistenceEntity.ShoppingCartPersistenceEntityBuilder;
 
 public class ShoppingCartPersistenceEntityTestDataBuilder {

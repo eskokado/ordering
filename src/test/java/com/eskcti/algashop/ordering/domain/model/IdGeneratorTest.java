@@ -1,0 +1,36 @@
+package com.eskcti.algashop.ordering.domain.model;
+
+import org.junit.jupiter.api.Test;
+
+import com.eskcti.algashop.ordering.domain.model.IdGenerator;
+
+import io.hypersistence.tsid.TSID;
+
+import org.assertj.core.api.Assertions;
+
+class IdGeneratorTest {
+
+  @Test
+  void shouldGenerateTimeBasedUuid() {
+    Assertions.assertThat(IdGenerator.generateTimeBasedUUID()).isNotNull();
+  }
+
+  @Test
+  void shouldGenerateTsid() {
+    Assertions.assertThat(IdGenerator.generateTSID()).isNotNull();
+  }
+
+  @Test
+  void shouldGenerateTsidFromString() {
+    TSID tsid = IdGenerator.generateTSID();
+    Assertions.assertThat(IdGenerator.generateTSID(tsid.toString())).isNotNull()
+        .isEqualTo(tsid);
+  }
+
+  @Test
+  void shouldGenerateTsidFromLong() {
+    TSID tsid = IdGenerator.generateTSID();
+    Assertions.assertThat(IdGenerator.generateTSID(tsid.toLong())).isNotNull()
+        .isEqualTo(tsid);
+  }
+}

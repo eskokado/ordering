@@ -7,12 +7,12 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 
-import com.eskcti.algashop.ordering.domain.model.entity.Order;
-import com.eskcti.algashop.ordering.domain.model.entity.OrderItem;
-import com.eskcti.algashop.ordering.domain.model.valueobject.Address;
-import com.eskcti.algashop.ordering.domain.model.valueobject.Billing;
-import com.eskcti.algashop.ordering.domain.model.valueobject.Recipient;
-import com.eskcti.algashop.ordering.domain.model.valueobject.Shipping;
+import com.eskcti.algashop.ordering.domain.model.commons.Address;
+import com.eskcti.algashop.ordering.domain.model.order.Billing;
+import com.eskcti.algashop.ordering.domain.model.order.Order;
+import com.eskcti.algashop.ordering.domain.model.order.OrderItem;
+import com.eskcti.algashop.ordering.domain.model.order.Recipient;
+import com.eskcti.algashop.ordering.domain.model.order.Shipping;
 import com.eskcti.algashop.ordering.infrastructure.persistence.embeddable.AddressEmbeddable;
 import com.eskcti.algashop.ordering.infrastructure.persistence.embeddable.BillingEmbeddable;
 import com.eskcti.algashop.ordering.infrastructure.persistence.embeddable.RecipientEmbeddable;
