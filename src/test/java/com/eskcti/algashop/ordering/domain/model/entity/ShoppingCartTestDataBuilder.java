@@ -3,10 +3,7 @@ package com.eskcti.algashop.ordering.domain.model.entity;
 import java.time.OffsetDateTime;
 import java.util.Set;
 
-import com.eskcti.algashop.ordering.domain.model.entity.ShoppingCart;
-import com.eskcti.algashop.ordering.domain.model.entity.ShoppingCartItem;
 import com.eskcti.algashop.ordering.domain.model.valueobject.Money;
-import com.eskcti.algashop.ordering.domain.model.valueobject.Product;
 import com.eskcti.algashop.ordering.domain.model.valueobject.ProductName;
 import com.eskcti.algashop.ordering.domain.model.valueobject.Quantity;
 import com.eskcti.algashop.ordering.domain.model.valueobject.id.CustomerId;
@@ -15,16 +12,38 @@ import com.eskcti.algashop.ordering.domain.model.valueobject.id.ShoppingCartId;
 import com.eskcti.algashop.ordering.domain.model.valueobject.id.ShoppingCartItemId;
 
 public final class ShoppingCartTestDataBuilder {
+
+  private CustomerId customerId = new CustomerId();
+  private boolean withItems = true;
+
   private ShoppingCartTestDataBuilder() {
+  }
+
+  public static ShoppingCartTestDataBuilder aShoppingCart() {
+    return new ShoppingCartTestDataBuilder();
   }
 
   public static ShoppingCart startShopping() {
     return ShoppingCart.startShopping(new CustomerId());
   }
 
-  public static ShoppingCart aShoppingCart() {
-    ShoppingCart cart = ShoppingCart.startShopping(new CustomerId());
-    cart.addItem(ProductTestDataBuilder.aProduct().build(), new Quantity(2));
+  public ShoppingCartTestDataBuilder customerId(CustomerId customerId) {
+    this.customerId = customerId;
+    return this;
+  }
+
+  public ShoppingCartTestDataBuilder withItems(boolean withItems) {
+    this.withItems = withItems;
+    return this;
+  }
+
+  public ShoppingCart build() {
+    ShoppingCart cart = ShoppingCart.startShopping(customerId);
+
+    if (withItems) {
+      cart.addItem(ProductTestDataBuilder.aProduct().build(), new Quantity(2));
+    }
+
     return cart;
   }
 

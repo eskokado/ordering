@@ -91,7 +91,7 @@ class ShoppingCartTest {
 
   @Test
   void given_shoppingCartWithItems_whenEmpty_shouldClearItemsAndTotals() {
-    ShoppingCart cart = ShoppingCartTestDataBuilder.aShoppingCart();
+    ShoppingCart cart = ShoppingCartTestDataBuilder.aShoppingCart().build();
 
     cart.empty();
 
@@ -102,7 +102,7 @@ class ShoppingCartTest {
 
   @Test
   void given_shoppingCartWithItems_whenRemoveItem_shouldRemoveAndRecalculateTotals() {
-    ShoppingCart cart = ShoppingCartTestDataBuilder.aShoppingCart();
+    ShoppingCart cart = ShoppingCartTestDataBuilder.aShoppingCart().build();
     ShoppingCartItem item = cart.items().iterator().next();
     Quantity initialTotalItems = cart.totalItems();
     Quantity itemQuantity = item.quantity();
@@ -125,7 +125,7 @@ class ShoppingCartTest {
 
   @Test
   void given_shoppingCart_whenRemoveItemWithNullId_shouldGenerateException() {
-    ShoppingCart cart = ShoppingCartTestDataBuilder.aShoppingCart();
+    ShoppingCart cart = ShoppingCartTestDataBuilder.aShoppingCart().build();
 
     Assertions.assertThatNullPointerException()
         .isThrownBy(() -> cart.removeItem(null));
@@ -133,7 +133,7 @@ class ShoppingCartTest {
 
   @Test
   void given_shoppingCartWithItem_whenChangeItemQuantity_shouldUpdateQuantityAndRecalculateTotals() {
-    ShoppingCart cart = ShoppingCartTestDataBuilder.aShoppingCart();
+    ShoppingCart cart = ShoppingCartTestDataBuilder.aShoppingCart().build();
     ShoppingCartItem item = cart.items().iterator().next();
     Quantity newQuantity = new Quantity(5);
 
@@ -154,7 +154,7 @@ class ShoppingCartTest {
 
   @Test
   void given_shoppingCart_whenChangeItemQuantityWithNullId_shouldGenerateException() {
-    ShoppingCart cart = ShoppingCartTestDataBuilder.aShoppingCart();
+    ShoppingCart cart = ShoppingCartTestDataBuilder.aShoppingCart().build();
 
     Assertions.assertThatNullPointerException()
         .isThrownBy(() -> cart.changeItemQuantity(null, new Quantity(1)));
@@ -162,7 +162,7 @@ class ShoppingCartTest {
 
   @Test
   void given_shoppingCart_whenChangeItemQuantityWithNullQuantity_shouldGenerateException() {
-    ShoppingCart cart = ShoppingCartTestDataBuilder.aShoppingCart();
+    ShoppingCart cart = ShoppingCartTestDataBuilder.aShoppingCart().build();
     ShoppingCartItem item = cart.items().iterator().next();
 
     Assertions.assertThatNullPointerException()
@@ -171,7 +171,7 @@ class ShoppingCartTest {
 
   @Test
   void given_shoppingCartWithItem_whenFindItemByItemId_shouldReturnItem() {
-    ShoppingCart cart = ShoppingCartTestDataBuilder.aShoppingCart();
+    ShoppingCart cart = ShoppingCartTestDataBuilder.aShoppingCart().build();
     ShoppingCartItem item = cart.items().iterator().next();
 
     ShoppingCartItem foundItem = cart.findItem(item.id());
@@ -181,7 +181,7 @@ class ShoppingCartTest {
 
   @Test
   void given_shoppingCartWithItem_whenFindItemByProductId_shouldReturnItem() {
-    ShoppingCart cart = ShoppingCartTestDataBuilder.aShoppingCart();
+    ShoppingCart cart = ShoppingCartTestDataBuilder.aShoppingCart().build();
     ShoppingCartItem item = cart.items().iterator().next();
 
     ShoppingCartItem foundItem = cart.findItem(item.productId());
@@ -216,7 +216,7 @@ class ShoppingCartTest {
 
   @Test
   void given_shoppingCartWithItem_whenRefreshItem_shouldUpdateItemFields() {
-    ShoppingCart cart = ShoppingCartTestDataBuilder.aShoppingCart();
+    ShoppingCart cart = ShoppingCartTestDataBuilder.aShoppingCart().build();
     ShoppingCartItem item = cart.items().iterator().next();
     Product altProduct = ProductTestDataBuilder.aProductAltRamMemory().build();
     Product updatedProduct = Product.builder()
@@ -236,7 +236,7 @@ class ShoppingCartTest {
 
   @Test
   void given_shoppingCartWithAvailableItems_whenCheckUnavailable_shouldReturnFalse() {
-    ShoppingCart cart = ShoppingCartTestDataBuilder.aShoppingCart();
+    ShoppingCart cart = ShoppingCartTestDataBuilder.aShoppingCart().build();
     assertThat(cart.containsUnavailableItems()).isFalse();
   }
 
@@ -254,7 +254,7 @@ class ShoppingCartTest {
 
   @Test
   void given_shoppingCartWithItems_whenCheckIsEmpty_shouldReturnFalse() {
-    ShoppingCart cart = ShoppingCartTestDataBuilder.aShoppingCart();
+    ShoppingCart cart = ShoppingCartTestDataBuilder.aShoppingCart().build();
     assertThat(cart.isEmpty()).isFalse();
   }
 

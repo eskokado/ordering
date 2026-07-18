@@ -14,7 +14,6 @@ import com.eskcti.algashop.ordering.domain.model.entity.CustomerTestDataBuilder;
 import com.eskcti.algashop.ordering.domain.model.entity.ProductTestDataBuilder;
 import com.eskcti.algashop.ordering.domain.model.entity.ShoppingCart;
 import com.eskcti.algashop.ordering.domain.model.entity.ShoppingCartItem;
-import com.eskcti.algashop.ordering.domain.model.entity.ShoppingCartTestDataBuilder;
 import com.eskcti.algashop.ordering.domain.model.valueobject.Money;
 import com.eskcti.algashop.ordering.domain.model.valueobject.Product;
 import com.eskcti.algashop.ordering.domain.model.valueobject.Quantity;

@@ -53,7 +53,7 @@ class ShoppingCartsPersistenceProviderTest {
 
   @Test
   void givenExistingShoppingCartId_whenOfId_shouldReturnShoppingCart() {
-    ShoppingCart cart = ShoppingCartTestDataBuilder.aShoppingCart();
+    ShoppingCart cart = ShoppingCartTestDataBuilder.aShoppingCart().build();
     ShoppingCartPersistenceEntity persistenceEntity = new ShoppingCartPersistenceEntity();
 
     when(repository.findById(cart.id().value())).thenReturn(Optional.of(persistenceEntity));
@@ -67,7 +67,7 @@ class ShoppingCartsPersistenceProviderTest {
 
   @Test
   void givenNonExistentShoppingCartId_whenOfId_shouldReturnEmpty() {
-    ShoppingCart cart = ShoppingCartTestDataBuilder.aShoppingCart();
+    ShoppingCart cart = ShoppingCartTestDataBuilder.aShoppingCart().build();
 
     when(repository.findById(cart.id().value())).thenReturn(Optional.empty());
 
@@ -78,7 +78,7 @@ class ShoppingCartsPersistenceProviderTest {
 
   @Test
   void givenShoppingCart_whenAddNew_shouldInsert() {
-    ShoppingCart cart = ShoppingCartTestDataBuilder.aShoppingCart();
+    ShoppingCart cart = ShoppingCartTestDataBuilder.aShoppingCart().build();
     ShoppingCartPersistenceEntity persistenceEntity = new ShoppingCartPersistenceEntity();
 
     when(repository.findById(cart.id().value())).thenReturn(Optional.empty());
@@ -94,7 +94,7 @@ class ShoppingCartsPersistenceProviderTest {
 
   @Test
   void givenShoppingCart_whenAddExisting_shouldUpdate() {
-    ShoppingCart cart = ShoppingCartTestDataBuilder.aShoppingCart();
+    ShoppingCart cart = ShoppingCartTestDataBuilder.aShoppingCart().build();
     ShoppingCartPersistenceEntity persistenceEntity = new ShoppingCartPersistenceEntity();
 
     when(repository.findById(cart.id().value())).thenReturn(Optional.of(persistenceEntity));
@@ -109,7 +109,7 @@ class ShoppingCartsPersistenceProviderTest {
 
   @Test
   void givenShoppingCart_whenRemove_shouldCallRepositoryDelete() {
-    ShoppingCart cart = ShoppingCartTestDataBuilder.aShoppingCart();
+    ShoppingCart cart = ShoppingCartTestDataBuilder.aShoppingCart().build();
 
     provider.remove(cart);
 
@@ -118,7 +118,7 @@ class ShoppingCartsPersistenceProviderTest {
 
   @Test
   void givenShoppingCartId_whenRemove_shouldCallRepositoryDelete() {
-    ShoppingCart cart = ShoppingCartTestDataBuilder.aShoppingCart();
+    ShoppingCart cart = ShoppingCartTestDataBuilder.aShoppingCart().build();
 
     provider.remove(cart.id());
 
@@ -127,7 +127,7 @@ class ShoppingCartsPersistenceProviderTest {
 
   @Test
   void givenCustomerId_whenOfCustomer_shouldReturnShoppingCart() {
-    ShoppingCart cart = ShoppingCartTestDataBuilder.aShoppingCart();
+    ShoppingCart cart = ShoppingCartTestDataBuilder.aShoppingCart().build();
     ShoppingCartPersistenceEntity persistenceEntity = new ShoppingCartPersistenceEntity();
 
     when(repository.findByCustomer_Id(cart.customerId().value())).thenReturn(Optional.of(persistenceEntity));
@@ -151,7 +151,7 @@ class ShoppingCartsPersistenceProviderTest {
 
   @Test
   void whenExists_thenReturnRepositoryExists() {
-    ShoppingCart cart = ShoppingCartTestDataBuilder.aShoppingCart();
+    ShoppingCart cart = ShoppingCartTestDataBuilder.aShoppingCart().build();
 
     when(repository.existsById(cart.id().value())).thenReturn(true);
 
@@ -160,7 +160,7 @@ class ShoppingCartsPersistenceProviderTest {
 
   @Test
   void shouldUpdateShoppingCartVersionFromPersistenceEntity() throws Exception {
-    ShoppingCart cart = ShoppingCartTestDataBuilder.aShoppingCart();
+    ShoppingCart cart = ShoppingCartTestDataBuilder.aShoppingCart().build();
     ShoppingCartsPersistenceProvider provider = new ShoppingCartsPersistenceProvider(null, null, null, null);
     Method updateVersion = ShoppingCartsPersistenceProvider.class.getDeclaredMethod("updateVersion",
         ShoppingCart.class, ShoppingCartPersistenceEntity.class);
@@ -178,7 +178,7 @@ class ShoppingCartsPersistenceProviderTest {
 
   @Test
   void shouldPropagateExceptionWhenUpdateVersionFails() throws Exception {
-    ShoppingCart cart = new ShoppingCartWithoutDeclaredVersion(ShoppingCartTestDataBuilder.aShoppingCart());
+    ShoppingCart cart = new ShoppingCartWithoutDeclaredVersion(ShoppingCartTestDataBuilder.aShoppingCart().build());
     ShoppingCartsPersistenceProvider provider = new ShoppingCartsPersistenceProvider(null, null, null, null);
     Method updateVersion = ShoppingCartsPersistenceProvider.class.getDeclaredMethod("updateVersion",
         ShoppingCart.class, ShoppingCartPersistenceEntity.class);

@@ -33,7 +33,7 @@ class ShoppingCartPersistenceEntityAssemblerTest {
 
   @Test
   void givenShoppingCart_whenAssembleFromDomain_shouldReturnShoppingCartPersistenceEntity() {
-    ShoppingCart shoppingCart = ShoppingCartTestDataBuilder.aShoppingCart();
+    ShoppingCart shoppingCart = ShoppingCartTestDataBuilder.aShoppingCart().build();
     UUID customerId = shoppingCart.customerId().value();
 
     Mockito.lenient().when(customerPersistenceEntityRepository.getReferenceById(Mockito.any(UUID.class)))
@@ -52,7 +52,7 @@ class ShoppingCartPersistenceEntityAssemblerTest {
 
   @Test
   void givenExistingShoppingCart_whenMerge_shouldUpdateValues() {
-    ShoppingCart shoppingCart = ShoppingCartTestDataBuilder.aShoppingCart();
+    ShoppingCart shoppingCart = ShoppingCartTestDataBuilder.aShoppingCart().build();
     UUID customerId = shoppingCart.customerId().value();
 
     Mockito.lenient().when(customerPersistenceEntityRepository.getReferenceById(Mockito.any(UUID.class)))
