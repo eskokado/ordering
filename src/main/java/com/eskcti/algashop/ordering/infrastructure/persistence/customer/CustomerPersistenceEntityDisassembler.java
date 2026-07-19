@@ -1,5 +1,7 @@
 package com.eskcti.algashop.ordering.infrastructure.persistence.customer;
 
+import org.springframework.stereotype.Component;
+
 import com.eskcti.algashop.ordering.domain.model.commons.Address;
 import com.eskcti.algashop.ordering.domain.model.commons.Document;
 import com.eskcti.algashop.ordering.domain.model.commons.Email;
@@ -12,6 +14,7 @@ import com.eskcti.algashop.ordering.domain.model.customer.CustomerId;
 import com.eskcti.algashop.ordering.domain.model.customer.LoyaltyPoints;
 import com.eskcti.algashop.ordering.infrastructure.persistence.commons.AddressEmbeddable;
 
+@Component
 public class CustomerPersistenceEntityDisassembler {
 
   public Customer toDomainEntity(CustomerPersistenceEntity entity) {

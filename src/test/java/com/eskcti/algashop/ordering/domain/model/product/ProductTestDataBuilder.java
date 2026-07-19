@@ -6,6 +6,8 @@ import com.eskcti.algashop.ordering.domain.model.product.ProductId;
 import com.eskcti.algashop.ordering.domain.model.product.ProductName;
 
 public class ProductTestDataBuilder {
+  public static final ProductId DEFAULT_PRODUCT_ID = new ProductId();
+
   private ProductTestDataBuilder() {
   }
 
