@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.eskcti.algashop.ordering.domain.model.customer.CustomerArchivedException;
 import com.eskcti.algashop.ordering.domain.model.customer.CustomerNotFoundException;
 
 @SpringBootTest
@@ -105,6 +106,62 @@ class CustomerManagementApplicationServiceIT {
     CustomerOutput customerOutput = customerManagementApplicationService.findById(customerId);
 
     Assertions.assertThat(customerOutput.getPromotionNotificationsAllowed()).isFalse();
+  }
+
+  @Test
+  public void shouldArchiveCustomer() {
+    CustomerInput input = CustomerInputTestDataBuilder.aCustomer().build();
+    UUID customerId = customerManagementApplicationService.create(input);
+    Assertions.assertThat(customerId).isNotNull();
+
+    customerManagementApplicationService.archive(customerId);
+
+    CustomerOutput archivedCustomer = customerManagementApplicationService.findById(customerId);
+
+    Assertions.assertThat(archivedCustomer)
+        .isNotNull()
+        .extracting(
+            CustomerOutput::getFirstName,
+            CustomerOutput::getLastName,
+            CustomerOutput::getPhone,
+            CustomerOutput::getDocument,
+            CustomerOutput::getBirthDate,
+            CustomerOutput::getPromotionNotificationsAllowed)
+        .containsExactly(
+            "Anonymous",
+            "Anonymous",
+            "000-000-0000",
+            "000-00-0000",
+            null,
+            false);
+
+    Assertions.assertThat(archivedCustomer.getEmail()).endsWith("@anonymous.com");
+    Assertions.assertThat(archivedCustomer.getArchived()).isTrue();
+    Assertions.assertThat(archivedCustomer.getArchivedAt()).isNotNull();
+
+    Assertions.assertThat(archivedCustomer.getAddress()).isNotNull();
+    Assertions.assertThat(archivedCustomer.getAddress().getNumber()).isNotNull().isEqualTo("Anonymized");
+    Assertions.assertThat(archivedCustomer.getAddress().getComplement()).isNull();
+  }
+
+  @Test
+  public void shouldThrowCustomerNotFoundExceptionWhenArchivingNonExistingCustomer() {
+    UUID nonExistingId = UUID.randomUUID();
+
+    Assertions.assertThatExceptionOfType(CustomerNotFoundException.class)
+        .isThrownBy(() -> customerManagementApplicationService.archive(nonExistingId));
+  }
+
+  @Test
+  public void shouldThrowCustomerArchivedExceptionWhenArchivingAlreadyArchivedCustomer() {
+    CustomerInput input = CustomerInputTestDataBuilder.aCustomer().build();
+    UUID customerId = customerManagementApplicationService.create(input);
+    Assertions.assertThat(customerId).isNotNull();
+
+    customerManagementApplicationService.archive(customerId);
+
+    Assertions.assertThatExceptionOfType(CustomerArchivedException.class)
+        .isThrownBy(() -> customerManagementApplicationService.archive(customerId));
   }
 
 }
