@@ -39,7 +39,7 @@ class BuyNowApplicationServiceIT {
   @MockitoBean(name = "productCatalogServiceFakeImpl")
   private ProductCatalogService productCatalogService;
 
-  @MockitoBean(name = "shippingCostServiceRapidexImpl")
+  @MockitoBean
   private ShippingCostService shippingCostService;
 
   @BeforeEach

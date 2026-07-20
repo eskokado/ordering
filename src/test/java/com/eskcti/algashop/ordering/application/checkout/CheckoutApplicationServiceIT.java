@@ -55,7 +55,7 @@ class CheckoutApplicationServiceIT {
   @Autowired
   private OriginAddressService originAddressService;
 
-  @MockitoBean(name = "shippingCostServiceRapidexImpl")
+  @MockitoBean
   private ShippingCostService shippingCostService;
 
   @BeforeEach

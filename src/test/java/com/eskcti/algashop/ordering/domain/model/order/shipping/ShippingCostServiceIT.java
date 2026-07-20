@@ -5,27 +5,14 @@ import java.time.LocalDate;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.TestPropertySource;
 
 import com.eskcti.algashop.ordering.domain.model.commons.Money;
 import com.eskcti.algashop.ordering.domain.model.commons.ZipCode;
-import com.eskcti.algashop.ordering.domain.model.order.shipping.OriginAddressService;
-import com.eskcti.algashop.ordering.domain.model.order.shipping.ShippingCostService;
 import com.eskcti.algashop.ordering.domain.model.order.shipping.ShippingCostService.CalculationRequest;
-import com.eskcti.algashop.ordering.infrastructure.shipping.client.fake.FixedOriginAddressService;
-import com.eskcti.algashop.ordering.infrastructure.shipping.client.rapidex.RapiDexAPIClientConfig;
-import com.eskcti.algashop.ordering.infrastructure.shipping.client.rapidex.ShippingCostServiceRapidexImpl;
 
-@SpringBootTest(classes = {
-    RapiDexAPIClientConfig.class,
-    ShippingCostServiceRapidexImpl.class,
-    FixedOriginAddressService.class
-})
-@TestPropertySource(properties = {
-    "algashop.integrations.shipping.provider=RAPIDEX",
-    "algashop.integrations.rapidex.url=http://localhost:8780"
-})
+@SpringBootTest
 class ShippingCostServiceIT {
 
   @Autowired
@@ -34,16 +21,22 @@ class ShippingCostServiceIT {
   @Autowired
   private OriginAddressService originAddressService;
 
+  @Value("${algashop.integrations.shipping.provider}")
+  private String shippingProvider;
+
   @Test
-  void shouldCalculateUsingRapidexWireMock() {
+  void shouldCalculateShippingCost() {
     ZipCode origin = originAddressService.originAddress().zipCode();
     ZipCode destination = new ZipCode("54321");
 
-    var result = shippingCostService
-        .calculate(new CalculationRequest(origin, destination));
+    var result = shippingCostService.calculate(new CalculationRequest(origin, destination));
 
-    Assertions.assertThat(result.cost()).isEqualTo(new Money("35.00"));
-    Assertions.assertThat(result.expectedDate()).isEqualTo(LocalDate.now().plusDays(7));
+    if ("FAKE".equals(shippingProvider)) {
+      Assertions.assertThat(result.cost()).isEqualTo(new Money("20"));
+      Assertions.assertThat(result.expectedDate()).isEqualTo(LocalDate.now().plusDays(5));
+    } else {
+      Assertions.assertThat(result.cost()).isEqualTo(new Money("35.00"));
+      Assertions.assertThat(result.expectedDate()).isEqualTo(LocalDate.now().plusDays(7));
+    }
   }
-
 }
