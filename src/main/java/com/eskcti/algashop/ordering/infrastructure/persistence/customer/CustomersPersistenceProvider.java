@@ -59,6 +59,8 @@ public class CustomersPersistenceProvider implements Customers {
         .ifPresentOrElse(
             (persistenceEntity) -> update(aggregateRoot, persistenceEntity),
             () -> insert(aggregateRoot));
+
+    aggregateRoot.clearDomainEvents();
   }
 
   private void update(Customer aggregateRoot, CustomerPersistenceEntity persistenceEntity) {
