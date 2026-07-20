@@ -11,6 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.eskcti.algashop.ordering.application.customer.notification.CustomerNotificationService;
 import com.eskcti.algashop.ordering.domain.model.customer.CustomerArchivedEvent;
 import com.eskcti.algashop.ordering.domain.model.customer.CustomerArchivedException;
 import com.eskcti.algashop.ordering.domain.model.customer.CustomerEmailIsInUseException;
@@ -27,6 +28,9 @@ class CustomerManagementApplicationServiceIT {
 
   @MockitoSpyBean
   private CustomerEventListener customerEventListener;
+
+  @MockitoSpyBean
+  private CustomerNotificationService customerNotificationService;
 
   @Test
   public void shouldRegister() {
@@ -56,11 +60,10 @@ class CustomerManagementApplicationServiceIT {
     Mockito.verify(customerEventListener)
         .listen(Mockito.any(CustomerRegisteredEvent.class));
 
-    Mockito.verify(customerEventListener)
-        .listenSecondary(Mockito.any(CustomerRegisteredEvent.class));
-
     Mockito.verify(customerEventListener, Mockito.never())
         .listen(Mockito.any(CustomerArchivedEvent.class));
+
+    Mockito.verify(customerNotificationService).notifyNewRegistration(Mockito.any(UUID.class));
   }
 
   @Test
