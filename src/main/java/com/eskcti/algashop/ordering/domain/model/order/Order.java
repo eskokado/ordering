@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
+import com.eskcti.algashop.ordering.domain.model.AbstractEventSourceEntity;
 import com.eskcti.algashop.ordering.domain.model.AggregateRoot;
 import com.eskcti.algashop.ordering.domain.model.commons.Money;
 import com.eskcti.algashop.ordering.domain.model.commons.Quantity;
@@ -22,7 +23,7 @@ import com.eskcti.algashop.ordering.domain.model.order.PaymentMethod;
 import com.eskcti.algashop.ordering.domain.model.order.Shipping;
 import com.eskcti.algashop.ordering.domain.model.order.Billing;
 
-public class Order implements AggregateRoot<OrderId> {
+public class Order extends AbstractEventSourceEntity implements AggregateRoot<OrderId> {
 
   private OrderId id;
   private CustomerId customerId;
