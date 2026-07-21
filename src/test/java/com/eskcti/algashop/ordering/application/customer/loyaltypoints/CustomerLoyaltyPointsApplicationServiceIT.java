@@ -3,9 +3,12 @@ package com.eskcti.algashop.ordering.application.customer.loyaltypoints;
 import java.util.UUID;
 
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.eskcti.algashop.ordering.domain.model.commons.Email;
@@ -22,11 +25,13 @@ import com.eskcti.algashop.ordering.domain.model.customer.LoyaltyPoints;
 import com.eskcti.algashop.ordering.domain.model.order.Order;
 import com.eskcti.algashop.ordering.domain.model.order.OrderNotBelongsToCustomerException;
 import com.eskcti.algashop.ordering.domain.model.order.OrderNotFoundException;
+import com.eskcti.algashop.ordering.domain.model.order.OrderReadyEvent;
 import com.eskcti.algashop.ordering.domain.model.order.OrderStatus;
 import com.eskcti.algashop.ordering.domain.model.order.OrderTestDataBuilder;
 import com.eskcti.algashop.ordering.domain.model.order.Orders;
 import com.eskcti.algashop.ordering.domain.model.product.Product;
 import com.eskcti.algashop.ordering.domain.model.product.ProductTestDataBuilder;
+import com.eskcti.algashop.ordering.infrastructure.listener.customer.CustomerEventListener;
 
 import io.hypersistence.tsid.TSID;
 
@@ -42,6 +47,14 @@ class CustomerLoyaltyPointsApplicationServiceIT {
 
   @Autowired
   private Orders orders;
+
+  @MockitoSpyBean
+  private CustomerEventListener customerEventListener;
+
+  @BeforeEach
+  void disableOrderReadyEventSideEffects() {
+    Mockito.doNothing().when(customerEventListener).listen(Mockito.any(OrderReadyEvent.class));
+  }
 
   @Test
   void shouldAddLoyaltyPointsToCustomerWhenOrderIsValidAndReady() {

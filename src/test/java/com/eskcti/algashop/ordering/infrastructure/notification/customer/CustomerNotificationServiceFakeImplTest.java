@@ -6,7 +6,7 @@ import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
 
-import com.eskcti.algashop.ordering.application.customer.notification.CustomerNotificationService.NotifyNewRegistrationInput;
+import com.eskcti.algashop.ordering.application.customer.notification.CustomerNotificationApplicationService.NotifyNewRegistrationInput;
 
 class CustomerNotificationServiceFakeImplTest {
 

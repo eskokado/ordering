@@ -1,6 +1,7 @@
 package com.eskcti.algashop.ordering.application.order.management;
 
 import java.util.Optional;
+import java.util.UUID;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -11,6 +12,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.eskcti.algashop.ordering.application.customer.loyaltypoints.CustomerLoyaltyPointsApplicationService;
+import com.eskcti.algashop.ordering.domain.model.customer.CustomerId;
 import com.eskcti.algashop.ordering.domain.model.customer.CustomerTestDataBuilder;
 import com.eskcti.algashop.ordering.domain.model.customer.Customers;
 import com.eskcti.algashop.ordering.domain.model.order.Order;
@@ -23,6 +26,7 @@ import com.eskcti.algashop.ordering.domain.model.order.OrderStatus;
 import com.eskcti.algashop.ordering.domain.model.order.OrderStatusCannotBeChangedException;
 import com.eskcti.algashop.ordering.domain.model.order.OrderTestDataBuilder;
 import com.eskcti.algashop.ordering.domain.model.order.Orders;
+import com.eskcti.algashop.ordering.infrastructure.listener.customer.CustomerEventListener;
 import com.eskcti.algashop.ordering.infrastructure.listener.order.OrderEventListener;
 
 @SpringBootTest
@@ -40,6 +44,12 @@ class OrderManagementApplicationServiceIT {
 
   @MockitoSpyBean
   private OrderEventListener orderEventListener;
+
+  @MockitoSpyBean
+  private CustomerEventListener customerEventListener;
+
+  @MockitoSpyBean
+  private CustomerLoyaltyPointsApplicationService customerLoyaltyPointsApplicationService;
 
   @BeforeEach
   public void setup() {
@@ -153,6 +163,10 @@ class OrderManagementApplicationServiceIT {
     Assertions.assertThat(updatedOrder.get().readyAt()).isNotNull();
 
     Mockito.verify(orderEventListener).listen(Mockito.any(OrderReadyEvent.class));
+    Mockito.verify(customerEventListener).listen(Mockito.any(OrderReadyEvent.class));
+    Mockito.verify(customerLoyaltyPointsApplicationService).addLoyaltyPoints(
+        Mockito.eq(CustomerTestDataBuilder.DEFAULT_CUSTOMER_ID.value()),
+        Mockito.eq(order.id().toString()));
   }
 
   @Test

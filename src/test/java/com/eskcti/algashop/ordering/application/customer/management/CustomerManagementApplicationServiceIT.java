@@ -11,7 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.eskcti.algashop.ordering.application.customer.notification.CustomerNotificationService;
+import com.eskcti.algashop.ordering.application.customer.notification.CustomerNotificationApplicationService;
 import com.eskcti.algashop.ordering.domain.model.customer.CustomerArchivedEvent;
 import com.eskcti.algashop.ordering.domain.model.customer.CustomerArchivedException;
 import com.eskcti.algashop.ordering.domain.model.customer.CustomerEmailIsInUseException;
@@ -30,7 +30,7 @@ class CustomerManagementApplicationServiceIT {
   private CustomerEventListener customerEventListener;
 
   @MockitoSpyBean
-  private CustomerNotificationService customerNotificationService;
+  private CustomerNotificationApplicationService customerNotificationApplicationService;
 
   @Test
   public void shouldRegister() {
@@ -63,8 +63,8 @@ class CustomerManagementApplicationServiceIT {
     Mockito.verify(customerEventListener, Mockito.never())
         .listen(Mockito.any(CustomerArchivedEvent.class));
 
-    Mockito.verify(customerNotificationService)
-        .notifyNewRegistration(Mockito.any(CustomerNotificationService.NotifyNewRegistrationInput.class));
+    Mockito.verify(customerNotificationApplicationService)
+        .notifyNewRegistration(Mockito.any(CustomerNotificationApplicationService.NotifyNewRegistrationInput.class));
   }
 
   @Test
@@ -164,6 +164,8 @@ class CustomerManagementApplicationServiceIT {
     Assertions.assertThat(archivedCustomer.getAddress()).isNotNull();
     Assertions.assertThat(archivedCustomer.getAddress().getNumber()).isNotNull().isEqualTo("Anonymized");
     Assertions.assertThat(archivedCustomer.getAddress().getComplement()).isNull();
+
+    Mockito.verify(customerEventListener).listen(Mockito.any(CustomerArchivedEvent.class));
   }
 
   @Test
