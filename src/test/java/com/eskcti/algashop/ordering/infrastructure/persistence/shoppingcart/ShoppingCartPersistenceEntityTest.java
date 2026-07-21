@@ -2,10 +2,16 @@ package com.eskcti.algashop.ordering.infrastructure.persistence.shoppingcart;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.List;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
+import com.eskcti.algashop.ordering.domain.model.customer.CustomerId;
+import com.eskcti.algashop.ordering.domain.model.product.ProductId;
+import com.eskcti.algashop.ordering.domain.model.shoppingcart.ShoppingCartCreatedEvent;
+import com.eskcti.algashop.ordering.domain.model.shoppingcart.ShoppingCartId;
+import com.eskcti.algashop.ordering.domain.model.shoppingcart.ShoppingCartItemAddedEvent;
 import com.eskcti.algashop.ordering.infrastructure.persistence.customer.CustomerPersistenceEntity;
 import com.eskcti.algashop.ordering.infrastructure.persistence.customer.CustomerPersistenceEntityTestDataBuilder;
 import com.eskcti.algashop.ordering.infrastructure.persistence.shoppingcart.ShoppingCartItemPersistenceEntity;
@@ -101,5 +107,34 @@ class ShoppingCartPersistenceEntityTest {
     cart.addItem(Set.of(item1, item2));
 
     assertThat(cart.getItems()).containsAll(Set.of(item1, item2));
+  }
+
+  @Test
+  void givenNullEvents_whenAddEvents_shouldDoNothing() {
+    ShoppingCartPersistenceEntity cart = ShoppingCartPersistenceEntityTestDataBuilder.existingShoppingCart().build();
+
+    cart.addEvents(null);
+
+    assertThat(cart.getEvents()).isEmpty();
+  }
+
+  @Test
+  void givenDomainEvents_whenAddEvents_shouldRegisterEvents() {
+    ShoppingCartPersistenceEntity cart = ShoppingCartPersistenceEntityTestDataBuilder.existingShoppingCart().build();
+    CustomerId customerId = new CustomerId(cart.getCustomerId());
+    ShoppingCartId shoppingCartId = new ShoppingCartId(cart.getId());
+    ShoppingCartCreatedEvent createdEvent = new ShoppingCartCreatedEvent(
+        shoppingCartId,
+        customerId,
+        cart.getCreatedAt());
+    ShoppingCartItemAddedEvent itemAddedEvent = new ShoppingCartItemAddedEvent(
+        shoppingCartId,
+        customerId,
+        new ProductId(),
+        cart.getCreatedAt());
+
+    cart.addEvents(List.of(createdEvent, itemAddedEvent));
+
+    assertThat(cart.getEvents()).containsExactly(createdEvent, itemAddedEvent);
   }
 }

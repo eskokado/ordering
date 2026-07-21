@@ -10,11 +10,15 @@ import com.eskcti.algashop.ordering.domain.model.product.ProductId;
 import com.eskcti.algashop.ordering.domain.model.product.ProductOutOfStockException;
 import com.eskcti.algashop.ordering.domain.model.product.ProductTestDataBuilder;
 import com.eskcti.algashop.ordering.domain.model.shoppingcart.ShoppingCart;
+import com.eskcti.algashop.ordering.domain.model.shoppingcart.ShoppingCartCreatedEvent;
 import com.eskcti.algashop.ordering.domain.model.shoppingcart.ShoppingCartDoesNotContainItemException;
 import com.eskcti.algashop.ordering.domain.model.shoppingcart.ShoppingCartDoesNotContainProductException;
+import com.eskcti.algashop.ordering.domain.model.shoppingcart.ShoppingCartEmptiedEvent;
 import com.eskcti.algashop.ordering.domain.model.shoppingcart.ShoppingCartId;
 import com.eskcti.algashop.ordering.domain.model.shoppingcart.ShoppingCartItem;
+import com.eskcti.algashop.ordering.domain.model.shoppingcart.ShoppingCartItemAddedEvent;
 import com.eskcti.algashop.ordering.domain.model.shoppingcart.ShoppingCartItemId;
+import com.eskcti.algashop.ordering.domain.model.shoppingcart.ShoppingCartItemRemovedEvent;
 
 import org.assertj.core.api.Assertions;
 
@@ -370,5 +374,65 @@ class ShoppingCartTest {
   void given_nullCustomerId_whenStartShopping_shouldGenerateException() {
     Assertions.assertThatNullPointerException()
         .isThrownBy(() -> ShoppingCart.startShopping(null));
+  }
+
+  @Test
+  void given_startShopping_whenBuild_shouldEmitShoppingCartCreatedEvent() {
+    ShoppingCart cart = ShoppingCart.startShopping(new CustomerId());
+
+    ShoppingCartCreatedEvent event = new ShoppingCartCreatedEvent(cart.id(), cart.customerId(), cart.createdAt());
+    Assertions.assertThat(cart.domainEvents()).contains(event);
+  }
+
+  @Test
+  void given_shoppingCart_whenAddItem_shouldEmitShoppingCartItemAddedEvent() {
+    ShoppingCart cart = ShoppingCartTestDataBuilder.startShopping();
+    Product product = ProductTestDataBuilder.aProduct().build();
+    cart.clearDomainEvents();
+
+    cart.addItem(product, new Quantity(1));
+
+    Assertions.assertThat(cart.domainEvents())
+        .hasSize(1)
+        .first()
+        .isInstanceOf(ShoppingCartItemAddedEvent.class);
+  }
+
+  @Test
+  void given_shoppingCartWithItems_whenRemoveItem_shouldEmitShoppingCartItemRemovedEvent() {
+    ShoppingCart cart = ShoppingCartTestDataBuilder.aShoppingCart().build();
+    ShoppingCartItem item = cart.items().iterator().next();
+    cart.clearDomainEvents();
+
+    cart.removeItem(item.id());
+
+    Assertions.assertThat(cart.domainEvents())
+        .hasSize(1)
+        .first()
+        .isInstanceOf(ShoppingCartItemRemovedEvent.class);
+  }
+
+  @Test
+  void given_shoppingCartWithItems_whenEmpty_shouldEmitShoppingCartEmptiedEvent() {
+    ShoppingCart cart = ShoppingCartTestDataBuilder.aShoppingCart().build();
+    cart.clearDomainEvents();
+
+    cart.empty();
+
+    Assertions.assertThat(cart.domainEvents())
+        .hasSize(1)
+        .first()
+        .isInstanceOf(ShoppingCartEmptiedEvent.class);
+  }
+
+  @Test
+  void givenShoppingCartWithDomainEvents_whenClearDomainEvents_shouldRemoveEvents() {
+    ShoppingCart cart = ShoppingCartTestDataBuilder.startShopping();
+
+    assertThat(cart.domainEvents()).isNotEmpty();
+
+    cart.clearDomainEvents();
+
+    assertThat(cart.domainEvents()).isEmpty();
   }
 }

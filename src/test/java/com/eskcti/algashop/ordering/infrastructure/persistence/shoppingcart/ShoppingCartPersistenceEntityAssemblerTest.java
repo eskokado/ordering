@@ -11,6 +11,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.eskcti.algashop.ordering.domain.model.shoppingcart.ShoppingCartCreatedEvent;
 import com.eskcti.algashop.ordering.domain.model.shoppingcart.ShoppingCartTestDataBuilder;
 import com.eskcti.algashop.ordering.domain.model.shoppingcart.ShoppingCart;
 import com.eskcti.algashop.ordering.infrastructure.persistence.customer.CustomerPersistenceEntity;
@@ -69,5 +70,21 @@ class ShoppingCartPersistenceEntityAssemblerTest {
     assertThat(merged.getCreatedAt()).isEqualTo(shoppingCart.createdAt());
     assertThat(merged.getItems()).hasSize(shoppingCart.items().size());
     assertThat(merged.getVersion()).isEqualTo(shoppingCart.version());
+  }
+
+  @Test
+  void givenShoppingCartWithDomainEvents_whenMerge_shouldRegisterEvents() {
+    ShoppingCart shoppingCart = ShoppingCartTestDataBuilder.startShopping();
+    UUID customerId = shoppingCart.customerId().value();
+
+    Mockito.lenient().when(customerPersistenceEntityRepository.getReferenceById(Mockito.any(UUID.class)))
+        .thenReturn(CustomerPersistenceEntityTestDataBuilder.aCustomer().id(customerId).build());
+
+    ShoppingCartPersistenceEntity merged = assembler.merge(new ShoppingCartPersistenceEntity(), shoppingCart);
+
+    assertThat(merged.getEvents())
+        .hasSize(1)
+        .first()
+        .isInstanceOf(ShoppingCartCreatedEvent.class);
   }
 }

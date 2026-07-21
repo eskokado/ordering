@@ -48,6 +48,8 @@ public class ShoppingCartsPersistenceProvider implements ShoppingCarts {
         .ifPresentOrElse(
             (persistenceEntity) -> update(aggregateRoot, persistenceEntity),
             () -> insert(aggregateRoot));
+
+    aggregateRoot.clearDomainEvents();
   }
 
   @Override

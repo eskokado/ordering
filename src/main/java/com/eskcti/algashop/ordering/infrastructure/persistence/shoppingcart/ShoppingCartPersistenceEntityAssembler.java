@@ -31,6 +31,7 @@ public class ShoppingCartPersistenceEntityAssembler {
     persistenceEntity.setCreatedAt(shoppingCart.createdAt());
     persistenceEntity.setVersion(shoppingCart.version());
     persistenceEntity.replaceItems(toOrderItemsEntities(shoppingCart.items()));
+    persistenceEntity.addEvents(shoppingCart.domainEvents());
     return persistenceEntity;
   }
 

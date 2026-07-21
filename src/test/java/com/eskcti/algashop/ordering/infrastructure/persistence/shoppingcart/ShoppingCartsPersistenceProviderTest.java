@@ -90,6 +90,7 @@ class ShoppingCartsPersistenceProviderTest {
     verify(repository).findById(cart.id().value());
     verify(assembler).fromDomain(cart);
     verify(repository).saveAndFlush(persistenceEntity);
+    assertThat(cart.domainEvents()).isEmpty();
   }
 
   @Test
@@ -105,6 +106,7 @@ class ShoppingCartsPersistenceProviderTest {
 
     verify(entityManager).detach(persistenceEntity);
     verify(repository).saveAndFlush(persistenceEntity);
+    assertThat(cart.domainEvents()).isEmpty();
   }
 
   @Test
