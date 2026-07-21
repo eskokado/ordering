@@ -74,6 +74,8 @@ public class OrdersPersistenceProvider implements Orders {
             () -> {
               insert(aggregateRoot);
             });
+
+    aggregateRoot.clearDomainEvents();
   }
 
   private void update(Order aggregateRoot, OrderPersistenceEntity persistenceEntity) {

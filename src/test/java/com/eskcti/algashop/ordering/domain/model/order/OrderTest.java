@@ -734,4 +734,56 @@ class OrderTest {
     assertThat(order.totalAmount()).isEqualTo(new Money("3000.00"));
     assertThat(order.totalItems()).isEqualTo(new Quantity(1));
   }
+
+  @Test
+  void given_draftOrder_whenPlace_shouldEmitOrderPlacedEvent() {
+    Order order = aDraftOrderWithSingleItem();
+
+    order.place();
+
+    OrderPlacedEvent event = new OrderPlacedEvent(order.id(), order.customerId(), order.placedAt());
+    Assertions.assertThat(order.domainEvents()).contains(event);
+  }
+
+  @Test
+  void given_placedOrder_whenMarkAsPaid_shouldEmitOrderPaidEvent() {
+    Order order = OrderTestDataBuilder.aPlacedOrder().build();
+
+    order.markAsPaid();
+
+    OrderPaidEvent event = new OrderPaidEvent(order.id(), order.customerId(), order.paidAt());
+    Assertions.assertThat(order.domainEvents()).contains(event);
+  }
+
+  @Test
+  void given_paidOrder_whenMarkAsReady_shouldEmitOrderReadyEvent() {
+    Order order = OrderTestDataBuilder.aPlacedOrder().build();
+    order.markAsPaid();
+
+    order.markAsReady();
+
+    OrderReadyEvent event = new OrderReadyEvent(order.id(), order.customerId(), order.readyAt());
+    Assertions.assertThat(order.domainEvents()).contains(event);
+  }
+
+  @Test
+  void given_placedOrder_whenCancel_shouldEmitOrderCanceledEvent() {
+    Order order = OrderTestDataBuilder.aPlacedOrder().build();
+
+    order.cancel();
+
+    OrderCanceledEvent event = new OrderCanceledEvent(order.id(), order.customerId(), order.canceledAt());
+    Assertions.assertThat(order.domainEvents()).contains(event);
+  }
+
+  @Test
+  void givenOrderWithDomainEvents_whenClearDomainEvents_shouldRemoveEvents() {
+    Order order = OrderTestDataBuilder.aPlacedOrder().build();
+
+    assertThat(order.domainEvents()).isNotEmpty();
+
+    order.clearDomainEvents();
+
+    assertThat(order.domainEvents()).isEmpty();
+  }
 }
