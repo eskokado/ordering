@@ -7,6 +7,8 @@ import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
 
+import com.eskcti.algashop.ordering.domain.model.commons.Email;
+import com.eskcti.algashop.ordering.domain.model.commons.FullName;
 import com.eskcti.algashop.ordering.domain.model.customer.CustomerArchivedEvent;
 import com.eskcti.algashop.ordering.domain.model.customer.CustomerId;
 import com.eskcti.algashop.ordering.domain.model.customer.CustomerRegisteredEvent;
@@ -72,7 +74,8 @@ class CustomerPersistenceEntityTest {
     void givenDomainEvents_whenAddEvents_shouldRegisterAndReturnEvents() {
         final var entity = CustomerPersistenceEntityTestDataBuilder.existingCustomer().build();
         final var customerId = new CustomerId(entity.getId());
-        final var registeredEvent = new CustomerRegisteredEvent(customerId, entity.getRegisteredAt());
+        final var registeredEvent = new CustomerRegisteredEvent(customerId, entity.getRegisteredAt(),
+                new FullName("John", "Doe"), new Email("johndoe@email.com"));
         final var archivedEvent = new CustomerArchivedEvent(customerId, entity.getRegisteredAt());
 
         entity.addEvents(List.of(registeredEvent, archivedEvent));

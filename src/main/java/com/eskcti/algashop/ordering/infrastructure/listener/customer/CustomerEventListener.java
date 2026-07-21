@@ -4,6 +4,7 @@ import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 import com.eskcti.algashop.ordering.application.customer.notification.CustomerNotificationService;
+import com.eskcti.algashop.ordering.application.customer.notification.CustomerNotificationService.NotifyNewRegistrationInput;
 import com.eskcti.algashop.ordering.domain.model.customer.CustomerArchivedEvent;
 import com.eskcti.algashop.ordering.domain.model.customer.CustomerRegisteredEvent;
 
@@ -20,7 +21,11 @@ public class CustomerEventListener {
   @EventListener
   public void listen(CustomerRegisteredEvent event) {
     log.info("CustomerRegisteredEvent listen 1");
-    customerNotificationService.notifyNewRegistration(event.customerId().value());
+    NotifyNewRegistrationInput input = new NotifyNewRegistrationInput(
+        event.customerId().value(),
+        event.fullName().firstName(),
+        event.email().value());
+    customerNotificationService.notifyNewRegistration(input);
   }
 
   @EventListener
