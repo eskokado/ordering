@@ -12,6 +12,8 @@ import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.eskcti.algashop.ordering.application.customer.notification.CustomerNotificationApplicationService;
+import com.eskcti.algashop.ordering.application.customer.query.CustomerOutput;
+import com.eskcti.algashop.ordering.application.customer.query.CustomerQueryService;
 import com.eskcti.algashop.ordering.domain.model.customer.CustomerArchivedEvent;
 import com.eskcti.algashop.ordering.domain.model.customer.CustomerArchivedException;
 import com.eskcti.algashop.ordering.domain.model.customer.CustomerEmailIsInUseException;
@@ -26,6 +28,9 @@ class CustomerManagementApplicationServiceIT {
   @Autowired
   private CustomerManagementApplicationService customerManagementApplicationService;
 
+  @Autowired
+  private CustomerQueryService queryService;
+
   @MockitoSpyBean
   private CustomerEventListener customerEventListener;
 
@@ -39,7 +44,7 @@ class CustomerManagementApplicationServiceIT {
     UUID customerId = customerManagementApplicationService.create(input);
     Assertions.assertThat(customerId).isNotNull();
 
-    CustomerOutput customerOutput = customerManagementApplicationService.findById(customerId);
+    CustomerOutput customerOutput = queryService.findById(customerId);
 
     Assertions.assertThat(customerOutput)
         .extracting(
@@ -77,7 +82,7 @@ class CustomerManagementApplicationServiceIT {
 
     customerManagementApplicationService.update(customerId, updateInput);
 
-    CustomerOutput customerOutput = customerManagementApplicationService.findById(customerId);
+    CustomerOutput customerOutput = queryService.findById(customerId);
 
     Assertions.assertThat(customerOutput)
         .extracting(
@@ -100,7 +105,7 @@ class CustomerManagementApplicationServiceIT {
   public void shouldThrowExceptionWhenCustomerDoesNotExistOnFindById() {
     UUID nonExistentId = UUID.randomUUID();
 
-    Assertions.assertThatThrownBy(() -> customerManagementApplicationService.findById(nonExistentId))
+    Assertions.assertThatThrownBy(() -> queryService.findById(nonExistentId))
         .isInstanceOf(CustomerNotFoundException.class);
   }
 
@@ -125,7 +130,7 @@ class CustomerManagementApplicationServiceIT {
     UUID customerId = customerManagementApplicationService.create(input);
     customerManagementApplicationService.update(customerId, updateInput);
 
-    CustomerOutput customerOutput = customerManagementApplicationService.findById(customerId);
+    CustomerOutput customerOutput = queryService.findById(customerId);
 
     Assertions.assertThat(customerOutput.getPromotionNotificationsAllowed()).isFalse();
   }
@@ -138,7 +143,7 @@ class CustomerManagementApplicationServiceIT {
 
     customerManagementApplicationService.archive(customerId);
 
-    CustomerOutput archivedCustomer = customerManagementApplicationService.findById(customerId);
+    CustomerOutput archivedCustomer = queryService.findById(customerId);
 
     Assertions.assertThat(archivedCustomer)
         .isNotNull()
@@ -195,7 +200,7 @@ class CustomerManagementApplicationServiceIT {
 
     customerManagementApplicationService.changeEmail(customerId, "newemail@email.com");
 
-    CustomerOutput customerOutput = customerManagementApplicationService.findById(customerId);
+    CustomerOutput customerOutput = queryService.findById(customerId);
 
     Assertions.assertThat(customerOutput.getEmail()).isEqualTo("newemail@email.com");
   }

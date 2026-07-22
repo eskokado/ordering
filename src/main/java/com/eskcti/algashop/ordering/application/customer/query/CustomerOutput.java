@@ -1,4 +1,4 @@
-package com.eskcti.algashop.ordering.application.customer.management;
+package com.eskcti.algashop.ordering.application.customer.query;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;

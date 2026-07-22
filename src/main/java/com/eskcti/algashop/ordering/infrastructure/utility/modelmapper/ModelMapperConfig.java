@@ -9,7 +9,7 @@ import org.modelmapper.convention.NamingConventions;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.eskcti.algashop.ordering.application.customer.management.CustomerOutput;
+import com.eskcti.algashop.ordering.application.customer.query.CustomerOutput;
 import com.eskcti.algashop.ordering.application.utility.Mapper;
 import com.eskcti.algashop.ordering.domain.model.commons.FullName;
 import com.eskcti.algashop.ordering.domain.model.customer.BirthDate;
