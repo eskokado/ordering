@@ -17,8 +17,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.eskcti.algashop.ordering.domain.model.commons.Money;
 import com.eskcti.algashop.ordering.domain.model.commons.Quantity;
+import com.eskcti.algashop.ordering.domain.model.customer.Customer;
+import com.eskcti.algashop.ordering.domain.model.customer.CustomerNotFoundException;
 import com.eskcti.algashop.ordering.domain.model.customer.CustomerTestDataBuilder;
 import com.eskcti.algashop.ordering.domain.model.customer.Customers;
+import com.eskcti.algashop.ordering.domain.model.customer.LoyaltyPoints;
 import com.eskcti.algashop.ordering.domain.model.order.CheckoutService;
 import com.eskcti.algashop.ordering.domain.model.order.Order;
 import com.eskcti.algashop.ordering.domain.model.order.OrderId;
@@ -49,7 +52,7 @@ class CheckoutApplicationServiceIT {
   @Autowired
   private ShoppingCarts shoppingCarts;
 
-  @Autowired
+  @MockitoSpyBean
   private Customers customers;
 
   @Autowired
@@ -109,6 +112,54 @@ class CheckoutApplicationServiceIT {
     Assertions.assertThat(updatedCart.get().isEmpty()).isTrue();
 
     Mockito.verify(orderEventListener).listen(Mockito.any(OrderPlacedEvent.class));
+  }
+
+  @Test
+  void shouldApplyFreeShippingWhenCustomerHasEnoughLoyaltyPoints() {
+    Customer customer = customers.ofId(CustomerTestDataBuilder.DEFAULT_CUSTOMER_ID).orElseThrow();
+    customer.addLoyaltyPoints(new LoyaltyPoints(2000));
+    customers.add(customer);
+
+    Product product = ProductTestDataBuilder.aProduct().inStock(true).build();
+
+    ShoppingCart shoppingCart = ShoppingCartTestDataBuilder
+        .aShoppingCart()
+        .customerId(CustomerTestDataBuilder.DEFAULT_CUSTOMER_ID)
+        .withItems(false).build();
+    shoppingCart.addItem(product, new Quantity(1));
+    shoppingCarts.add(shoppingCart);
+
+    CheckoutInput input = CheckoutInputTestDataBuilder.aCheckoutInput()
+        .shoppingCartId(shoppingCart.id().value())
+        .build();
+
+    String orderId = service.checkout(input);
+
+    Order order = orders.ofId(new OrderId(orderId)).orElseThrow();
+    Assertions.assertThat(order.shipping().cost()).isEqualTo(Money.ZERO);
+    Assertions.assertThat(order.totalAmount()).isEqualTo(product.price());
+  }
+
+  @Test
+  void shouldThrowCustomerNotFoundExceptionWhenCustomerDoesNotExist() {
+    Product product = ProductTestDataBuilder.aProduct().inStock(true).build();
+
+    ShoppingCart shoppingCart = ShoppingCartTestDataBuilder
+        .aShoppingCart()
+        .customerId(CustomerTestDataBuilder.DEFAULT_CUSTOMER_ID)
+        .withItems(false).build();
+    shoppingCart.addItem(product, new Quantity(1));
+    shoppingCarts.add(shoppingCart);
+
+    Mockito.doReturn(Optional.empty())
+        .when(customers).ofId(CustomerTestDataBuilder.DEFAULT_CUSTOMER_ID);
+
+    CheckoutInput input = CheckoutInputTestDataBuilder.aCheckoutInput()
+        .shoppingCartId(shoppingCart.id().value())
+        .build();
+
+    Assertions.assertThatExceptionOfType(CustomerNotFoundException.class)
+        .isThrownBy(() -> service.checkout(input));
   }
 
   @Test

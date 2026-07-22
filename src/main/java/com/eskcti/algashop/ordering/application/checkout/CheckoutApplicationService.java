@@ -6,12 +6,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.eskcti.algashop.ordering.domain.model.commons.ZipCode;
+import com.eskcti.algashop.ordering.domain.model.customer.Customer;
+import com.eskcti.algashop.ordering.domain.model.customer.CustomerNotFoundException;
+import com.eskcti.algashop.ordering.domain.model.customer.Customers;
 import com.eskcti.algashop.ordering.domain.model.order.CheckoutService;
 import com.eskcti.algashop.ordering.domain.model.order.Order;
 import com.eskcti.algashop.ordering.domain.model.order.Orders;
 import com.eskcti.algashop.ordering.domain.model.order.PaymentMethod;
 import com.eskcti.algashop.ordering.domain.model.order.shipping.OriginAddressService;
 import com.eskcti.algashop.ordering.domain.model.order.shipping.ShippingCostService;
+import com.eskcti.algashop.ordering.domain.model.product.ProductCatalogService;
 import com.eskcti.algashop.ordering.domain.model.shoppingcart.ShoppingCart;
 import com.eskcti.algashop.ordering.domain.model.shoppingcart.ShoppingCartId;
 import com.eskcti.algashop.ordering.domain.model.shoppingcart.ShoppingCartNotFoundException;
@@ -25,6 +29,8 @@ public class CheckoutApplicationService {
 
   private final Orders orders;
   private final ShoppingCarts shoppingCarts;
+  private final Customers customers;
+
   private final CheckoutService checkoutService;
 
   private final BillingInputDisassembler billingInputDisassembler;
@@ -32,6 +38,7 @@ public class CheckoutApplicationService {
 
   private final ShippingCostService shippingCostService;
   private final OriginAddressService originAddressService;
+  private final ProductCatalogService productCatalogService;
 
   @Transactional
   public String checkout(CheckoutInput input) {
@@ -42,9 +49,11 @@ public class CheckoutApplicationService {
     ShoppingCart shoppingCart = shoppingCarts.ofId(shoppingCartId)
         .orElseThrow(() -> new ShoppingCartNotFoundException());
 
+    Customer customer = customers.ofId(shoppingCart.customerId()).orElseThrow(() -> new CustomerNotFoundException());
+
     var shippingCalculationResult = calculateShippingCost(input.getShipping());
 
-    Order order = checkoutService.checkout(shoppingCart,
+    Order order = checkoutService.checkout(customer, shoppingCart,
         billingInputDisassembler.toDomainModel(input.getBilling()),
         shippingInputDisassembler.toDomainModel(input.getShipping(), shippingCalculationResult),
         paymentMethod);
