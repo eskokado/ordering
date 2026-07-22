@@ -1,5 +1,6 @@
 package com.eskcti.algashop.ordering.domain.model.order;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -25,11 +26,20 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class BuyNowServiceTest {
 
-  @InjectMocks
   private BuyNowService buyNowService;
 
   @Mock
   private Orders orders;
+
+  @BeforeEach
+  void setup() {
+    var specification = new CustomerHaveFreeShippingSpecification(
+        orders,
+        100,
+        2,
+        2000);
+    buyNowService = new BuyNowService(specification);
+  }
 
   @Test
   void givenValidProductAndDetails_whenBuyNow_shouldReturnPlacedOrder() {

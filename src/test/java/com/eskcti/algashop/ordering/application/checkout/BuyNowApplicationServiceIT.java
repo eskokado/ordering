@@ -13,6 +13,8 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.eskcti.algashop.ordering.domain.model.commons.Money;
+import com.eskcti.algashop.ordering.domain.model.customer.CustomerId;
+import com.eskcti.algashop.ordering.domain.model.customer.CustomerNotFoundException;
 import com.eskcti.algashop.ordering.domain.model.customer.CustomerTestDataBuilder;
 import com.eskcti.algashop.ordering.domain.model.customer.Customers;
 import com.eskcti.algashop.ordering.domain.model.order.Orders;
@@ -70,6 +72,22 @@ class BuyNowApplicationServiceIT {
 
     Assertions.assertThat(orderId).isNotBlank();
     Assertions.assertThat(orders.exists(new OrderId(orderId))).isTrue();
+  }
+
+  @Test
+  public void shouldThrowExceptionWhenCustomerDoesNotExist() {
+    Product product = ProductTestDataBuilder.aProduct()
+        .id(ProductTestDataBuilder.DEFAULT_PRODUCT_ID)
+        .build();
+    Mockito.when(productCatalogService.ofId(ProductTestDataBuilder.DEFAULT_PRODUCT_ID))
+        .thenReturn(Optional.of(product));
+
+    BuyNowInput input = BuyNowInputTestDataBuilder.aBuyNowInput()
+        .customerId(new CustomerId().value())
+        .build();
+
+    Assertions.assertThatThrownBy(() -> buyNowApplicationService.buyNow(input))
+        .isInstanceOf(CustomerNotFoundException.class);
   }
 
   @Test
