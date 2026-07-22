@@ -7,7 +7,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.eskcti.algashop.ordering.domain.model.commons.Quantity;
 import com.eskcti.algashop.ordering.domain.model.commons.ZipCode;
+import com.eskcti.algashop.ordering.domain.model.customer.Customer;
 import com.eskcti.algashop.ordering.domain.model.customer.CustomerId;
+import com.eskcti.algashop.ordering.domain.model.customer.CustomerNotFoundException;
+import com.eskcti.algashop.ordering.domain.model.customer.Customers;
 import com.eskcti.algashop.ordering.domain.model.order.Billing;
 import com.eskcti.algashop.ordering.domain.model.order.BuyNowService;
 import com.eskcti.algashop.ordering.domain.model.order.Order;
@@ -34,6 +37,7 @@ public class BuyNowApplicationService {
   private final OriginAddressService originAddressService;
 
   private final Orders orders;
+  private final Customers customers;
 
   private final ShippingInputDisassembler shippingInputDisassembler;
   private final BillingInputDisassembler billingInputDisassembler;
@@ -46,6 +50,8 @@ public class BuyNowApplicationService {
     CustomerId customerId = new CustomerId(input.getCustomerId());
     Quantity quantity = new Quantity(input.getQuantity());
 
+    Customer customer = customers.ofId(customerId).orElseThrow(() -> new CustomerNotFoundException());
+
     Product product = findProduct(new ProductId(input.getProductId()));
 
     var shippingCalculationResult = calculateShippingCost(input.getShipping());
@@ -56,7 +62,7 @@ public class BuyNowApplicationService {
     Billing billing = billingInputDisassembler.toDomainModel(input.getBilling());
 
     Order order = buyNowService.buyNow(
-        product, customerId, billing, shipping, quantity, paymentMethod);
+        product, customer, billing, shipping, quantity, paymentMethod);
 
     orders.add(order);
 
