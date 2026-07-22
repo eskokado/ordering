@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.OffsetDateTime;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
@@ -13,6 +14,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 
+import com.eskcti.algashop.ordering.application.customer.query.CustomerOutput;
 import com.eskcti.algashop.ordering.infrastructure.persistence.SpringDataAuditingConfig;
 import com.eskcti.algashop.ordering.infrastructure.persistence.customer.CustomerPersistenceEntity;
 import com.eskcti.algashop.ordering.infrastructure.persistence.customer.CustomerPersistenceEntityRepository;
@@ -33,6 +35,61 @@ class CustomerPersistenceEntityRepositoryIT {
             EntityManager entityManager) {
         this.customerPersistenceEntityRepository = customerPersistenceEntityRepository;
         this.entityManager = entityManager;
+    }
+
+    @Test
+    public void shouldFindByIdAsOutput() {
+        CustomerPersistenceEntity entity = CustomerPersistenceEntityTestDataBuilder.existingCustomer().build();
+        customerPersistenceEntityRepository.saveAndFlush(entity);
+
+        Optional<CustomerOutput> output = customerPersistenceEntityRepository.findByIdAsOutput(entity.getId());
+
+        assertThat(output).isPresent();
+        assertThat(output.get())
+                .extracting(
+                        CustomerOutput::getId,
+                        CustomerOutput::getFirstName,
+                        CustomerOutput::getLastName,
+                        CustomerOutput::getEmail,
+                        CustomerOutput::getDocument,
+                        CustomerOutput::getPhone,
+                        CustomerOutput::getBirthDate,
+                        CustomerOutput::getLoyaltyPoints,
+                        CustomerOutput::getPromotionNotificationsAllowed,
+                        CustomerOutput::getArchived)
+                .containsExactly(
+                        entity.getId(),
+                        entity.getFirstName(),
+                        entity.getLastName(),
+                        entity.getEmail(),
+                        entity.getDocument(),
+                        entity.getPhone(),
+                        entity.getBirthDate(),
+                        entity.getLoyaltyPoints(),
+                        entity.getPromotionNotificationsAllowed(),
+                        entity.getArchived());
+        assertThat(output.get().getAddress())
+                .extracting(
+                        address -> address.getStreet(),
+                        address -> address.getNumber(),
+                        address -> address.getComplement(),
+                        address -> address.getNeighborhood(),
+                        address -> address.getCity(),
+                        address -> address.getState(),
+                        address -> address.getZipCode())
+                .containsExactly(
+                        entity.getAddress().getStreet(),
+                        entity.getAddress().getNumber(),
+                        entity.getAddress().getComplement(),
+                        entity.getAddress().getNeighborhood(),
+                        entity.getAddress().getCity(),
+                        entity.getAddress().getState(),
+                        entity.getAddress().getZipCode());
+    }
+
+    @Test
+    public void shouldReturnEmptyWhenFindByIdAsOutputDoesNotExist() {
+        assertThat(customerPersistenceEntityRepository.findByIdAsOutput(UUID.randomUUID())).isEmpty();
     }
 
     @Test
