@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,9 +16,9 @@ import com.eskcti.algashop.ordering.application.order.query.OrderFilter;
 import com.eskcti.algashop.ordering.application.order.query.OrderQueryService;
 import com.eskcti.algashop.ordering.application.order.query.OrderSummaryOutput;
 import com.eskcti.algashop.ordering.application.utility.Mapper;
-import com.eskcti.algashop.ordering.application.utility.PageFilter;
 import com.eskcti.algashop.ordering.domain.model.order.OrderId;
 import com.eskcti.algashop.ordering.domain.model.order.OrderNotFoundException;
+import com.eskcti.algashop.ordering.infrastructure.persistence.customer.CustomerPersistenceEntity;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
@@ -71,42 +72,64 @@ public class OrderQueryServiceImpl implements OrderQueryService {
 
   private Page<OrderSummaryOutput> filterQuery(OrderFilter filter, Long totalQueryResults) {
     CriteriaBuilder builder = entityManager.getCriteriaBuilder();
-    CriteriaQuery<OrderSummaryOutput> criteriaQuery = builder.createQuery(OrderSummaryOutput.class);
+    CriteriaQuery<OrderPersistenceEntity> criteriaQuery = builder.createQuery(OrderPersistenceEntity.class);
 
     Root<OrderPersistenceEntity> root = criteriaQuery.from(OrderPersistenceEntity.class);
+    root.fetch("customer", JoinType.INNER);
 
-    Path<Object> customer = root.get("customer");
-
-    criteriaQuery.select(
-        builder.construct(OrderSummaryOutput.class,
-            root.get("id"),
-            builder.construct(CustomerMinimalOutput.class,
-                customer.get("id"),
-                customer.get("firstName"),
-                customer.get("lastName"),
-                customer.get("email"),
-                customer.get("document"),
-                customer.get("phone")),
-            root.get("totalItems"),
-            root.get("totalAmount"),
-            root.get("placedAt"),
-            root.get("paidAt"),
-            root.get("canceledAt"),
-            root.get("readyAt"),
-            root.get("status"),
-            root.get("paymentMethod")));
     Predicate[] predicates = toPredicates(builder, root, filter);
 
+    criteriaQuery.select(root).distinct(true);
     criteriaQuery.where(predicates);
+    criteriaQuery.orderBy(toSortOrder(builder, root, filter));
 
-    TypedQuery<OrderSummaryOutput> typedQuery = entityManager.createQuery(criteriaQuery);
+    TypedQuery<OrderPersistenceEntity> typedQuery = entityManager.createQuery(criteriaQuery);
 
     typedQuery.setFirstResult(filter.getSize() * filter.getPage());
     typedQuery.setMaxResults(filter.getSize());
 
+    List<OrderSummaryOutput> content = typedQuery.getResultList().stream()
+        .map(this::toSummaryOutput)
+        .toList();
+
     PageRequest pageRequest = PageRequest.of(filter.getPage(), filter.getSize());
 
-    return new PageImpl<>(typedQuery.getResultList(), pageRequest, totalQueryResults);
+    return new PageImpl<>(content, pageRequest, totalQueryResults);
+  }
+
+  private OrderSummaryOutput toSummaryOutput(OrderPersistenceEntity entity) {
+    CustomerPersistenceEntity customer = entity.getCustomer();
+
+    CustomerMinimalOutput customerOutput = new CustomerMinimalOutput(
+        customer.getId(),
+        customer.getFirstName(),
+        customer.getLastName(),
+        customer.getEmail(),
+        customer.getDocument(),
+        customer.getPhone());
+
+    return new OrderSummaryOutput(
+        entity.getId(),
+        customerOutput,
+        entity.getTotalItems(),
+        entity.getTotalAmount(),
+        entity.getPlacedAt(),
+        entity.getPaidAt(),
+        entity.getCanceledAt(),
+        entity.getReadyAt(),
+        entity.getStatus(),
+        entity.getPaymentMethod());
+  }
+
+  private jakarta.persistence.criteria.Order toSortOrder(CriteriaBuilder builder, Root<OrderPersistenceEntity> root,
+      OrderFilter filter) {
+    Path<?> sortPath = root.get(filter.getSortByPropertyOrDefault().getPropertyName());
+
+    if (Sort.Direction.ASC.equals(filter.getSortDirectionOrDefault())) {
+      return builder.asc(sortPath);
+    }
+
+    return builder.desc(sortPath);
   }
 
   private Predicate[] toPredicates(CriteriaBuilder builder,

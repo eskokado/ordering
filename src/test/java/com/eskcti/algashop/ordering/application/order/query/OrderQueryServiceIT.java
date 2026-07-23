@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.eskcti.algashop.ordering.domain.model.customer.Customer;
@@ -453,6 +454,83 @@ class OrderQueryServiceIT {
         Assertions.assertThat(page.getTotalElements()).isZero();
     }
 
+    @Test
+    public void shouldSortOrdersByStatusAscending() {
+        Customer customer = CustomerTestDataBuilder.existingCustomer().build();
+        customers.add(customer);
+
+        orders.add(OrderTestDataBuilder.aPlacedOrder().customerId(customer.id()).build());
+        orders.add(OrderTestDataBuilder.aPlacedOrder()
+                .customerId(customer.id())
+                .status(OrderStatus.PAID)
+                .build());
+
+        OrderFilter filter = orderFilterWithSort(15, 0, OrderFilter.SortType.STATUS, Sort.Direction.ASC);
+
+        Page<OrderSummaryOutput> page = queryService.filter(filter);
+
+        Assertions.assertThat(page.getContent())
+                .extracting(OrderSummaryOutput::getStatus)
+                .containsExactly(OrderStatus.PAID.name(), OrderStatus.PLACED.name());
+    }
+
+    @Test
+    public void shouldSortOrdersByStatusDescending() {
+        Customer customer = CustomerTestDataBuilder.existingCustomer().build();
+        customers.add(customer);
+
+        orders.add(OrderTestDataBuilder.aPlacedOrder().customerId(customer.id()).build());
+        orders.add(OrderTestDataBuilder.aPlacedOrder()
+                .customerId(customer.id())
+                .status(OrderStatus.PAID)
+                .build());
+
+        OrderFilter filter = orderFilterWithSort(15, 0, OrderFilter.SortType.STATUS, Sort.Direction.DESC);
+
+        Page<OrderSummaryOutput> page = queryService.filter(filter);
+
+        Assertions.assertThat(page.getContent())
+                .extracting(OrderSummaryOutput::getStatus)
+                .containsExactly(OrderStatus.PLACED.name(), OrderStatus.PAID.name());
+    }
+
+    @Test
+    public void shouldSortOrdersByPaidAtDescending() {
+        Customer customer = CustomerTestDataBuilder.existingCustomer().build();
+        customers.add(customer);
+
+        orders.add(OrderTestDataBuilder.aPlacedOrder().customerId(customer.id()).build());
+        orders.add(OrderTestDataBuilder.aPlacedOrder()
+                .customerId(customer.id())
+                .status(OrderStatus.PAID)
+                .build());
+
+        OrderFilter filter = orderFilterWithSort(15, 0, OrderFilter.SortType.PAID_AT, Sort.Direction.DESC);
+
+        Page<OrderSummaryOutput> page = queryService.filter(filter);
+
+        Assertions.assertThat(page.getContent().getFirst().getStatus()).isEqualTo(OrderStatus.PAID.name());
+        Assertions.assertThat(page.getContent().get(1).getStatus()).isEqualTo(OrderStatus.PLACED.name());
+    }
+
+    @Test
+    public void shouldSortOrdersByPlacedAtAscendingByDefault() {
+        Customer customer = CustomerTestDataBuilder.existingCustomer().build();
+        customers.add(customer);
+
+        orders.add(OrderTestDataBuilder.aPlacedOrder().customerId(customer.id()).build());
+        orders.add(OrderTestDataBuilder.aPlacedOrder().customerId(customer.id()).build());
+
+        OrderFilter filter = orderFilter(15, 0);
+
+        Page<OrderSummaryOutput> page = queryService.filter(filter);
+
+        Assertions.assertThat(page.getTotalElements()).isEqualTo(2);
+        Assertions.assertThat(page.getContent())
+                .extracting(OrderSummaryOutput::getPlacedAt)
+                .isSortedAccordingTo(OffsetDateTime::compareTo);
+    }
+
     private OrderFilter orderFilter(int size, int page) {
         return orderFilter(size, page, null, null, null, null, null, null, null);
     }
@@ -468,6 +546,14 @@ class OrderQueryServiceIT {
                 totalAmountFrom, totalAmountTo);
         filter.setSize(size);
         filter.setPage(page);
+        return filter;
+    }
+
+    private OrderFilter orderFilterWithSort(int size, int page, OrderFilter.SortType sortBy,
+            Sort.Direction direction) {
+        OrderFilter filter = orderFilter(size, page);
+        filter.setSortByProperty(sortBy);
+        filter.setSortDirection(direction);
         return filter;
     }
 
