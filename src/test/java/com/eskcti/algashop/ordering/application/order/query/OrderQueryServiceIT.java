@@ -2,6 +2,7 @@ package com.eskcti.algashop.ordering.application.order.query;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.UUID;
 
 import org.assertj.core.api.Assertions;
@@ -294,12 +295,177 @@ class OrderQueryServiceIT {
         Assertions.assertThat(page.getTotalElements()).isZero();
     }
 
+    @Test
+    public void shouldFilterOrdersByStatus() {
+        Customer customer = CustomerTestDataBuilder.existingCustomer().build();
+        customers.add(customer);
+
+        Order placedOrder = OrderTestDataBuilder.aPlacedOrder()
+                .customerId(customer.id())
+                .build();
+        Order paidOrder = OrderTestDataBuilder.aPlacedOrder()
+                .customerId(customer.id())
+                .status(OrderStatus.PAID)
+                .build();
+        orders.add(placedOrder);
+        orders.add(paidOrder);
+
+        OrderFilter filter = orderFilter(15, 0, "placed", null, null, null, null, null, null);
+
+        Page<OrderSummaryOutput> page = queryService.filter(filter);
+
+        Assertions.assertThat(page.getTotalElements()).isEqualTo(1);
+        Assertions.assertThat(page.getContent().getFirst().getId()).isEqualTo(placedOrder.id().toString());
+        Assertions.assertThat(page.getContent().getFirst().getStatus()).isEqualTo(OrderStatus.PLACED.name());
+    }
+
+    @Test
+    public void shouldIgnoreBlankStatusWhenFiltering() {
+        Customer customer = CustomerTestDataBuilder.existingCustomer().build();
+        customers.add(customer);
+
+        orders.add(OrderTestDataBuilder.aPlacedOrder().customerId(customer.id()).build());
+        orders.add(OrderTestDataBuilder.aPlacedOrder()
+                .customerId(customer.id())
+                .status(OrderStatus.PAID)
+                .build());
+
+        OrderFilter filter = orderFilter(15, 0, "   ", null, null, null, null, null, null);
+
+        Page<OrderSummaryOutput> page = queryService.filter(filter);
+
+        Assertions.assertThat(page.getTotalElements()).isEqualTo(2);
+    }
+
+    @Test
+    public void shouldFilterOrdersByOrderId() {
+        Customer customer = CustomerTestDataBuilder.existingCustomer().build();
+        customers.add(customer);
+
+        Order firstOrder = OrderTestDataBuilder.aPlacedOrder()
+                .customerId(customer.id())
+                .build();
+        Order secondOrder = OrderTestDataBuilder.aPlacedOrder()
+                .customerId(customer.id())
+                .build();
+        orders.add(firstOrder);
+        orders.add(secondOrder);
+
+        OrderFilter filter = orderFilter(15, 0, null, firstOrder.id().toString(), null, null, null, null, null);
+
+        Page<OrderSummaryOutput> page = queryService.filter(filter);
+
+        Assertions.assertThat(page.getTotalElements()).isEqualTo(1);
+        Assertions.assertThat(page.getContent().getFirst().getId()).isEqualTo(firstOrder.id().toString());
+    }
+
+    @Test
+    public void shouldReturnEmptyPageWhenOrderIdIsInvalid() {
+        Customer customer = CustomerTestDataBuilder.existingCustomer().build();
+        customers.add(customer);
+
+        orders.add(OrderTestDataBuilder.aPlacedOrder().customerId(customer.id()).build());
+
+        OrderFilter filter = orderFilter(15, 0, null, "invalid-order-id", null, null, null, null, null);
+
+        Page<OrderSummaryOutput> page = queryService.filter(filter);
+
+        Assertions.assertThat(page.getContent()).isEmpty();
+        Assertions.assertThat(page.getTotalElements()).isZero();
+    }
+
+    @Test
+    public void shouldFilterOrdersByPlacedAtRange() {
+        Customer customer = CustomerTestDataBuilder.existingCustomer().build();
+        customers.add(customer);
+
+        Order order = OrderTestDataBuilder.aPlacedOrder()
+                .customerId(customer.id())
+                .build();
+        orders.add(order);
+
+        OffsetDateTime placedAt = order.placedAt();
+        OrderFilter filter = orderFilter(15, 0, null, null, null,
+                placedAt.minusDays(1), placedAt.plusDays(1), null, null);
+
+        Page<OrderSummaryOutput> page = queryService.filter(filter);
+
+        Assertions.assertThat(page.getTotalElements()).isEqualTo(1);
+        Assertions.assertThat(page.getContent().getFirst().getId()).isEqualTo(order.id().toString());
+    }
+
+    @Test
+    public void shouldReturnEmptyPageWhenPlacedAtIsOutsideRange() {
+        Customer customer = CustomerTestDataBuilder.existingCustomer().build();
+        customers.add(customer);
+
+        Order order = OrderTestDataBuilder.aPlacedOrder()
+                .customerId(customer.id())
+                .build();
+        orders.add(order);
+
+        OffsetDateTime placedAt = order.placedAt();
+        OrderFilter filter = orderFilter(15, 0, null, null, null,
+                placedAt.plusDays(1), null, null, null);
+
+        Page<OrderSummaryOutput> page = queryService.filter(filter);
+
+        Assertions.assertThat(page.getContent()).isEmpty();
+        Assertions.assertThat(page.getTotalElements()).isZero();
+    }
+
+    @Test
+    public void shouldFilterOrdersByTotalAmountRange() {
+        Customer customer = CustomerTestDataBuilder.existingCustomer().build();
+        customers.add(customer);
+
+        Order order = OrderTestDataBuilder.aPlacedOrder()
+                .customerId(customer.id())
+                .build();
+        orders.add(order);
+
+        BigDecimal totalAmount = order.totalAmount().value();
+        OrderFilter filter = orderFilter(15, 0, null, null, null, null, null,
+                totalAmount, totalAmount);
+
+        Page<OrderSummaryOutput> page = queryService.filter(filter);
+
+        Assertions.assertThat(page.getTotalElements()).isEqualTo(1);
+        Assertions.assertThat(page.getContent().getFirst().getTotalAmount()).isEqualByComparingTo(totalAmount);
+    }
+
+    @Test
+    public void shouldReturnEmptyPageWhenTotalAmountIsOutsideRange() {
+        Customer customer = CustomerTestDataBuilder.existingCustomer().build();
+        customers.add(customer);
+
+        Order order = OrderTestDataBuilder.aPlacedOrder()
+                .customerId(customer.id())
+                .build();
+        orders.add(order);
+
+        OrderFilter filter = orderFilter(15, 0, null, null, null, null, null,
+                order.totalAmount().value().add(BigDecimal.ONE), null);
+
+        Page<OrderSummaryOutput> page = queryService.filter(filter);
+
+        Assertions.assertThat(page.getContent()).isEmpty();
+        Assertions.assertThat(page.getTotalElements()).isZero();
+    }
+
     private OrderFilter orderFilter(int size, int page) {
-        return new OrderFilter(size, page);
+        return orderFilter(size, page, null, null, null, null, null, null, null);
     }
 
     private OrderFilter orderFilterByCustomer(int size, int page, UUID customerId) {
-        OrderFilter filter = new OrderFilter(null, null, customerId, null, null, null, null);
+        return orderFilter(size, page, null, null, customerId, null, null, null, null);
+    }
+
+    private OrderFilter orderFilter(int size, int page, String status, String orderId, UUID customerId,
+            OffsetDateTime placedAtFrom, OffsetDateTime placedAtTo,
+            BigDecimal totalAmountFrom, BigDecimal totalAmountTo) {
+        OrderFilter filter = new OrderFilter(status, orderId, customerId, placedAtFrom, placedAtTo,
+                totalAmountFrom, totalAmountTo);
         filter.setSize(size);
         filter.setPage(page);
         return filter;
