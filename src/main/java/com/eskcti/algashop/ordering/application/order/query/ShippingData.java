@@ -3,7 +3,6 @@ package com.eskcti.algashop.ordering.application.order.query;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-import com.eskcti.algashop.ordering.application.checkout.RecipientData;
 import com.eskcti.algashop.ordering.application.commons.AddressData;
 
 import lombok.AllArgsConstructor;

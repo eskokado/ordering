@@ -7,8 +7,10 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.eskcti.algashop.ordering.application.utility.PageFilter;
 import com.eskcti.algashop.ordering.domain.model.customer.Customer;
 import com.eskcti.algashop.ordering.domain.model.customer.CustomerTestDataBuilder;
 import com.eskcti.algashop.ordering.domain.model.customer.Customers;
@@ -146,6 +148,101 @@ class OrderQueryServiceIT {
 
     Assertions.assertThatThrownBy(() -> queryService.findById(nonExistentOrderId))
         .isInstanceOf(OrderNotFoundException.class);
+  }
+
+  @Test
+  public void shouldReturnEmptyPageWhenNoOrdersExist() {
+    PageFilter filter = new PageFilter(15, 0);
+
+    Page<OrderSummaryOutput> page = queryService.filter(filter);
+
+    Assertions.assertThat(page.getContent()).isEmpty();
+    Assertions.assertThat(page.getTotalElements()).isZero();
+    Assertions.assertThat(page.getNumber()).isZero();
+    Assertions.assertThat(page.getSize()).isEqualTo(15);
+  }
+
+  @Test
+  public void shouldFilterOrders() {
+    Customer customer = CustomerTestDataBuilder.existingCustomer().build();
+    customers.add(customer);
+
+    Order order = OrderTestDataBuilder.aPlacedOrder()
+        .customerId(customer.id())
+        .build();
+    orders.add(order);
+
+    PageFilter filter = new PageFilter(15, 0);
+    Page<OrderSummaryOutput> page = queryService.filter(filter);
+
+    Assertions.assertThat(page.getTotalElements()).isEqualTo(1);
+    Assertions.assertThat(page.getContent()).hasSize(1);
+
+    OrderSummaryOutput summary = page.getContent().getFirst();
+    Assertions.assertThat(summary)
+        .extracting(
+            OrderSummaryOutput::getId,
+            OrderSummaryOutput::getTotalAmount,
+            OrderSummaryOutput::getTotalItems,
+            OrderSummaryOutput::getStatus,
+            OrderSummaryOutput::getPaymentMethod)
+        .containsExactly(
+            order.id().toString(),
+            order.totalAmount().value(),
+            order.totalItems().value(),
+            OrderStatus.PLACED.name(),
+            PaymentMethod.CREDIT_CARD.name());
+
+    Assertions.assertThat(summary.getPlacedAt()).isNotNull();
+    Assertions.assertThat(summary.getPaidAt()).isNull();
+    Assertions.assertThat(summary.getCanceledAt()).isNull();
+    Assertions.assertThat(summary.getReadyAt()).isNull();
+
+    Assertions.assertThat(summary.getCustomer())
+        .extracting(
+            CustomerMinimalOutput::getId,
+            CustomerMinimalOutput::getFirstName,
+            CustomerMinimalOutput::getLastName,
+            CustomerMinimalOutput::getEmail,
+            CustomerMinimalOutput::getDocument,
+            CustomerMinimalOutput::getPhone)
+        .containsExactly(
+            customer.id().value(),
+            "John",
+            "Doe",
+            "johndoe@email.com",
+            "255-08-0578",
+            "478-256-2604");
+  }
+
+  @Test
+  public void shouldPaginateOrders() {
+    Customer customer = CustomerTestDataBuilder.existingCustomer().build();
+    customers.add(customer);
+
+    Order firstOrder = OrderTestDataBuilder.aPlacedOrder()
+        .customerId(customer.id())
+        .build();
+    Order secondOrder = OrderTestDataBuilder.aPlacedOrder()
+        .customerId(customer.id())
+        .build();
+    orders.add(firstOrder);
+    orders.add(secondOrder);
+
+    PageFilter firstPageFilter = new PageFilter(1, 0);
+    Page<OrderSummaryOutput> firstPage = queryService.filter(firstPageFilter);
+
+    Assertions.assertThat(firstPage.getTotalElements()).isEqualTo(2);
+    Assertions.assertThat(firstPage.getContent()).hasSize(1);
+    Assertions.assertThat(firstPage.getTotalPages()).isEqualTo(2);
+
+    PageFilter secondPageFilter = new PageFilter(1, 1);
+    Page<OrderSummaryOutput> secondPage = queryService.filter(secondPageFilter);
+
+    Assertions.assertThat(secondPage.getContent()).hasSize(1);
+    Assertions.assertThat(secondPage.getNumber()).isEqualTo(1);
+    Assertions.assertThat(firstPage.getContent().getFirst().getId())
+        .isNotEqualTo(secondPage.getContent().getFirst().getId());
   }
 
 }
