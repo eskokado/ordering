@@ -51,9 +51,9 @@ class CustomerControllerContractTest {
   @Test
   public void createCustomerContract() {
     CustomerOutput customerOutput = CustomerOutputTestDataBuilder.existing().build();
-
+    UUID customerId = UUID.randomUUID();
     Mockito.when(customerManagementApplicationService.create(Mockito.any(CustomerInput.class)))
-        .thenReturn(UUID.randomUUID());
+        .thenReturn(customerId);
     Mockito.when(customerQueryService.findById(Mockito.any(UUID.class)))
         .thenReturn(customerOutput);
 
@@ -89,6 +89,7 @@ class CustomerControllerContractTest {
         .assertThat()
         .contentType(MediaType.APPLICATION_JSON_VALUE)
         .statusCode(HttpStatus.CREATED.value())
+        .header("Location", Matchers.containsString("/api/v1/customers/" + customerId))
         .body(
             "id", Matchers.notNullValue(),
             "registeredAt", Matchers.notNullValue(),
@@ -208,6 +209,45 @@ class CustomerControllerContractTest {
             "content[1].registeredAt", Matchers.is(formatter.format(customer2.getRegisteredAt()))
 
         );
+  }
+
+  @Test
+  public void findCustomerByIdContract() {
+    CustomerOutput customerOutput = CustomerOutputTestDataBuilder.existing().build();
+    UUID customerId = customerOutput.getId();
+
+    Mockito.when(customerQueryService.findById(customerId))
+        .thenReturn(customerOutput);
+
+    DateTimeFormatter formatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
+
+    RestAssuredMockMvc
+        .given()
+        .accept(MediaType.APPLICATION_JSON)
+        .when()
+        .get("/api/v1/customers/{customerId}", customerId)
+        .then()
+        .assertThat()
+        .contentType(MediaType.APPLICATION_JSON_VALUE)
+        .statusCode(HttpStatus.OK.value())
+        .body(
+            "id", Matchers.equalTo(customerId.toString()),
+            "firstName", Matchers.is(customerOutput.getFirstName()),
+            "lastName", Matchers.is(customerOutput.getLastName()),
+            "email", Matchers.is(customerOutput.getEmail()),
+            "document", Matchers.is(customerOutput.getDocument()),
+            "phone", Matchers.is(customerOutput.getPhone()),
+            "birthDate", Matchers.is(customerOutput.getBirthDate().toString()),
+            "promotionNotificationsAllowed", Matchers.is(customerOutput.getPromotionNotificationsAllowed()),
+            "loyaltyPoints", Matchers.is(customerOutput.getLoyaltyPoints()),
+            "registeredAt", Matchers.is(formatter.format(customerOutput.getRegisteredAt())),
+            "address.street", Matchers.is(customerOutput.getAddress().getStreet()),
+            "address.number", Matchers.is(customerOutput.getAddress().getNumber()),
+            "address.complement", Matchers.is(customerOutput.getAddress().getComplement()),
+            "address.neighborhood", Matchers.is(customerOutput.getAddress().getNeighborhood()),
+            "address.city", Matchers.is(customerOutput.getAddress().getCity()),
+            "address.state", Matchers.is(customerOutput.getAddress().getState()),
+            "address.zipCode", Matchers.is(customerOutput.getAddress().getZipCode()));
   }
 
 }
