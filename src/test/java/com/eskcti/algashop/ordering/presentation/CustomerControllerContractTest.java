@@ -24,6 +24,7 @@ import com.eskcti.algashop.ordering.application.customer.query.CustomerQueryServ
 import com.eskcti.algashop.ordering.application.customer.query.CustomerSummaryOutput;
 import com.eskcti.algashop.ordering.application.customer.query.CustomerSummaryOutputTestDataBuilder;
 import com.eskcti.algashop.ordering.domain.model.DomainException;
+import com.eskcti.algashop.ordering.domain.model.customer.CustomerArchivedException;
 import com.eskcti.algashop.ordering.domain.model.customer.CustomerEmailIsInUseException;
 import com.eskcti.algashop.ordering.domain.model.customer.CustomerNotFoundException;
 
@@ -424,10 +425,7 @@ class CustomerControllerContractTest {
         {
           "firstName": "John",
           "lastName": "Doe",
-          "email": "johndoe@email.com",
-          "document": "12345",
           "phone": "1191234564",
-          "birthDate": "1991-07-05",
           "promotionNotificationsAllowed": false,
           "address": {
             "street": "Bourbon Street",
@@ -474,12 +472,182 @@ class CustomerControllerContractTest {
   }
 
   @Test
-  public void deleteCustomerContract() {
-    CustomerOutput customer = CustomerOutputTestDataBuilder.existing().build();
-
+  public void updateCustomerError400Contract() {
     UUID customerId = UUID.randomUUID();
-    Mockito.when(customerQueryService.findById(Mockito.any(UUID.class)))
-        .thenReturn(customer);
+
+    String jsonInput = """
+        {
+          "firstName": "",
+          "lastName": "",
+          "phone": "1191234564",
+          "promotionNotificationsAllowed": false,
+          "address": {
+            "street": "Bourbon Street",
+            "number": "2000",
+            "complement": "apt 122",
+            "neighborhood": "North Ville",
+            "city": "Yostfort",
+            "state": "South Carolina",
+            "zipCode": "12321"
+          }
+        }
+        """;
+
+    RestAssuredMockMvc
+        .given()
+        .accept(MediaType.APPLICATION_JSON)
+        .contentType(MediaType.APPLICATION_JSON)
+        .body(jsonInput)
+        .when()
+        .put("/api/v1/customers/{customerId}", customerId)
+        .then()
+        .assertThat()
+        .contentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE)
+        .statusCode(HttpStatus.BAD_REQUEST.value())
+        .body(
+            "status", Matchers.is(HttpStatus.BAD_REQUEST.value()),
+            "type", Matchers.is("/errors/invalid-fields"),
+            "title", Matchers.notNullValue(),
+            "detail", Matchers.notNullValue(),
+            "instance", Matchers.notNullValue(),
+            "fields", Matchers.notNullValue());
+  }
+
+  @Test
+  public void updateCustomerError404Contract() {
+    UUID invalidCustomerId = UUID.randomUUID();
+
+    Mockito.doThrow(CustomerNotFoundException.class)
+        .when(customerManagementApplicationService)
+        .update(Mockito.eq(invalidCustomerId), Mockito.any());
+
+    String jsonInput = """
+        {
+          "firstName": "John",
+          "lastName": "Doe",
+          "phone": "1191234564",
+          "promotionNotificationsAllowed": false,
+          "address": {
+            "street": "Bourbon Street",
+            "number": "2000",
+            "complement": "apt 122",
+            "neighborhood": "North Ville",
+            "city": "Yostfort",
+            "state": "South Carolina",
+            "zipCode": "12321"
+          }
+        }
+        """;
+
+    RestAssuredMockMvc
+        .given()
+        .accept(MediaType.APPLICATION_JSON_VALUE)
+        .body(jsonInput)
+        .contentType(MediaType.APPLICATION_JSON_VALUE)
+        .when()
+        .put("/api/v1/customers/{customerId}", invalidCustomerId)
+        .then()
+        .assertThat()
+        .contentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE)
+        .statusCode(HttpStatus.NOT_FOUND.value())
+        .body(
+            "status", Matchers.is(HttpStatus.NOT_FOUND.value()),
+            "type", Matchers.is("/errors/not-found"),
+            "title", Matchers.notNullValue(),
+            "instance", Matchers.notNullValue());
+  }
+
+  @Test
+  public void updateCustomerError409Contract() {
+    UUID customerId = UUID.randomUUID();
+
+    Mockito.doThrow(CustomerEmailIsInUseException.class)
+        .when(customerManagementApplicationService)
+        .update(Mockito.eq(customerId), Mockito.any());
+
+    String jsonInput = """
+        {
+          "firstName": "John",
+          "lastName": "Doe",
+          "phone": "1191234564",
+          "promotionNotificationsAllowed": false,
+          "address": {
+            "street": "Bourbon Street",
+            "number": "2000",
+            "complement": "apt 122",
+            "neighborhood": "North Ville",
+            "city": "Yostfort",
+            "state": "South Carolina",
+            "zipCode": "12321"
+          }
+        }
+        """;
+
+    RestAssuredMockMvc
+        .given()
+        .accept(MediaType.APPLICATION_JSON_VALUE)
+        .body(jsonInput)
+        .contentType(MediaType.APPLICATION_JSON_VALUE)
+        .when()
+        .put("/api/v1/customers/{customerId}", customerId)
+        .then()
+        .assertThat()
+        .contentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE)
+        .statusCode(HttpStatus.CONFLICT.value())
+        .body(
+            "status", Matchers.is(HttpStatus.CONFLICT.value()),
+            "type", Matchers.is("/errors/conflict"),
+            "title", Matchers.notNullValue(),
+            "instance", Matchers.notNullValue());
+  }
+
+  @Test
+  public void updateCustomerError422Contract() {
+    UUID customerId = UUID.randomUUID();
+
+    Mockito.doThrow(DomainException.class)
+        .when(customerManagementApplicationService)
+        .update(Mockito.eq(customerId), Mockito.any());
+
+    String jsonInput = """
+        {
+          "firstName": "John",
+          "lastName": "Doe",
+          "phone": "1191234564",
+          "promotionNotificationsAllowed": false,
+          "address": {
+            "street": "Bourbon Street",
+            "number": "2000",
+            "complement": "apt 122",
+            "neighborhood": "North Ville",
+            "city": "Yostfort",
+            "state": "South Carolina",
+            "zipCode": "12321"
+          }
+        }
+        """;
+
+    RestAssuredMockMvc
+        .given()
+        .accept(MediaType.APPLICATION_JSON_VALUE)
+        .body(jsonInput)
+        .contentType(MediaType.APPLICATION_JSON_VALUE)
+        .when()
+        .put("/api/v1/customers/{customerId}", customerId)
+        .then()
+        .assertThat()
+        .contentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE)
+        .statusCode(HttpStatus.UNPROCESSABLE_ENTITY.value())
+        .body(
+            "status", Matchers.is(HttpStatus.UNPROCESSABLE_ENTITY.value()),
+            "type", Matchers.is("/errors/unprocessable-entity"),
+            "title", Matchers.notNullValue(),
+            "instance", Matchers.notNullValue());
+  }
+
+  @Test
+  public void deleteCustomerContract() {
+    UUID customerId = UUID.randomUUID();
 
     RestAssuredMockMvc
         .given()
@@ -489,6 +657,78 @@ class CustomerControllerContractTest {
         .then()
         .assertThat()
         .statusCode(HttpStatus.NO_CONTENT.value());
+  }
+
+  @Test
+  public void deleteCustomerError404Contract() {
+    UUID invalidCustomerId = UUID.randomUUID();
+
+    Mockito.doThrow(CustomerNotFoundException.class)
+        .when(customerManagementApplicationService)
+        .archive(invalidCustomerId);
+
+    RestAssuredMockMvc
+        .given()
+        .accept(MediaType.APPLICATION_JSON)
+        .when()
+        .delete("/api/v1/customers/{customerId}", invalidCustomerId)
+        .then()
+        .assertThat()
+        .contentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE)
+        .statusCode(HttpStatus.NOT_FOUND.value())
+        .body(
+            "status", Matchers.is(HttpStatus.NOT_FOUND.value()),
+            "type", Matchers.is("/errors/not-found"),
+            "title", Matchers.notNullValue(),
+            "instance", Matchers.notNullValue());
+  }
+
+  @Test
+  public void deleteCustomerError422Contract() {
+    UUID customerId = UUID.randomUUID();
+
+    Mockito.doThrow(CustomerArchivedException.class)
+        .when(customerManagementApplicationService)
+        .archive(customerId);
+
+    RestAssuredMockMvc
+        .given()
+        .accept(MediaType.APPLICATION_JSON)
+        .when()
+        .delete("/api/v1/customers/{customerId}", customerId)
+        .then()
+        .assertThat()
+        .contentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE)
+        .statusCode(HttpStatus.UNPROCESSABLE_ENTITY.value())
+        .body(
+            "status", Matchers.is(HttpStatus.UNPROCESSABLE_ENTITY.value()),
+            "type", Matchers.is("/errors/unprocessable-entity"),
+            "title", Matchers.notNullValue(),
+            "instance", Matchers.notNullValue());
+  }
+
+  @Test
+  public void deleteCustomerError500Contract() {
+    UUID customerId = UUID.randomUUID();
+
+    Mockito.doThrow(RuntimeException.class)
+        .when(customerManagementApplicationService)
+        .archive(customerId);
+
+    RestAssuredMockMvc
+        .given()
+        .accept(MediaType.APPLICATION_JSON)
+        .when()
+        .delete("/api/v1/customers/{customerId}", customerId)
+        .then()
+        .assertThat()
+        .contentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE)
+        .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
+        .body(
+            "status", Matchers.is(HttpStatus.INTERNAL_SERVER_ERROR.value()),
+            "type", Matchers.is("/errors/internal"),
+            "title", Matchers.notNullValue(),
+            "instance", Matchers.notNullValue());
   }
 
 }
