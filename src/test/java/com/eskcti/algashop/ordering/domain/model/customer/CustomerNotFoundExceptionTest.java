@@ -3,8 +3,7 @@ package com.eskcti.algashop.ordering.domain.model.customer;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import com.eskcti.algashop.ordering.domain.model.DomainException;
-import com.eskcti.algashop.ordering.domain.model.customer.CustomerNotFoundException;
+import com.eskcti.algashop.ordering.domain.model.DomainEntityNotFoundException;
 
 class CustomerNotFoundExceptionTest {
 
@@ -12,6 +11,6 @@ class CustomerNotFoundExceptionTest {
   void shouldCreateException() {
     CustomerNotFoundException exception = new CustomerNotFoundException();
 
-    Assertions.assertThat(exception).isInstanceOf(DomainException.class);
+    Assertions.assertThat(exception).isInstanceOf(DomainEntityNotFoundException.class);
   }
 }
