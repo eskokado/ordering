@@ -2,8 +2,10 @@ package com.eskcti.algashop.ordering.presentation;
 
 import com.eskcti.algashop.ordering.application.customer.management.CustomerInput;
 import com.eskcti.algashop.ordering.application.customer.management.CustomerManagementApplicationService;
+import com.eskcti.algashop.ordering.application.customer.query.CustomerFilter;
 import com.eskcti.algashop.ordering.application.customer.query.CustomerOutput;
 import com.eskcti.algashop.ordering.application.customer.query.CustomerQueryService;
+import com.eskcti.algashop.ordering.application.customer.query.CustomerSummaryOutput;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +28,11 @@ public class CustomerController {
     public CustomerOutput create(@RequestBody @Valid CustomerInput input) {
         UUID customerId = customerManagementApplicationService.create(input);
         return customerQueryService.findById(customerId);
+    }
+
+    @GetMapping
+    public PageModel<CustomerSummaryOutput> findAll(CustomerFilter customerFilter) {
+        return PageModel.of(customerQueryService.filter(customerFilter));
     }
 
 }
