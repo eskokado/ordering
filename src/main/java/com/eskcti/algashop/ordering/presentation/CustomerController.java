@@ -1,11 +1,11 @@
 package com.eskcti.algashop.ordering.presentation;
 
-import com.eskcti.algashop.ordering.application.commons.AddressData;
 import com.eskcti.algashop.ordering.application.customer.management.CustomerInput;
 import com.eskcti.algashop.ordering.application.customer.management.CustomerManagementApplicationService;
 import com.eskcti.algashop.ordering.application.customer.query.CustomerOutput;
 import com.eskcti.algashop.ordering.application.customer.query.CustomerQueryService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.HttpStatus;
@@ -23,7 +23,7 @@ public class CustomerController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public CustomerOutput create(@RequestBody CustomerInput input) {
+    public CustomerOutput create(@RequestBody @Valid CustomerInput input) {
         UUID customerId = customerManagementApplicationService.create(input);
         return customerQueryService.findById(customerId);
     }
