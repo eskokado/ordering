@@ -55,4 +55,10 @@ public class CustomerController {
         return customerQueryService.findById(customerId);
     }
 
+    @DeleteMapping("/{customerId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void delete(@PathVariable UUID customerId) {
+        customerManagementApplicationService.archive(customerId);
+    }
+
 }

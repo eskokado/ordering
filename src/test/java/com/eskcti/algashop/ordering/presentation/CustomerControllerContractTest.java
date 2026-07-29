@@ -473,4 +473,22 @@ class CustomerControllerContractTest {
             "address.zipCode", Matchers.is(address.getZipCode()));
   }
 
+  @Test
+  public void deleteCustomerContract() {
+    CustomerOutput customer = CustomerOutputTestDataBuilder.existing().build();
+
+    UUID customerId = UUID.randomUUID();
+    Mockito.when(customerQueryService.findById(Mockito.any(UUID.class)))
+        .thenReturn(customer);
+
+    RestAssuredMockMvc
+        .given()
+        .contentType(MediaType.APPLICATION_JSON_VALUE)
+        .when()
+        .delete("/api/v1/customers/{customerId}", customerId)
+        .then()
+        .assertThat()
+        .statusCode(HttpStatus.NO_CONTENT.value());
+  }
+
 }
