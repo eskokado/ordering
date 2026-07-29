@@ -2,6 +2,7 @@ package com.eskcti.algashop.ordering.presentation;
 
 import com.eskcti.algashop.ordering.application.customer.management.CustomerInput;
 import com.eskcti.algashop.ordering.application.customer.management.CustomerManagementApplicationService;
+import com.eskcti.algashop.ordering.application.customer.management.CustomerUpdateInput;
 import com.eskcti.algashop.ordering.application.customer.query.CustomerFilter;
 import com.eskcti.algashop.ordering.application.customer.query.CustomerOutput;
 import com.eskcti.algashop.ordering.application.customer.query.CustomerQueryService;
@@ -44,6 +45,13 @@ public class CustomerController {
 
     @GetMapping("/{customerId}")
     public CustomerOutput findById(@PathVariable UUID customerId) {
+        return customerQueryService.findById(customerId);
+    }
+
+    @PutMapping("/{customerId}")
+    public CustomerOutput update(@PathVariable UUID customerId,
+            @RequestBody @Valid CustomerUpdateInput input) {
+        customerManagementApplicationService.update(customerId, input);
         return customerQueryService.findById(customerId);
     }
 
