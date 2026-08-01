@@ -1,5 +1,6 @@
 package com.eskcti.algashop.ordering.contract.base;
 
+import com.eskcti.algashop.ordering.application.order.query.OrderDetailOutputTestDataBuilder;
 import com.eskcti.algashop.ordering.application.order.query.OrderFilter;
 import com.eskcti.algashop.ordering.application.order.query.OrderQueryService;
 import com.eskcti.algashop.ordering.presentation.OrderController;
@@ -30,6 +31,10 @@ public class OrderBase {
   void setUp() {
     Mockito.when(orderQueryService.filter(Mockito.any(OrderFilter.class)))
         .thenReturn(new PageImpl<>(List.of()));
+
+    String id = "01226N0640J7Q";
+    Mockito.when(orderQueryService.findById(id))
+        .thenReturn(OrderDetailOutputTestDataBuilder.placedOrder(id).build());
 
     RestAssuredMockMvc.mockMvc(MockMvcBuilders.webAppContextSetup(context)
         .defaultResponseCharacterEncoding(StandardCharsets.UTF_8).build());
