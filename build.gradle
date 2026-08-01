@@ -1,7 +1,8 @@
 plugins {
 	id 'java'
-	id 'org.springframework.boot' version '3.4.4'
+	id 'org.springframework.boot' version '3.5.5'
 	id 'io.spring.dependency-management' version '1.1.7'
+	id 'org.springframework.cloud.contract' version '4.3.0'
 	id 'jacoco'
 }
 
@@ -25,6 +26,17 @@ repositories {
 	mavenCentral()
 }
 
+ext {
+	set('springCloudVersion', "2025.0.0")
+}
+
+dependencyManagement {
+	imports {
+		mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+	}
+}
+
+
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'com.fasterxml.uuid:java-uuid-generator:5.1.0'
@@ -38,6 +50,7 @@ dependencies {
   compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.springframework.cloud:spring-cloud-starter-contract-verifier'
 	testImplementation 'org.assertj:assertj-core:3.27.3'
 	testImplementation 'io.rest-assured:rest-assured'
 	testImplementation 'io.rest-assured:spring-mock-mvc'
@@ -46,6 +59,15 @@ dependencies {
 	testAnnotationProcessor 'org.projectlombok:lombok'
 	mockitoAgent('org.mockito:mockito-core:5.14.2') {transitive = false}
 }
+
+contracts {
+	packageWithBaseClasses = "com.eskcti.algashop.ordering.contract.base"
+}
+
+tasks.named('contractTest') {
+	useJUnitPlatform()
+}
+
 
 tasks.named('test') {
 	useJUnitPlatform()
@@ -102,7 +124,7 @@ def jacocoCoverageExcludes = [
 
 jacocoTestReport {
 	dependsOn test, integrationTest
-	executionData(test, integrationTest)
+	executionData(test, integrationTest, contractTest)
 	reports {
 		xml.required = true
 		html.required = true
@@ -116,7 +138,7 @@ jacocoTestReport {
 
 jacocoTestCoverageVerification {
 	dependsOn jacocoTestReport
-	executionData(test, integrationTest)
+	executionData(test, integrationTest, contractTest)
 	violationRules {
 		rule {
 			limit {
