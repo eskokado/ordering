@@ -1,5 +1,9 @@
 package com.eskcti.algashop.ordering.contract.base;
 
+import com.eskcti.algashop.ordering.application.checkout.BuyNowApplicationService;
+import com.eskcti.algashop.ordering.application.checkout.BuyNowInput;
+import com.eskcti.algashop.ordering.application.checkout.CheckoutApplicationService;
+import com.eskcti.algashop.ordering.application.checkout.CheckoutInput;
 import com.eskcti.algashop.ordering.application.order.query.OrderDetailOutputTestDataBuilder;
 import com.eskcti.algashop.ordering.application.order.query.OrderFilter;
 import com.eskcti.algashop.ordering.application.order.query.OrderQueryService;
@@ -28,6 +32,12 @@ public class OrderBase {
   @MockitoBean
   private OrderQueryService orderQueryService;
 
+  @MockitoBean
+  private BuyNowApplicationService buyNowApplicationService;
+
+  @MockitoBean
+  private CheckoutApplicationService checkoutApplicationService;
+
   public static final String validOrderId = "01226N0640J7Q";
 
   public static final String notFoundOrderId = "01226N0693HDH";
@@ -36,6 +46,12 @@ public class OrderBase {
   void setUp() {
     Mockito.when(orderQueryService.filter(Mockito.any(OrderFilter.class)))
         .thenReturn(new PageImpl<>(List.of()));
+
+    Mockito.when(buyNowApplicationService.buyNow(Mockito.any(BuyNowInput.class)))
+        .thenReturn(validOrderId);
+
+    Mockito.when(checkoutApplicationService.checkout(Mockito.any(CheckoutInput.class)))
+        .thenReturn(validOrderId);
 
     Mockito.when(orderQueryService.findById(validOrderId))
         .thenReturn(OrderDetailOutputTestDataBuilder.placedOrder(validOrderId).build());
