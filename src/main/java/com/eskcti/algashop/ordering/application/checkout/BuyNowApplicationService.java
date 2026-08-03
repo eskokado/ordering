@@ -50,9 +50,11 @@ public class BuyNowApplicationService {
     CustomerId customerId = new CustomerId(input.getCustomerId());
     Quantity quantity = new Quantity(input.getQuantity());
 
-    Customer customer = customers.ofId(customerId).orElseThrow(() -> new CustomerNotFoundException());
+    Customer customer = customers.ofId(customerId).orElseThrow(() -> new CustomerNotFoundException(customerId));
 
-    Product product = findProduct(new ProductId(input.getProductId()));
+    ProductId productId = new ProductId(input.getProductId());
+    Product product = productCatalogService.ofId(productId)
+        .orElseThrow(() -> new ProductNotFoundException(productId));
 
     var shippingCalculationResult = calculateShippingCost(input.getShipping());
 
@@ -74,10 +76,4 @@ public class BuyNowApplicationService {
     ZipCode destination = new ZipCode(shipping.getAddress().getZipCode());
     return shippingCostService.calculate(new ShippingCostService.CalculationRequest(origin, destination));
   }
-
-  private Product findProduct(ProductId productId) {
-    return productCatalogService.ofId(productId)
-        .orElseThrow(() -> new ProductNotFoundException());
-  }
-
 }
