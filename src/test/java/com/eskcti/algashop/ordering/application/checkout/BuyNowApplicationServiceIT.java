@@ -38,7 +38,7 @@ class BuyNowApplicationServiceIT {
   @Autowired
   private Customers customers;
 
-  @MockitoBean(name = "productCatalogServiceFakeImpl")
+  @MockitoBean
   private ProductCatalogService productCatalogService;
 
   @MockitoBean
