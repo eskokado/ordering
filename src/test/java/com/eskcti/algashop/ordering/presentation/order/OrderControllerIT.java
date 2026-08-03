@@ -5,6 +5,8 @@ import com.eskcti.algashop.ordering.infrastructure.persistence.customer.Customer
 import com.eskcti.algashop.ordering.infrastructure.persistence.customer.CustomerPersistenceEntityTestDataBuilder;
 import com.eskcti.algashop.ordering.infrastructure.persistence.order.OrderPersistenceEntityRepository;
 import com.eskcti.algashop.ordering.presentation.utils.AlgaShopResourceUtils;
+import com.github.tomakehurst.wiremock.WireMockServer;
+import com.github.tomakehurst.wiremock.extension.responsetemplating.ResponseTemplateTransformer;
 
 import io.restassured.RestAssured;
 import io.restassured.config.JsonConfig;
@@ -12,6 +14,7 @@ import io.restassured.path.json.config.JsonPathConfig;
 
 import org.assertj.core.api.Assertions;
 import org.hamcrest.Matchers;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,114 +25,137 @@ import org.springframework.http.MediaType;
 
 import java.util.UUID;
 
+import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
 import static io.restassured.config.JsonConfig.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class OrderControllerIT {
 
-    @LocalServerPort
-    private int port;
+  @LocalServerPort
+  private int port;
 
-    private static boolean databaseInitialized;
+  private static boolean databaseInitialized;
 
-    @Autowired
-    private CustomerPersistenceEntityRepository customerRepository;
+  @Autowired
+  private CustomerPersistenceEntityRepository customerRepository;
 
-    @Autowired
-    private OrderPersistenceEntityRepository orderRepository;
+  @Autowired
+  private OrderPersistenceEntityRepository orderRepository;
 
-    private static final UUID validCustomerId = UUID.fromString("6e148bd5-47f6-4022-b9da-07cfaa294f7a");
+  private static final UUID validCustomerId = UUID.fromString("6e148bd5-47f6-4022-b9da-07cfaa294f7a");
 
-    @BeforeEach
-    public void setup() {
-        RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
-        RestAssured.port = port;
+  private WireMockServer wireMockProductCatalog;
+  private WireMockServer wireMockRapidex;
 
-        RestAssured.config().jsonConfig(jsonConfig().numberReturnType(JsonPathConfig.NumberReturnType.BIG_DECIMAL));
+  @BeforeEach
+  public void setup() {
+    RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
+    RestAssured.port = port;
 
-        initDatabase();
+    RestAssured.config().jsonConfig(jsonConfig().numberReturnType(JsonPathConfig.NumberReturnType.BIG_DECIMAL));
+
+    initDatabase();
+
+    wireMockRapidex = new WireMockServer(options()
+        .port(8780)
+        .usingFilesUnderDirectory("src/test/resources/wiremock/rapidex")
+        .extensions(new ResponseTemplateTransformer(true)));
+
+    wireMockProductCatalog = new WireMockServer(options()
+        .port(8781)
+        .usingFilesUnderDirectory("src/test/resources/wiremock/product-catalog")
+        .extensions(new ResponseTemplateTransformer(true)));
+
+    wireMockRapidex.start();
+    wireMockProductCatalog.start();
+  }
+
+  @AfterEach
+  public void after() {
+    wireMockRapidex.stop();
+    wireMockProductCatalog.stop();
+  }
+
+  private void initDatabase() {
+    if (databaseInitialized) {
+      return;
     }
 
-    private void initDatabase() {
-        if (databaseInitialized) {
-            return;
-        }
+    customerRepository.saveAndFlush(
+        CustomerPersistenceEntityTestDataBuilder.aCustomer().id(validCustomerId).build());
 
-        customerRepository.saveAndFlush(
-                CustomerPersistenceEntityTestDataBuilder.aCustomer().id(validCustomerId).build());
+    databaseInitialized = true;
+  }
 
-        databaseInitialized = true;
-    }
+  @Test
+  public void shouldCreateOrderUsingProduct() {
+    String json = AlgaShopResourceUtils.readContent("json/create-order-with-product.json");
+    String createdOrderId = RestAssured
+        .given()
+        .accept(MediaType.APPLICATION_JSON_VALUE)
+        .contentType("application/vnd.order-with-product.v1+json")
+        .body(json)
+        .when()
+        .post("/api/v1/orders")
+        .then()
+        .assertThat()
+        .contentType(MediaType.APPLICATION_JSON_VALUE)
+        .statusCode(HttpStatus.CREATED.value())
+        .body("id", Matchers.not(Matchers.emptyString()),
+            "customer.id", Matchers.is(validCustomerId.toString()))
+        .extract()
+        .jsonPath().getString("id");
 
-    @Test
-    public void shouldCreateOrderUsingProduct() {
-        String json = AlgaShopResourceUtils.readContent("json/create-order-with-product.json");
-        String createdOrderId = RestAssured
-                .given()
-                .accept(MediaType.APPLICATION_JSON_VALUE)
-                .contentType("application/vnd.order-with-product.v1+json")
-                .body(json)
-                .when()
-                .post("/api/v1/orders")
-                .then()
-                .assertThat()
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .statusCode(HttpStatus.CREATED.value())
-                .body("id", Matchers.not(Matchers.emptyString()),
-                        "customer.id", Matchers.is(validCustomerId.toString()))
-                .extract()
-                .jsonPath().getString("id");
+    boolean orderExists = orderRepository.existsById(new OrderId(createdOrderId).value().toLong());
+    Assertions.assertThat(orderExists).isTrue();
+  }
 
-        boolean orderExists = orderRepository.existsById(new OrderId(createdOrderId).value().toLong());
-        Assertions.assertThat(orderExists).isTrue();
-    }
+  @Test
+  public void shouldNotCreateOrderUsingProductWhenCustomerWasNotFound() {
+    String json = AlgaShopResourceUtils.readContent("json/create-order-with-product-and-invalid-customer.json");
+    RestAssured
+        .given()
+        .accept(MediaType.APPLICATION_JSON_VALUE)
+        .contentType("application/vnd.order-with-product.v1+json")
+        .body(json)
+        .when()
+        .post("/api/v1/orders")
+        .then()
+        .assertThat()
+        .contentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE)
+        .statusCode(HttpStatus.UNPROCESSABLE_ENTITY.value());
+  }
 
-    @Test
-    public void shouldNotCreateOrderUsingProductWhenCustomerWasNotFound() {
-        String json = AlgaShopResourceUtils.readContent("json/create-order-with-product-and-invalid-customer.json");
-        RestAssured
-                .given()
-                .accept(MediaType.APPLICATION_JSON_VALUE)
-                .contentType("application/vnd.order-with-product.v1+json")
-                .body(json)
-                .when()
-                .post("/api/v1/orders")
-                .then()
-                .assertThat()
-                .contentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE)
-                .statusCode(HttpStatus.UNPROCESSABLE_ENTITY.value());
-    }
+  @Test
+  public void shouldNotCreateOrderUsingProductWhenProductWasNotFound() {
+    String json = AlgaShopResourceUtils.readContent("json/create-order-with-product-and-invalid-product.json");
+    RestAssured
+        .given()
+        .accept(MediaType.APPLICATION_JSON_VALUE)
+        .contentType("application/vnd.order-with-product.v1+json")
+        .body(json)
+        .when()
+        .post("/api/v1/orders")
+        .then()
+        .assertThat()
+        .contentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE)
+        .statusCode(HttpStatus.UNPROCESSABLE_ENTITY.value());
+  }
 
-    @Test
-    public void shouldNotCreateOrderUsingProductWhenProductWasNotFound() {
-        String json = AlgaShopResourceUtils.readContent("json/create-order-with-product-and-invalid-product.json");
-        RestAssured
-                .given()
-                .accept(MediaType.APPLICATION_JSON_VALUE)
-                .contentType("application/vnd.order-with-product.v1+json")
-                .body(json)
-                .when()
-                .post("/api/v1/orders")
-                .then()
-                .assertThat()
-                .contentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE)
-                .statusCode(HttpStatus.UNPROCESSABLE_ENTITY.value());
-    }
-
-    @Test
-    public void shouldNotCreateOrderUsingShoppingCartWhenShoppingCartWasNotFound() {
-        String json = AlgaShopResourceUtils.readContent(
-                "json/create-order-with-shopping-cart-and-invalid-cart.json");
-        RestAssured
-                .given()
-                .accept(MediaType.APPLICATION_JSON_VALUE)
-                .contentType("application/vnd.order-with-shopping-cart.v1+json")
-                .body(json)
-                .when()
-                .post("/api/v1/orders")
-                .then()
-                .assertThat()
-                .contentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE)
-                .statusCode(HttpStatus.UNPROCESSABLE_ENTITY.value());
-    }
+  @Test
+  public void shouldNotCreateOrderUsingShoppingCartWhenShoppingCartWasNotFound() {
+    String json = AlgaShopResourceUtils.readContent(
+        "json/create-order-with-shopping-cart-and-invalid-cart.json");
+    RestAssured
+        .given()
+        .accept(MediaType.APPLICATION_JSON_VALUE)
+        .contentType("application/vnd.order-with-shopping-cart.v1+json")
+        .body(json)
+        .when()
+        .post("/api/v1/orders")
+        .then()
+        .assertThat()
+        .contentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE)
+        .statusCode(HttpStatus.UNPROCESSABLE_ENTITY.value());
+  }
 }

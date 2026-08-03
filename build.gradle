@@ -76,6 +76,7 @@ tasks.named('test') {
 
 tasks.withType(Test).configureEach {
 	maxParallelForks = 1
+	systemProperty 'spring.profiles.active', 'test'
 	jvmArgs '-Djdk.attach.allowAttachSelf=true', '-XX:+EnableDynamicAgentLoading'
 }
 
