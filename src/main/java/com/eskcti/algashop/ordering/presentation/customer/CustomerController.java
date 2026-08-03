@@ -1,4 +1,4 @@
-package com.eskcti.algashop.ordering.presentation;
+package com.eskcti.algashop.ordering.presentation.customer;
 
 import com.eskcti.algashop.ordering.application.customer.management.CustomerInput;
 import com.eskcti.algashop.ordering.application.customer.management.CustomerManagementApplicationService;
@@ -7,6 +7,7 @@ import com.eskcti.algashop.ordering.application.customer.query.CustomerFilter;
 import com.eskcti.algashop.ordering.application.customer.query.CustomerOutput;
 import com.eskcti.algashop.ordering.application.customer.query.CustomerQueryService;
 import com.eskcti.algashop.ordering.application.customer.query.CustomerSummaryOutput;
+import com.eskcti.algashop.ordering.presentation.PageModel;
 
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;

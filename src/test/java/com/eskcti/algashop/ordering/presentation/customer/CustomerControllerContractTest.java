@@ -1,4 +1,4 @@
-package com.eskcti.algashop.ordering.presentation;
+package com.eskcti.algashop.ordering.presentation.customer;
 
 import io.restassured.module.mockmvc.RestAssuredMockMvc;
 import org.hamcrest.Matchers;
@@ -27,6 +27,7 @@ import com.eskcti.algashop.ordering.domain.model.DomainException;
 import com.eskcti.algashop.ordering.domain.model.customer.CustomerArchivedException;
 import com.eskcti.algashop.ordering.domain.model.customer.CustomerEmailIsInUseException;
 import com.eskcti.algashop.ordering.domain.model.customer.CustomerNotFoundException;
+import com.eskcti.algashop.ordering.presentation.customer.CustomerController;
 
 import java.nio.charset.StandardCharsets;
 import java.time.format.DateTimeFormatter;
