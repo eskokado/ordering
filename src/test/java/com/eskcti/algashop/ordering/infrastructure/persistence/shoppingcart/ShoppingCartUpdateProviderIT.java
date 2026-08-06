@@ -22,11 +22,6 @@ import com.eskcti.algashop.ordering.infrastructure.persistence.SpringDataAuditin
 import com.eskcti.algashop.ordering.infrastructure.persistence.customer.CustomerPersistenceEntityAssembler;
 import com.eskcti.algashop.ordering.infrastructure.persistence.customer.CustomerPersistenceEntityDisassembler;
 import com.eskcti.algashop.ordering.infrastructure.persistence.customer.CustomersPersistenceProvider;
-import com.eskcti.algashop.ordering.infrastructure.persistence.shoppingcart.ShoppingCartPersistenceEntityAssembler;
-import com.eskcti.algashop.ordering.infrastructure.persistence.shoppingcart.ShoppingCartPersistenceEntityDisassembler;
-import com.eskcti.algashop.ordering.infrastructure.persistence.shoppingcart.ShoppingCartPersistenceEntityRepository;
-import com.eskcti.algashop.ordering.infrastructure.persistence.shoppingcart.ShoppingCartUpdateProvider;
-import com.eskcti.algashop.ordering.infrastructure.persistence.shoppingcart.ShoppingCartsPersistenceProvider;
 
 @DataJpaTest
 @Import({
