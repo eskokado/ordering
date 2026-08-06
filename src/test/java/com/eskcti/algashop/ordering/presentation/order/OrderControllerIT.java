@@ -9,7 +9,6 @@ import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.extension.responsetemplating.ResponseTemplateTransformer;
 
 import io.restassured.RestAssured;
-import io.restassured.config.JsonConfig;
 import io.restassured.path.json.config.JsonPathConfig;
 
 import org.assertj.core.api.Assertions;
@@ -111,6 +110,26 @@ public class OrderControllerIT {
   }
 
   @Test
+  public void shouldNotCreateOrderUsingProductWhenProductAPIIsUnavailable() {
+    String json = AlgaShopResourceUtils.readContent("json/create-order-with-product.json");
+
+    wireMockProductCatalog.stop();
+
+    RestAssured
+        .given()
+        .accept(MediaType.APPLICATION_JSON_VALUE)
+        .contentType("application/vnd.order-with-product.v1+json")
+        .body(json)
+        .when()
+        .post("/api/v1/orders")
+        .then()
+        .assertThat()
+        .contentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE)
+        .statusCode(HttpStatus.GATEWAY_TIMEOUT.value());
+
+  }
+
+  @Test
   public void shouldNotCreateOrderUsingProductWhenCustomerWasNotFound() {
     String json = AlgaShopResourceUtils.readContent("json/create-order-with-product-and-invalid-customer.json");
     RestAssured
@@ -139,7 +158,7 @@ public class OrderControllerIT {
         .then()
         .assertThat()
         .contentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE)
-        .statusCode(HttpStatus.UNPROCESSABLE_ENTITY.value());
+        .statusCode(HttpStatus.BAD_GATEWAY.value());
   }
 
   @Test

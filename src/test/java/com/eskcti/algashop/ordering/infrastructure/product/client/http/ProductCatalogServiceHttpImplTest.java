@@ -2,6 +2,8 @@ package com.eskcti.algashop.ordering.infrastructure.product.client.http;
 
 import com.eskcti.algashop.ordering.domain.model.product.Product;
 import com.eskcti.algashop.ordering.domain.model.product.ProductId;
+import com.eskcti.algashop.ordering.presentation.BadGatewayException;
+import com.eskcti.algashop.ordering.presentation.GatewayTimeoutException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -9,6 +11,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.ResourceAccessException;
 
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
@@ -20,13 +23,13 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class ProductCatalogServierHttpImplTest {
+class ProductCatalogServiceHttpImplTest {
 
     @Mock
     private ProductCatalogAPIClient productCatalogAPIClient;
 
     @InjectMocks
-    private ProductCatalogServierHttpImpl productCatalogService;
+    private ProductCatalogServiceHttpImpl productCatalogService;
 
     @Test
     void shouldReturnProductWhenCatalogRespondsSuccessfully() {
@@ -49,23 +52,25 @@ class ProductCatalogServierHttpImplTest {
     }
 
     @Test
-    void shouldReturnEmptyWhenCatalogRespondsNotFound() {
+    void shouldThrowBadGatewayWhenCatalogRespondsNotFound() {
         UUID productId = UUID.fromString("21651a12-b126-4213-ac21-19f66ff4642e");
-        when(productCatalogAPIClient.getById(productId))
-                .thenThrow(HttpClientErrorException.create(
-                        HttpStatus.NOT_FOUND,
-                        "Not Found",
-                        null,
-                        null,
-                        StandardCharsets.UTF_8));
+        HttpClientErrorException notFound = HttpClientErrorException.create(
+                HttpStatus.NOT_FOUND,
+                "Not Found",
+                null,
+                null,
+                StandardCharsets.UTF_8);
 
-        Optional<Product> product = productCatalogService.ofId(new ProductId(productId));
+        when(productCatalogAPIClient.getById(productId)).thenThrow(notFound);
 
-        assertThat(product).isEmpty();
+        assertThatThrownBy(() -> productCatalogService.ofId(new ProductId(productId)))
+                .isInstanceOf(BadGatewayException.class)
+                .hasMessage("Product Catalog API Bad Gateway")
+                .hasCause(notFound);
     }
 
     @Test
-    void shouldRethrowWhenCatalogRespondsWithOtherClientError() {
+    void shouldThrowBadGatewayWhenCatalogRespondsWithOtherClientError() {
         UUID productId = UUID.randomUUID();
         HttpClientErrorException badRequest = HttpClientErrorException.create(
                 HttpStatus.BAD_REQUEST,
@@ -77,6 +82,21 @@ class ProductCatalogServierHttpImplTest {
         when(productCatalogAPIClient.getById(productId)).thenThrow(badRequest);
 
         assertThatThrownBy(() -> productCatalogService.ofId(new ProductId(productId)))
-                .isSameAs(badRequest);
+                .isInstanceOf(BadGatewayException.class)
+                .hasMessage("Product Catalog API Bad Gateway")
+                .hasCause(badRequest);
+    }
+
+    @Test
+    void shouldThrowGatewayTimeoutWhenCatalogIsUnreachable() {
+        UUID productId = UUID.randomUUID();
+        ResourceAccessException timeout = new ResourceAccessException("Connection timed out");
+
+        when(productCatalogAPIClient.getById(productId)).thenThrow(timeout);
+
+        assertThatThrownBy(() -> productCatalogService.ofId(new ProductId(productId)))
+                .isInstanceOf(GatewayTimeoutException.class)
+                .hasMessage("Product Catalog API Timeout")
+                .hasCause(timeout);
     }
 }
