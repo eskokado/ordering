@@ -23,12 +23,14 @@ import com.eskcti.algashop.ordering.application.customer.query.CustomerOutputTes
 import com.eskcti.algashop.ordering.application.customer.query.CustomerQueryService;
 import com.eskcti.algashop.ordering.application.customer.query.CustomerSummaryOutput;
 import com.eskcti.algashop.ordering.application.customer.query.CustomerSummaryOutputTestDataBuilder;
+import com.eskcti.algashop.ordering.application.shoppingcart.query.ShoppingCartItemOutput;
+import com.eskcti.algashop.ordering.application.shoppingcart.query.ShoppingCartOutput;
+import com.eskcti.algashop.ordering.application.shoppingcart.query.ShoppingCartQueryService;
 import com.eskcti.algashop.ordering.domain.model.DomainException;
 import com.eskcti.algashop.ordering.domain.model.customer.CustomerArchivedException;
 import com.eskcti.algashop.ordering.domain.model.customer.CustomerEmailIsInUseException;
 import com.eskcti.algashop.ordering.domain.model.customer.CustomerNotFoundException;
-import com.eskcti.algashop.ordering.presentation.customer.CustomerController;
-
+import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -45,6 +47,9 @@ class CustomerControllerContractTest {
 
   @MockitoBean
   private CustomerQueryService customerQueryService;
+
+  @MockitoBean
+  private ShoppingCartQueryService shoppingCartQueryService;
 
   @BeforeEach
   public void setupAll() {
@@ -254,6 +259,57 @@ class CustomerControllerContractTest {
             "address.city", Matchers.is(customerOutput.getAddress().getCity()),
             "address.state", Matchers.is(customerOutput.getAddress().getState()),
             "address.zipCode", Matchers.is(customerOutput.getAddress().getZipCode()));
+  }
+
+  @Test
+  public void findCustomerShoppingCartContract() {
+    UUID customerId = UUID.randomUUID();
+    UUID shoppingCartId = UUID.randomUUID();
+    UUID productId = UUID.randomUUID();
+    UUID itemId = UUID.randomUUID();
+
+    ShoppingCartItemOutput item = ShoppingCartItemOutput.builder()
+        .id(itemId)
+        .productId(productId)
+        .name("Notebook X11")
+        .price(new BigDecimal("1000.00"))
+        .quantity(2)
+        .totalAmount(new BigDecimal("2000.00"))
+        .available(true)
+        .build();
+
+    ShoppingCartOutput shoppingCartOutput = ShoppingCartOutput.builder()
+        .id(shoppingCartId)
+        .customerId(customerId)
+        .totalItems(2)
+        .totalAmount(new BigDecimal("2000.00"))
+        .items(List.of(item))
+        .build();
+
+    Mockito.when(shoppingCartQueryService.findByCustomerId(customerId))
+        .thenReturn(shoppingCartOutput);
+
+    RestAssuredMockMvc
+        .given()
+        .accept(MediaType.APPLICATION_JSON)
+        .when()
+        .get("/api/v1/customers/{customerId}/shopping-cart", customerId)
+        .then()
+        .assertThat()
+        .contentType(MediaType.APPLICATION_JSON_VALUE)
+        .statusCode(HttpStatus.OK.value())
+        .body(
+            "id", Matchers.equalTo(shoppingCartId.toString()),
+            "customerId", Matchers.equalTo(customerId.toString()),
+            "totalItems", Matchers.is(2),
+            "totalAmount", Matchers.is(2000.0f),
+            "items[0].id", Matchers.equalTo(itemId.toString()),
+            "items[0].productId", Matchers.equalTo(productId.toString()),
+            "items[0].name", Matchers.is("Notebook X11"),
+            "items[0].price", Matchers.is(1000.0f),
+            "items[0].quantity", Matchers.is(2),
+            "items[0].totalAmount", Matchers.is(2000.0f),
+            "items[0].available", Matchers.is(true));
   }
 
   @Test

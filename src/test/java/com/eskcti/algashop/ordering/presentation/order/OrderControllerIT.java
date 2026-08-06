@@ -31,6 +31,8 @@ import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options
 import static io.restassured.config.JsonConfig.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+// @AutoConfigureStubRunner(stubsMode = StubRunnerProperties.StubsMode.LOCAL,
+// ids = "com.eskcti.algashop:product-catalog:0.0.1-SNAPSHOT:8781")
 public class OrderControllerIT {
 
   @LocalServerPort

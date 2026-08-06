@@ -54,6 +54,7 @@ dependencies {
 	testImplementation 'org.assertj:assertj-core:3.27.3'
 	testImplementation 'io.rest-assured:rest-assured'
 	testImplementation 'io.rest-assured:spring-mock-mvc'
+	testImplementation 'org.springframework.cloud:spring-cloud-starter-contract-stub-runner'
 	testCompileOnly 'org.projectlombok:lombok'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 	testAnnotationProcessor 'org.projectlombok:lombok'

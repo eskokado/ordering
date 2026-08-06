@@ -7,6 +7,8 @@ import com.eskcti.algashop.ordering.application.customer.query.CustomerFilter;
 import com.eskcti.algashop.ordering.application.customer.query.CustomerOutput;
 import com.eskcti.algashop.ordering.application.customer.query.CustomerQueryService;
 import com.eskcti.algashop.ordering.application.customer.query.CustomerSummaryOutput;
+import com.eskcti.algashop.ordering.application.shoppingcart.query.ShoppingCartOutput;
+import com.eskcti.algashop.ordering.application.shoppingcart.query.ShoppingCartQueryService;
 import com.eskcti.algashop.ordering.presentation.PageModel;
 
 import jakarta.servlet.http.HttpServletResponse;
@@ -27,6 +29,7 @@ public class CustomerController {
 
     private final CustomerManagementApplicationService customerManagementApplicationService;
     private final CustomerQueryService customerQueryService;
+    private final ShoppingCartQueryService shoppingCartQueryService;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -54,6 +57,11 @@ public class CustomerController {
             @RequestBody @Valid CustomerUpdateInput input) {
         customerManagementApplicationService.update(customerId, input);
         return customerQueryService.findById(customerId);
+    }
+
+    @GetMapping("/{customerId}/shopping-cart")
+    public ShoppingCartOutput findShoppingCartByCustomerId(@PathVariable UUID customerId) {
+        return shoppingCartQueryService.findByCustomerId(customerId);
     }
 
     @DeleteMapping("/{customerId}")
