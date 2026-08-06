@@ -52,7 +52,7 @@ class ProductCatalogServiceHttpImplTest {
     }
 
     @Test
-    void shouldThrowBadGatewayWhenCatalogRespondsNotFound() {
+    void shouldReturnEmptyWhenCatalogRespondsNotFound() {
         UUID productId = UUID.fromString("21651a12-b126-4213-ac21-19f66ff4642e");
         HttpClientErrorException notFound = HttpClientErrorException.create(
                 HttpStatus.NOT_FOUND,
@@ -63,10 +63,9 @@ class ProductCatalogServiceHttpImplTest {
 
         when(productCatalogAPIClient.getById(productId)).thenThrow(notFound);
 
-        assertThatThrownBy(() -> productCatalogService.ofId(new ProductId(productId)))
-                .isInstanceOf(BadGatewayException.class)
-                .hasMessage("Product Catalog API Bad Gateway")
-                .hasCause(notFound);
+        Optional<Product> product = productCatalogService.ofId(new ProductId(productId));
+
+        assertThat(product).isEmpty();
     }
 
     @Test

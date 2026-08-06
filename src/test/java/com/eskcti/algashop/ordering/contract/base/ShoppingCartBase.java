@@ -3,6 +3,8 @@ package com.eskcti.algashop.ordering.contract.base;
 import com.eskcti.algashop.ordering.application.shoppingcart.management.ShoppingCartManagementApplicationService;
 import com.eskcti.algashop.ordering.application.shoppingcart.query.ShoppingCartOutputTestDataBuilder;
 import com.eskcti.algashop.ordering.application.shoppingcart.query.ShoppingCartQueryService;
+import com.eskcti.algashop.ordering.domain.model.customer.CustomerNotFoundException;
+import com.eskcti.algashop.ordering.domain.model.product.ProductNotFoundException;
 import com.eskcti.algashop.ordering.domain.model.shoppingcart.ShoppingCartNotFoundException;
 import com.eskcti.algashop.ordering.presentation.shoppingcart.ShoppingCartController;
 
@@ -34,6 +36,10 @@ public class ShoppingCartBase {
 
         public static final UUID notFoundShoppingCartId = UUID.fromString("e2103964-5353-4910-81ee-212a40a2ca70");
 
+        public static final UUID notFoundCustomerId = UUID.fromString("73677343-9c25-4bff-a1d8-fea3830b6d97");
+
+        public static final UUID notFoundProductId = UUID.fromString("21651a12-b126-4213-ac21-19f66ff4642e");
+
         @BeforeEach
         void setUp() {
                 RestAssuredMockMvc.mockMvc(
@@ -53,5 +59,12 @@ public class ShoppingCartBase {
                 Mockito.when(managementService.createNew(Mockito.any(UUID.class)))
                                 .thenReturn(validShoppingCartId);
 
+                Mockito.when(managementService.createNew(notFoundCustomerId))
+                                .thenThrow(new CustomerNotFoundException());
+
+                Mockito.doThrow(new ProductNotFoundException())
+                                .when(managementService)
+                                .addItem(Mockito.argThat(input -> input != null
+                                                && notFoundProductId.equals(input.getProductId())));
         }
 }

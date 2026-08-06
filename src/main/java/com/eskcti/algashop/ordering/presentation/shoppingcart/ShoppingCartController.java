@@ -4,6 +4,10 @@ import com.eskcti.algashop.ordering.application.shoppingcart.management.Shopping
 import com.eskcti.algashop.ordering.application.shoppingcart.management.ShoppingCartManagementApplicationService;
 import com.eskcti.algashop.ordering.application.shoppingcart.query.ShoppingCartOutput;
 import com.eskcti.algashop.ordering.application.shoppingcart.query.ShoppingCartQueryService;
+import com.eskcti.algashop.ordering.domain.model.customer.CustomerNotFoundException;
+import com.eskcti.algashop.ordering.domain.model.product.ProductNotFoundException;
+import com.eskcti.algashop.ordering.presentation.UnprocessableEntityException;
+
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -22,7 +26,12 @@ public class ShoppingCartController {
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
 	public ShoppingCartOutput create(@RequestBody @Valid ShoppingCartInput input) {
-		UUID shoppingCartId = managementService.createNew(input.getCustomerId());
+		UUID shoppingCartId;
+		try {
+			shoppingCartId = managementService.createNew(input.getCustomerId());
+		} catch (CustomerNotFoundException e) {
+			throw new UnprocessableEntityException(e.getMessage(), e);
+		}
 		return queryService.findById(shoppingCartId);
 	}
 
@@ -54,7 +63,11 @@ public class ShoppingCartController {
 	public void addItem(@PathVariable UUID shoppingCartId,
 			@RequestBody @Valid ShoppingCartItemInput input) {
 		input.setShoppingCartId(shoppingCartId);
-		managementService.addItem(input);
+		try {
+			managementService.addItem(input);
+		} catch (ProductNotFoundException e) {
+			throw new UnprocessableEntityException(e.getMessage(), e);
+		}
 	}
 
 	@DeleteMapping("/{shoppingCartId}/items/{itemId}")

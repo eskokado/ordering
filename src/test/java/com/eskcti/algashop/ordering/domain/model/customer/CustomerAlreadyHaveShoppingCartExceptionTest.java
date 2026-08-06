@@ -1,16 +1,19 @@
 package com.eskcti.algashop.ordering.domain.model.customer;
 
+import java.util.UUID;
+
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import com.eskcti.algashop.ordering.domain.model.DomainException;
-import com.eskcti.algashop.ordering.domain.model.customer.CustomerAlreadyHaveShoppingCartException;
 
 class CustomerAlreadyHaveShoppingCartExceptionTest {
 
   @Test
   void shouldCreateException() {
-    CustomerAlreadyHaveShoppingCartException exception = new CustomerAlreadyHaveShoppingCartException();
+
+    CustomerAlreadyHaveShoppingCartException exception = new CustomerAlreadyHaveShoppingCartException(
+        new CustomerId(UUID.randomUUID()));
 
     Assertions.assertThat(exception).isInstanceOf(DomainException.class);
   }

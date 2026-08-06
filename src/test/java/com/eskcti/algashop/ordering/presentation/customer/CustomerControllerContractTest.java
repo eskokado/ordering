@@ -30,6 +30,7 @@ import com.eskcti.algashop.ordering.domain.model.DomainException;
 import com.eskcti.algashop.ordering.domain.model.customer.CustomerArchivedException;
 import com.eskcti.algashop.ordering.domain.model.customer.CustomerEmailIsInUseException;
 import com.eskcti.algashop.ordering.domain.model.customer.CustomerNotFoundException;
+import com.eskcti.algashop.ordering.presentation.BadGatewayException;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.time.format.DateTimeFormatter;
@@ -377,6 +378,51 @@ class CustomerControllerContractTest {
             "status", Matchers.is(HttpStatus.CONFLICT.value()),
             "type", Matchers.is("/errors/conflict"),
             "title", Matchers.notNullValue(),
+            "instance", Matchers.notNullValue());
+  }
+
+  @Test
+  public void createCustomerError502Contract() {
+    Mockito.when(customerManagementApplicationService.create(Mockito.any(CustomerInput.class)))
+        .thenThrow(new BadGatewayException("Product Catalog API Bad Gateway", new RuntimeException("upstream")));
+
+    String jsonInput = """
+        {
+          "firstName": "John",
+          "lastName": "Doe",
+          "email": "johndoe@email.com",
+          "document": "12345",
+          "phone": "1191234564",
+          "birthDate": "1991-07-05",
+          "promotionNotificationsAllowed": false,
+          "address": {
+            "street": "Bourbon Street",
+            "number": "2000",
+            "complement": "apt 122",
+            "neighborhood": "North Ville",
+            "city": "Yostfort",
+            "state": "South Carolina",
+            "zipCode": "12321"
+          }
+        }
+        """;
+
+    RestAssuredMockMvc
+        .given()
+        .accept(MediaType.APPLICATION_JSON_VALUE)
+        .body(jsonInput)
+        .contentType(MediaType.APPLICATION_JSON_VALUE)
+        .when()
+        .post("/api/v1/customers")
+        .then()
+        .assertThat()
+        .contentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE)
+        .statusCode(HttpStatus.BAD_GATEWAY.value())
+        .body(
+            "status", Matchers.is(HttpStatus.BAD_GATEWAY.value()),
+            "type", Matchers.is("/errors/bad-gateway"),
+            "title", Matchers.notNullValue(),
+            "detail", Matchers.is("Product Catalog API Bad Gateway"),
             "instance", Matchers.notNullValue());
   }
 
