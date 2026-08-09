@@ -1,6 +1,7 @@
 package com.eskcti.algashop.ordering.domain.model.customer;
 
 import java.time.OffsetDateTime;
+import java.util.UUID;
 
 import com.eskcti.algashop.ordering.domain.model.commons.Address;
 import com.eskcti.algashop.ordering.domain.model.commons.Document;
@@ -8,11 +9,6 @@ import com.eskcti.algashop.ordering.domain.model.commons.Email;
 import com.eskcti.algashop.ordering.domain.model.commons.FullName;
 import com.eskcti.algashop.ordering.domain.model.commons.Phone;
 import com.eskcti.algashop.ordering.domain.model.commons.ZipCode;
-import com.eskcti.algashop.ordering.domain.model.customer.BirthDate;
-import com.eskcti.algashop.ordering.domain.model.customer.Customer;
-import com.eskcti.algashop.ordering.domain.model.customer.CustomerId;
-import com.eskcti.algashop.ordering.domain.model.customer.LoyaltyPoints;
-
 import java.time.LocalDate;
 
 public class CustomerTestDataBuilder {
@@ -26,7 +22,7 @@ public class CustomerTestDataBuilder {
     return Customer.brandNew()
         .fullName(new FullName("John", "Doe"))
         .birthDate(new BirthDate(LocalDate.of(1991, 7, 5)))
-        .email(new Email("johndoe@email.com"))
+        .email(new Email("johndoe" + UUID.randomUUID() + "@email.com"))
         .phone(new Phone("478-256-2604"))
         .document(new Document("255-08-0578"))
         .promotionNotificationsAllowed(true)
@@ -50,7 +46,7 @@ public class CustomerTestDataBuilder {
         .archivedAt(null)
         .fullName(new FullName("John", "Doe"))
         .birthDate(new BirthDate(LocalDate.of(1991, 7, 5)))
-        .email(new Email("johndoe@email.com"))
+        .email(new Email("johndoe" + UUID.randomUUID() + "@email.com"))
         .phone(new Phone("478-256-2604"))
         .document(new Document("255-08-0578"))
         .promotionNotificationsAllowed(true)
@@ -71,7 +67,7 @@ public class CustomerTestDataBuilder {
         .id(new CustomerId())
         .fullName(new FullName("Anonymous", "Anonymous"))
         .birthDate(null)
-        .email(new Email("anonymous@anonymous.com"))
+        .email(new Email("anonymous" + UUID.randomUUID() + "@anonymous.com"))
         .phone(new Phone("000-000-0000"))
         .document(new Document("000-00-0000"))
         .promotionNotificationsAllowed(false)

@@ -83,12 +83,10 @@ tasks.named('contractTest') {
 
 tasks.named('test') {
 	useJUnitPlatform()
-	finalizedBy jacocoTestReport
 }
 
 tasks.withType(Test).configureEach {
 	maxParallelForks = 1
-	systemProperty 'spring.profiles.active', 'test'
 	jvmArgs '-Djdk.attach.allowAttachSelf=true', '-XX:+EnableDynamicAgentLoading'
 }
 
@@ -96,6 +94,7 @@ test {
 	filter {
 		excludeTestsMatching("*IT")
 	}
+	systemProperty 'spring.profiles.active', 'test'
 	jvmArgs += "-javaagent:${configurations.mockitoAgent.asPath}"
 }
 
@@ -106,6 +105,7 @@ tasks.named('check') {
 tasks.register('integrationTest', Test) {
   description = 'Run integration tests.'
   group = 'verification'
+	systemProperty 'spring.profiles.active', 'it'
 	jvmArgs += "-javaagent:${configurations.mockitoAgent.asPath}"
 
   testClassesDirs = sourceSets.test.output.classesDirs
@@ -123,8 +123,6 @@ tasks.register('integrationTest', Test) {
     includeTestsMatching "*IT"
     excludeTestsMatching "*Test"
   }
-
-  finalizedBy jacocoTestReport
 }
 
 def jacocoCoverageExcludes = [

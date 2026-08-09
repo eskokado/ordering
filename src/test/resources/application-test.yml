@@ -2,21 +2,23 @@ spring:
   application:
     name: ordering
   datasource:
-    url: "jdbc:h2:mem:ordering-test"
+    url: jdbc:h2:mem:ordering;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;NON_KEYWORDS=ORDER,VALUE,KEY,YEAR,USER
+    driver-class-name: org.h2.Driver
     username: sa
-    password: "123"
-  h2:
-    console:
-      enabled: "true"
-      settings.web-allow-others: "true"
+    password:
   jpa:
-    database-platform: org.hibernate.dialect.H2Dialect
     hibernate:
       ddl-auto: create-drop
-    show-sql: "true"
+    show-sql: true
+    open-in-view: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+  flyway:
+    enabled: false
 
 algashop:
   integrations:
-    shipping.provider: "FAKE" # or "RAPIDEX"
+    shipping.provider: "FAKE"
     rapidex.url: "http://localhost:8780"
     product-catalog.url: "http://localhost:8781"
