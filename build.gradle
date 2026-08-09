@@ -78,6 +78,8 @@ contracts {
 
 tasks.named('contractTest') {
 	useJUnitPlatform()
+	systemProperty 'spring.profiles.active', 'test'
+	jvmArgs "-javaagent:${configurations.mockitoAgent.asPath}"
 }
 
 
@@ -150,6 +152,7 @@ jacocoTestReport {
 jacocoTestCoverageVerification {
 	dependsOn jacocoTestReport
 	executionData(test, integrationTest, contractTest)
+	finalizedBy jacocoTestReport
 	violationRules {
 		rule {
 			limit {
