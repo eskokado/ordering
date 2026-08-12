@@ -10,10 +10,13 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
+import org.springframework.test.context.jdbc.Sql;
+import org.springframework.test.context.jdbc.SqlConfig;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.test.context.ActiveProfiles;
 
 import com.eskcti.algashop.ordering.application.customer.loyaltypoints.CustomerLoyaltyPointsApplicationService;
-import com.eskcti.algashop.ordering.domain.model.customer.CustomerId;
 import com.eskcti.algashop.ordering.domain.model.customer.CustomerTestDataBuilder;
 import com.eskcti.algashop.ordering.domain.model.customer.Customers;
 import com.eskcti.algashop.ordering.domain.model.order.Order;
@@ -30,7 +33,11 @@ import com.eskcti.algashop.ordering.infrastructure.listener.customer.CustomerEve
 import com.eskcti.algashop.ordering.infrastructure.listener.order.OrderEventListener;
 
 @SpringBootTest
-@Transactional
+
+@Sql(scripts = "classpath:sql/clean-database.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS, config = @SqlConfig(transactionMode = SqlConfig.TransactionMode.ISOLATED))
+@Sql(scripts = "classpath:sql/clean-database.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD, config = @SqlConfig(transactionMode = SqlConfig.TransactionMode.ISOLATED))
+@Transactional(propagation = Propagation.NOT_SUPPORTED)
+@ActiveProfiles("it")
 class OrderManagementApplicationServiceIT {
 
   @Autowired

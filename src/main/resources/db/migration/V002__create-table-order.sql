@@ -37,24 +37,25 @@ create table public."order" (
 	billing_first_name varchar(255),
 	billing_last_name varchar(255),
 	billing_phone varchar(255),
+	billing_email varchar(255),
 	primary key (id)
 );
 
 create index idx_order_customer_id on public."order" (customer_id);
+
 alter table public."order" add constraint fk_order_customer_id foreign key (customer_id) references public.customer(id);
 
-
 create table public.order_item (
-	id bigint not null,
-	order_id bigint not null,
-	price numeric(38,2),
-	product_id uuid,
-	product_name varchar(255),
-	quantity integer,
-	total_amount numeric(38,2),
-	primary key (id)
+    id bigint not null,
+    order_id bigint not null,
+    price numeric(38, 2),
+    product_id uuid,
+    product_name varchar(255),
+    quantity integer,
+    total_amount numeric(38, 2),
+    primary key (id)
 );
 
 create index idx_order_item_order_id on public.order_item (order_id);
-alter table public.order_item add constraint fk_order_item_order_id foreign key (order_id) references public."order"(id);
 
+alter table public.order_item add constraint fk_order_item_order_id foreign key (order_id) references public."order"(id);
