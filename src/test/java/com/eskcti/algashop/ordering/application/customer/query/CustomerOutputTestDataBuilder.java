@@ -8,10 +8,16 @@ import java.util.UUID;
 
 public class CustomerOutputTestDataBuilder {
 
+	public static final UUID DEFAULT_CUSTOMER_ID = UUID.fromString("6e148bd5-47f6-4022-b9da-07cfaa294f7a");
+
+	public static final OffsetDateTime DEFAULT_REGISTERED_AT = OffsetDateTime.parse("2025-01-15T10:30:00Z");
+
 	public static CustomerOutput.CustomerOutputBuilder existing() {
 		return CustomerOutput.builder()
-				.id(UUID.randomUUID())
-				.registeredAt(OffsetDateTime.now())
+				.id(DEFAULT_CUSTOMER_ID)
+				.registeredAt(DEFAULT_REGISTERED_AT)
+				.archivedAt(null)
+				.archived(false)
 				.phone("1191234564")
 				.email("johndoe@email.com")
 				.firstName("John")

@@ -101,7 +101,7 @@ test {
 }
 
 tasks.named('check') {
-	dependsOn(test, integrationTest)
+	dependsOn(test, integrationTest, contractTest)
 }
 
 tasks.register('integrationTest', Test) {
@@ -136,7 +136,7 @@ def jacocoCoverageExcludes = [
 ]
 
 jacocoTestReport {
-	dependsOn test, integrationTest
+	dependsOn test, integrationTest, contractTest
 	executionData(test, integrationTest, contractTest)
 	reports {
 		xml.required = true

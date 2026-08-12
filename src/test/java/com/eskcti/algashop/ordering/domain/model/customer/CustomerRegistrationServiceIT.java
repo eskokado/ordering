@@ -11,6 +11,11 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.jdbc.Sql;
+import org.springframework.test.context.jdbc.SqlConfig;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.eskcti.algashop.ordering.domain.model.commons.Address;
 import com.eskcti.algashop.ordering.domain.model.commons.Document;
@@ -18,12 +23,6 @@ import com.eskcti.algashop.ordering.domain.model.commons.Email;
 import com.eskcti.algashop.ordering.domain.model.commons.FullName;
 import com.eskcti.algashop.ordering.domain.model.commons.Phone;
 import com.eskcti.algashop.ordering.domain.model.commons.ZipCode;
-import com.eskcti.algashop.ordering.domain.model.customer.BirthDate;
-import com.eskcti.algashop.ordering.domain.model.customer.Customer;
-import com.eskcti.algashop.ordering.domain.model.customer.CustomerEmailIsInUseException;
-import com.eskcti.algashop.ordering.domain.model.customer.CustomerRegistrationService;
-import com.eskcti.algashop.ordering.domain.model.customer.Customers;
-import com.eskcti.algashop.ordering.domain.model.customer.CustomerTestDataBuilder;
 import com.eskcti.algashop.ordering.infrastructure.persistence.SpringDataAuditingConfig;
 import com.eskcti.algashop.ordering.infrastructure.persistence.customer.CustomerPersistenceEntityAssembler;
 import com.eskcti.algashop.ordering.infrastructure.persistence.customer.CustomerPersistenceEntityDisassembler;
@@ -39,6 +38,11 @@ import com.eskcti.algashop.ordering.infrastructure.persistence.customer.Customer
     CustomerPersistenceEntityDisassembler.class,
     SpringDataAuditingConfig.class
 })
+
+@Sql(scripts = "classpath:sql/clean-database.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS, config = @SqlConfig(transactionMode = SqlConfig.TransactionMode.ISOLATED))
+@Sql(scripts = "classpath:sql/clean-database.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD, config = @SqlConfig(transactionMode = SqlConfig.TransactionMode.ISOLATED))
+@Transactional(propagation = Propagation.NOT_SUPPORTED)
+@ActiveProfiles("it")
 class CustomerRegistrationServiceIT {
 
   @Autowired
@@ -110,9 +114,12 @@ class CustomerRegistrationServiceIT {
 
   @Test
   public void shouldThrowExceptionWhenEmailIsNotUniqueOnChangeEmail() {
-    Customer customer = CustomerTestDataBuilder.existingCustomer().build();
     Email takenEmail = new Email("taken@email.com");
-    customers.add(CustomerTestDataBuilder.existingCustomer().email(takenEmail).build());
+    Customer customer = CustomerTestDataBuilder.existingCustomer().build();
+    customers.add(CustomerTestDataBuilder.existingCustomer()
+        .id(CustomerTestDataBuilder.SECOND_CUSTOMER_ID)
+        .email(takenEmail)
+        .build());
 
     Assertions.assertThatThrownBy(() -> customerRegistrationService.changeEmail(customer, takenEmail))
         .isInstanceOf(CustomerEmailIsInUseException.class);

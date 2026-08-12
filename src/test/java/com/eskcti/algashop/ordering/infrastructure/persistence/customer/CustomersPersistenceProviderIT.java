@@ -3,20 +3,21 @@ package com.eskcti.algashop.ordering.infrastructure.persistence.customer;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.jdbc.Sql;
+import org.springframework.test.context.jdbc.SqlConfig;
 
 import com.eskcti.algashop.ordering.domain.model.commons.Email;
+import com.eskcti.algashop.ordering.domain.model.commons.FullName;
 import com.eskcti.algashop.ordering.domain.model.customer.Customer;
 import com.eskcti.algashop.ordering.domain.model.customer.CustomerId;
 import com.eskcti.algashop.ordering.domain.model.customer.CustomerTestDataBuilder;
 import com.eskcti.algashop.ordering.infrastructure.persistence.SpringDataAuditingConfig;
-import com.eskcti.algashop.ordering.infrastructure.persistence.customer.CustomerPersistenceEntityAssembler;
-import com.eskcti.algashop.ordering.infrastructure.persistence.customer.CustomerPersistenceEntityDisassembler;
-import com.eskcti.algashop.ordering.infrastructure.persistence.customer.CustomerPersistenceEntityRepository;
-import com.eskcti.algashop.ordering.infrastructure.persistence.customer.CustomersPersistenceProvider;
 
 @DataJpaTest
 @Import({
@@ -25,6 +26,11 @@ import com.eskcti.algashop.ordering.infrastructure.persistence.customer.Customer
     CustomerPersistenceEntityDisassembler.class,
     SpringDataAuditingConfig.class
 })
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@Sql(scripts = "classpath:sql/clean-database.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS, config = @SqlConfig(transactionMode = SqlConfig.TransactionMode.ISOLATED))
+@Sql(scripts = "classpath:sql/clean-database.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD, config = @SqlConfig(transactionMode = SqlConfig.TransactionMode.ISOLATED))
+@Transactional(propagation = Propagation.NOT_SUPPORTED)
+@ActiveProfiles("it")
 class CustomersPersistenceProviderIT {
 
   private final CustomersPersistenceProvider persistenceProvider;
@@ -45,7 +51,7 @@ class CustomersPersistenceProviderIT {
 
     var persistenceEntity = entityRepository.findById(customerId).orElseThrow();
 
-    Assertions.assertThat(persistenceEntity.getEmail()).isEqualTo("johndoe@email.com");
+    Assertions.assertThat(persistenceEntity.getEmail()).isEqualTo(customer.email().value());
     Assertions.assertThat(persistenceEntity.getCreatedByUserId()).isNotNull();
     Assertions.assertThat(persistenceEntity.getLastModifiedAt()).isNotNull();
     Assertions.assertThat(persistenceEntity.getLastModifiedByUserId()).isNotNull();
@@ -90,10 +96,16 @@ class CustomersPersistenceProviderIT {
   public void shouldCountCustomers() {
     Assertions.assertThat(persistenceProvider.count()).isZero();
 
-    persistenceProvider.add(CustomerTestDataBuilder.existingCustomer().build());
+    persistenceProvider.add(CustomerTestDataBuilder.brandNewCustomer()
+        .fullName(new FullName("John", "Doe"))
+        .email(new Email("johndoe@email.com"))
+        .build());
     Assertions.assertThat(persistenceProvider.count()).isEqualTo(1L);
 
-    persistenceProvider.add(CustomerTestDataBuilder.existingCustomer().build());
+    persistenceProvider.add(CustomerTestDataBuilder.existingCustomer()
+        .fullName(new FullName("Jane", "Doe"))
+        .email(new Email("janedoe@email.com"))
+        .build());
     Assertions.assertThat(persistenceProvider.count()).isEqualTo(2L);
   }
 

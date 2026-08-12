@@ -4,17 +4,19 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.jdbc.Sql;
+import org.springframework.test.context.jdbc.SqlConfig;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.assertj.core.api.Assertions;
 
 import com.eskcti.algashop.ordering.domain.model.commons.Email;
 import com.eskcti.algashop.ordering.domain.model.commons.FullName;
-import com.eskcti.algashop.ordering.domain.model.customer.Customer;
-import com.eskcti.algashop.ordering.domain.model.customer.CustomerId;
-import com.eskcti.algashop.ordering.domain.model.customer.Customers;
-import com.eskcti.algashop.ordering.domain.model.customer.CustomerTestDataBuilder;
 import com.eskcti.algashop.ordering.infrastructure.persistence.customer.CustomerPersistenceEntityAssembler;
 import com.eskcti.algashop.ordering.infrastructure.persistence.customer.CustomerPersistenceEntityDisassembler;
 import com.eskcti.algashop.ordering.infrastructure.persistence.customer.CustomersPersistenceProvider;
@@ -25,6 +27,11 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 @Import({ CustomersPersistenceProvider.class,
     CustomerPersistenceEntityAssembler.class,
     CustomerPersistenceEntityDisassembler.class })
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@Sql(scripts = "classpath:sql/clean-database.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS, config = @SqlConfig(transactionMode = SqlConfig.TransactionMode.ISOLATED))
+@Sql(scripts = "classpath:sql/clean-database.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD, config = @SqlConfig(transactionMode = SqlConfig.TransactionMode.ISOLATED))
+@Transactional(propagation = Propagation.NOT_SUPPORTED)
+@ActiveProfiles("it")
 class CustomersIT {
 
   private Customers customers;
@@ -94,10 +101,16 @@ class CustomersIT {
   public void shouldCountExistingOrders() {
     Assertions.assertThat(customers.count()).isZero();
 
-    Customer customer1 = CustomerTestDataBuilder.brandNewCustomer().build();
+    Customer customer1 = CustomerTestDataBuilder.brandNewCustomer()
+        .fullName(new FullName("John", "Doe"))
+        .email(new Email("johndoe@email.com"))
+        .build();
     customers.add(customer1);
 
-    Customer customer2 = CustomerTestDataBuilder.brandNewCustomer().build();
+    Customer customer2 = CustomerTestDataBuilder.brandNewCustomer()
+        .fullName(new FullName("Jane", "Doe"))
+        .email(new Email("janedoe@email.com"))
+        .build();
     customers.add(customer2);
 
     Assertions.assertThat(customers.count()).isEqualTo(2L);

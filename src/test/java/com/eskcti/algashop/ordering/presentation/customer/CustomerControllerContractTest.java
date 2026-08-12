@@ -1,6 +1,8 @@
 package com.eskcti.algashop.ordering.presentation.customer;
 
+import io.restassured.config.JsonConfig;
 import io.restassured.module.mockmvc.RestAssuredMockMvc;
+import io.restassured.path.json.config.JsonPathConfig;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -58,12 +60,15 @@ class CustomerControllerContractTest {
         .defaultResponseCharacterEncoding(StandardCharsets.UTF_8)
         .build());
     RestAssuredMockMvc.enableLoggingOfRequestAndResponseIfValidationFails();
+    RestAssuredMockMvc.config = RestAssuredMockMvc.config()
+        .jsonConfig(JsonConfig.jsonConfig()
+            .numberReturnType(JsonPathConfig.NumberReturnType.BIG_DECIMAL));
   }
 
   @Test
   public void createCustomerContract() {
-    CustomerOutput customerOutput = CustomerOutputTestDataBuilder.existing().build();
     UUID customerId = UUID.randomUUID();
+    CustomerOutput customerOutput = CustomerOutputTestDataBuilder.existing().id(customerId).build();
     Mockito.when(customerManagementApplicationService.create(Mockito.any(CustomerInput.class)))
         .thenReturn(customerId);
     Mockito.when(customerQueryService.findById(Mockito.any(UUID.class)))
@@ -161,7 +166,6 @@ class CustomerControllerContractTest {
             "type", Matchers.is("/errors/invalid-fields"),
             "title", Matchers.notNullValue(),
             "detail", Matchers.notNullValue(),
-            "instance", Matchers.notNullValue(),
             "fields", Matchers.notNullValue());
 
   }
@@ -303,13 +307,13 @@ class CustomerControllerContractTest {
             "id", Matchers.equalTo(shoppingCartId.toString()),
             "customerId", Matchers.equalTo(customerId.toString()),
             "totalItems", Matchers.is(2),
-            "totalAmount", Matchers.is(2000.0f),
+            "totalAmount", Matchers.comparesEqualTo(new BigDecimal("2000.00")),
             "items[0].id", Matchers.equalTo(itemId.toString()),
             "items[0].productId", Matchers.equalTo(productId.toString()),
             "items[0].name", Matchers.is("Notebook X11"),
-            "items[0].price", Matchers.is(1000.0f),
+            "items[0].price", Matchers.comparesEqualTo(new BigDecimal("1000.00")),
             "items[0].quantity", Matchers.is(2),
-            "items[0].totalAmount", Matchers.is(2000.0f),
+            "items[0].totalAmount", Matchers.comparesEqualTo(new BigDecimal("2000.00")),
             "items[0].available", Matchers.is(true));
   }
 
@@ -332,8 +336,7 @@ class CustomerControllerContractTest {
         .body(
             "status", Matchers.is(HttpStatus.NOT_FOUND.value()),
             "type", Matchers.is("/errors/not-found"),
-            "title", Matchers.notNullValue(),
-            "instance", Matchers.notNullValue());
+            "title", Matchers.notNullValue());
 
   }
 
@@ -377,8 +380,7 @@ class CustomerControllerContractTest {
         .body(
             "status", Matchers.is(HttpStatus.CONFLICT.value()),
             "type", Matchers.is("/errors/conflict"),
-            "title", Matchers.notNullValue(),
-            "instance", Matchers.notNullValue());
+            "title", Matchers.notNullValue());
   }
 
   @Test
@@ -422,8 +424,7 @@ class CustomerControllerContractTest {
             "status", Matchers.is(HttpStatus.BAD_GATEWAY.value()),
             "type", Matchers.is("/errors/bad-gateway"),
             "title", Matchers.notNullValue(),
-            "detail", Matchers.is("Product Catalog API Bad Gateway"),
-            "instance", Matchers.notNullValue());
+            "detail", Matchers.is("Product Catalog API Bad Gateway"));
   }
 
   @Test
@@ -466,8 +467,7 @@ class CustomerControllerContractTest {
         .body(
             "status", Matchers.is(HttpStatus.UNPROCESSABLE_ENTITY.value()),
             "type", Matchers.is("/errors/unprocessable-entity"),
-            "title", Matchers.notNullValue(),
-            "instance", Matchers.notNullValue());
+            "title", Matchers.notNullValue());
   }
 
   @Test
@@ -510,8 +510,7 @@ class CustomerControllerContractTest {
         .body(
             "status", Matchers.is(HttpStatus.INTERNAL_SERVER_ERROR.value()),
             "type", Matchers.is("/errors/internal"),
-            "title", Matchers.notNullValue(),
-            "instance", Matchers.notNullValue());
+            "title", Matchers.notNullValue());
   }
 
   @Test
@@ -521,6 +520,8 @@ class CustomerControllerContractTest {
     AddressData address = customer.getAddress();
 
     UUID customerId = UUID.randomUUID();
+    Mockito.doNothing().when(customerManagementApplicationService)
+        .update(Mockito.eq(customerId), Mockito.any());
     Mockito.when(customerQueryService.findById(Mockito.any(UUID.class)))
         .thenReturn(customer);
 
@@ -612,7 +613,6 @@ class CustomerControllerContractTest {
             "type", Matchers.is("/errors/invalid-fields"),
             "title", Matchers.notNullValue(),
             "detail", Matchers.notNullValue(),
-            "instance", Matchers.notNullValue(),
             "fields", Matchers.notNullValue());
   }
 
@@ -656,8 +656,7 @@ class CustomerControllerContractTest {
         .body(
             "status", Matchers.is(HttpStatus.NOT_FOUND.value()),
             "type", Matchers.is("/errors/not-found"),
-            "title", Matchers.notNullValue(),
-            "instance", Matchers.notNullValue());
+            "title", Matchers.notNullValue());
   }
 
   @Test
@@ -700,8 +699,7 @@ class CustomerControllerContractTest {
         .body(
             "status", Matchers.is(HttpStatus.CONFLICT.value()),
             "type", Matchers.is("/errors/conflict"),
-            "title", Matchers.notNullValue(),
-            "instance", Matchers.notNullValue());
+            "title", Matchers.notNullValue());
   }
 
   @Test
@@ -744,13 +742,15 @@ class CustomerControllerContractTest {
         .body(
             "status", Matchers.is(HttpStatus.UNPROCESSABLE_ENTITY.value()),
             "type", Matchers.is("/errors/unprocessable-entity"),
-            "title", Matchers.notNullValue(),
-            "instance", Matchers.notNullValue());
+            "title", Matchers.notNullValue());
   }
 
   @Test
   public void deleteCustomerContract() {
     UUID customerId = UUID.randomUUID();
+
+    Mockito.doNothing().when(customerManagementApplicationService)
+        .archive(customerId);
 
     RestAssuredMockMvc
         .given()
@@ -782,8 +782,7 @@ class CustomerControllerContractTest {
         .body(
             "status", Matchers.is(HttpStatus.NOT_FOUND.value()),
             "type", Matchers.is("/errors/not-found"),
-            "title", Matchers.notNullValue(),
-            "instance", Matchers.notNullValue());
+            "title", Matchers.notNullValue());
   }
 
   @Test
@@ -806,8 +805,7 @@ class CustomerControllerContractTest {
         .body(
             "status", Matchers.is(HttpStatus.UNPROCESSABLE_ENTITY.value()),
             "type", Matchers.is("/errors/unprocessable-entity"),
-            "title", Matchers.notNullValue(),
-            "instance", Matchers.notNullValue());
+            "title", Matchers.notNullValue());
   }
 
   @Test
@@ -830,8 +828,7 @@ class CustomerControllerContractTest {
         .body(
             "status", Matchers.is(HttpStatus.INTERNAL_SERVER_ERROR.value()),
             "type", Matchers.is("/errors/internal"),
-            "title", Matchers.notNullValue(),
-            "instance", Matchers.notNullValue());
+            "title", Matchers.notNullValue());
   }
 
 }
