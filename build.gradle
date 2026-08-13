@@ -150,9 +150,8 @@ jacocoTestReport {
 }
 
 jacocoTestCoverageVerification {
-	dependsOn jacocoTestReport
+	dependsOn test, integrationTest, contractTest
 	executionData(test, integrationTest, contractTest)
-	finalizedBy jacocoTestReport
 	violationRules {
 		rule {
 			limit {
