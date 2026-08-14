@@ -16,6 +16,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.SqlConfig;
 
+import com.eskcti.algashop.ordering.domain.model.DomainException;
 import com.eskcti.algashop.ordering.domain.model.commons.Money;
 import com.eskcti.algashop.ordering.domain.model.customer.CustomerId;
 import com.eskcti.algashop.ordering.domain.model.customer.CustomerNotFoundException;
@@ -107,6 +108,28 @@ class BuyNowApplicationServiceIT {
 
     Assertions.assertThatThrownBy(() -> buyNowApplicationService.buyNow(input))
         .isInstanceOf(ProductNotFoundException.class);
+  }
+
+  @Test
+  public void shouldThrowDomainExceptionWhenCreditCardIdIsMissingAndPaymentMethodIsCreditCard() {
+    Product product = ProductTestDataBuilder.aProduct()
+        .id(ProductTestDataBuilder.DEFAULT_PRODUCT_ID)
+        .build();
+    Mockito.when(productCatalogService.ofId(ProductTestDataBuilder.DEFAULT_PRODUCT_ID))
+        .thenReturn(Optional.of(product));
+
+    Mockito.when(shippingCostService.calculate(Mockito.any(ShippingCostService.CalculationRequest.class)))
+        .thenReturn(new ShippingCostService.CalculationResult(
+            new Money("10.00"),
+            LocalDate.now().plusDays(3)));
+
+    BuyNowInput input = BuyNowInputTestDataBuilder.aBuyNowInput()
+        .creditCardId(null)
+        .build();
+
+    Assertions.assertThatThrownBy(() -> buyNowApplicationService.buyNow(input))
+        .isInstanceOf(DomainException.class)
+        .hasMessage("Credit card id is required");
   }
 
 }

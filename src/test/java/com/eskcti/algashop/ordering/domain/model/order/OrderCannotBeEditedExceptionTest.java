@@ -4,9 +4,6 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import com.eskcti.algashop.ordering.domain.model.ErrorMessages;
-import com.eskcti.algashop.ordering.domain.model.order.OrderCannotBeEditedException;
-import com.eskcti.algashop.ordering.domain.model.order.OrderId;
-import com.eskcti.algashop.ordering.domain.model.order.OrderStatus;
 
 class OrderCannotBeEditedExceptionTest {
 

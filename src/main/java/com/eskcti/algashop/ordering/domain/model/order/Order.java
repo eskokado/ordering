@@ -39,6 +39,8 @@ public class Order extends AbstractEventSourceEntity implements AggregateRoot<Or
 
   private Set<OrderItem> items;
 
+  private CreditCardId creditCardId;
+
   @Builder(builderClassName = "ExistingOrderBuilder", builderMethodName = "existing")
   public Order(OrderId id, CustomerId customerId,
       Long version,
@@ -47,7 +49,9 @@ public class Order extends AbstractEventSourceEntity implements AggregateRoot<Or
       OffsetDateTime canceledAt, OffsetDateTime readyAt,
       Billing billing, Shipping shipping,
       OrderStatus status, PaymentMethod paymentMethod,
-      Set<OrderItem> items) {
+      Set<OrderItem> items,
+      CreditCardId creditCardId) {
+    this.setCreditCardId(creditCardId);
     this.setId(id);
     this.setCustomerId(customerId);
     this.setVersion(version);
@@ -79,7 +83,8 @@ public class Order extends AbstractEventSourceEntity implements AggregateRoot<Or
         null,
         OrderStatus.DRAFT,
         null,
-        new HashSet<>());
+        new HashSet<>(),
+        null);
   }
 
   public Long version() {
@@ -132,8 +137,12 @@ public class Order extends AbstractEventSourceEntity implements AggregateRoot<Or
     publishDomainEvent(new OrderReadyEvent(this.id(), this.customerId(), this.readyAt()));
   }
 
-  public void changePaymentMethod(PaymentMethod paymentMethod) {
+  public void changePaymentMethod(PaymentMethod paymentMethod, CreditCardId creditCardId) {
     Objects.requireNonNull(paymentMethod);
+    if (paymentMethod.equals(PaymentMethod.CREDIT_CARD)) {
+      Objects.requireNonNull(creditCardId);
+      this.setCreditCardId(creditCardId);
+    }
     this.verifyIfChangeable();
     this.setPaymentMethod(paymentMethod);
   }
@@ -256,6 +265,10 @@ public class Order extends AbstractEventSourceEntity implements AggregateRoot<Or
     return Collections.unmodifiableSet(this.items);
   }
 
+  public CreditCardId creditCardId() {
+    return creditCardId;
+  }
+
   private void recalculateTotals() {
     BigDecimal totalItemsAmount = this.items().stream().map(i -> i.totalAmount().value())
         .reduce(BigDecimal.ZERO, BigDecimal::add);
@@ -369,6 +382,10 @@ public class Order extends AbstractEventSourceEntity implements AggregateRoot<Or
   private void setItems(Set<OrderItem> items) {
     Objects.requireNonNull(items);
     this.items = items;
+  }
+
+  private void setCreditCardId(CreditCardId creditCardId) {
+    this.creditCardId = creditCardId;
   }
 
   @Override

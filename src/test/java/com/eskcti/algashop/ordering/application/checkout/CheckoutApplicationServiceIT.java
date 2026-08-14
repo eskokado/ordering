@@ -19,6 +19,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.SqlConfig;
 
+import com.eskcti.algashop.ordering.domain.model.DomainException;
 import com.eskcti.algashop.ordering.domain.model.commons.Money;
 import com.eskcti.algashop.ordering.domain.model.commons.Quantity;
 import com.eskcti.algashop.ordering.domain.model.customer.Customer;
@@ -215,5 +216,17 @@ class CheckoutApplicationServiceIT {
 
                 Assertions.assertThatExceptionOfType(ShoppingCartCantProceedToCheckoutException.class)
                                 .isThrownBy(() -> service.checkout(input));
+        }
+
+        @Test
+        void shouldThrowDomainExceptionWhenCreditCardIdIsMissingAndPaymentMethodIsCreditCard() {
+                CheckoutInput input = CheckoutInputTestDataBuilder.aCheckoutInput()
+                                .shoppingCartId(UUID.randomUUID())
+                                .creditCardId(null)
+                                .build();
+
+                Assertions.assertThatThrownBy(() -> service.checkout(input))
+                                .isInstanceOf(DomainException.class)
+                                .hasMessage("Credit card id is required");
         }
 }

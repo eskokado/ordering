@@ -3,8 +3,6 @@ package com.eskcti.algashop.ordering.domain.model.order;
 import io.hypersistence.tsid.TSID;
 import org.junit.jupiter.api.Test;
 
-import com.eskcti.algashop.ordering.domain.model.order.OrderId;
-
 import org.assertj.core.api.Assertions;
 
 class OrderIdTest {

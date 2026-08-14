@@ -4,9 +4,6 @@ import org.junit.jupiter.api.Test;
 
 import com.eskcti.algashop.ordering.domain.model.order.OrderTestDataBuilder;
 import com.eskcti.algashop.ordering.domain.model.order.Order;
-import com.eskcti.algashop.ordering.infrastructure.persistence.order.OrderPersistenceEntity;
-import com.eskcti.algashop.ordering.infrastructure.persistence.order.OrdersPersistenceProvider;
-
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Set;
@@ -70,7 +67,8 @@ class OrdersPersistenceProviderTest {
                     source.shipping(),
                     source.status(),
                     source.paymentMethod(),
-                    Set.copyOf(source.items()));
+                    Set.copyOf(source.items()),
+                    source.creditCardId());
         }
     }
 }

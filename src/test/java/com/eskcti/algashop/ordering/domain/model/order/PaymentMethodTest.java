@@ -3,8 +3,6 @@ package com.eskcti.algashop.ordering.domain.model.order;
 
 import org.junit.jupiter.api.Test;
 
-import com.eskcti.algashop.ordering.domain.model.order.PaymentMethod;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 class PaymentMethodTest {

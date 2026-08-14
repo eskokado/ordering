@@ -2,10 +2,6 @@ package com.eskcti.algashop.ordering.domain.model.order;
 
 import org.junit.jupiter.api.Test;
 
-import com.eskcti.algashop.ordering.domain.model.order.OrderId;
-import com.eskcti.algashop.ordering.domain.model.order.OrderStatus;
-import com.eskcti.algashop.ordering.domain.model.order.OrderStatusCannotBeChangedException;
-
 import static com.eskcti.algashop.ordering.domain.model.ErrorMessages.ERROR_ORDER_STATUS_CANNOT_BE_CHANGED;
 
 import org.assertj.core.api.Assertions;

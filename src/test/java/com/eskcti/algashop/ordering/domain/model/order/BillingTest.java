@@ -3,8 +3,6 @@ package com.eskcti.algashop.ordering.domain.model.order;
 import org.junit.jupiter.api.Test;
 
 import com.eskcti.algashop.ordering.domain.model.commons.ValueObjectTestFixtures;
-import com.eskcti.algashop.ordering.domain.model.order.Billing;
-
 import org.assertj.core.api.Assertions;
 
 class BillingTest {

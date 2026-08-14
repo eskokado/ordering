@@ -5,13 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import com.eskcti.algashop.ordering.domain.model.commons.Quantity;
 import com.eskcti.algashop.ordering.domain.model.customer.CustomerId;
-import com.eskcti.algashop.ordering.domain.model.order.OrderTestDataBuilder;
 import com.eskcti.algashop.ordering.domain.model.product.ProductTestDataBuilder;
-import com.eskcti.algashop.ordering.domain.model.order.Billing;
-import com.eskcti.algashop.ordering.domain.model.order.Order;
-import com.eskcti.algashop.ordering.domain.model.order.OrderFactory;
-import com.eskcti.algashop.ordering.domain.model.order.PaymentMethod;
-import com.eskcti.algashop.ordering.domain.model.order.Shipping;
 
 class OrderFactoryTest {
 
@@ -24,7 +18,8 @@ class OrderFactoryTest {
     var product = ProductTestDataBuilder.aProduct().build();
     Quantity quantity = new Quantity(2);
 
-    Order order = OrderFactory.filled(customerId, shipping, billing, paymentMethod, product, quantity);
+    Order order = OrderFactory.filled(customerId, shipping, billing, paymentMethod, product, quantity,
+        new CreditCardId());
 
     Assertions.assertThat(order).isNotNull();
     Assertions.assertThat(order.customerId()).isEqualTo(customerId);
@@ -44,7 +39,8 @@ class OrderFactoryTest {
     Quantity quantity = new Quantity(2);
 
     Assertions.assertThatNullPointerException()
-        .isThrownBy(() -> OrderFactory.filled(null, shipping, billing, paymentMethod, product, quantity));
+        .isThrownBy(
+            () -> OrderFactory.filled(null, shipping, billing, paymentMethod, product, quantity, new CreditCardId()));
   }
 
   @Test
@@ -56,7 +52,8 @@ class OrderFactoryTest {
     Quantity quantity = new Quantity(2);
 
     Assertions.assertThatNullPointerException()
-        .isThrownBy(() -> OrderFactory.filled(customerId, null, billing, paymentMethod, product, quantity));
+        .isThrownBy(
+            () -> OrderFactory.filled(customerId, null, billing, paymentMethod, product, quantity, new CreditCardId()));
   }
 
   @Test
@@ -68,7 +65,9 @@ class OrderFactoryTest {
     Quantity quantity = new Quantity(2);
 
     Assertions.assertThatNullPointerException()
-        .isThrownBy(() -> OrderFactory.filled(customerId, shipping, null, paymentMethod, product, quantity));
+        .isThrownBy(
+            () -> OrderFactory.filled(customerId, shipping, null, paymentMethod, product, quantity,
+                new CreditCardId()));
   }
 
   @Test
@@ -80,7 +79,7 @@ class OrderFactoryTest {
     Quantity quantity = new Quantity(2);
 
     Assertions.assertThatNullPointerException()
-        .isThrownBy(() -> OrderFactory.filled(customerId, shipping, billing, null, product, quantity));
+        .isThrownBy(() -> OrderFactory.filled(customerId, shipping, billing, null, product, quantity, null));
   }
 
   @Test
@@ -92,7 +91,9 @@ class OrderFactoryTest {
     Quantity quantity = new Quantity(2);
 
     Assertions.assertThatNullPointerException()
-        .isThrownBy(() -> OrderFactory.filled(customerId, shipping, billing, paymentMethod, null, quantity));
+        .isThrownBy(
+            () -> OrderFactory.filled(customerId, shipping, billing, paymentMethod, null, quantity,
+                new CreditCardId()));
   }
 
   @Test
@@ -104,6 +105,7 @@ class OrderFactoryTest {
     var product = ProductTestDataBuilder.aProduct().build();
 
     Assertions.assertThatNullPointerException()
-        .isThrownBy(() -> OrderFactory.filled(customerId, shipping, billing, paymentMethod, product, null));
+        .isThrownBy(
+            () -> OrderFactory.filled(customerId, shipping, billing, paymentMethod, product, null, new CreditCardId()));
   }
 }

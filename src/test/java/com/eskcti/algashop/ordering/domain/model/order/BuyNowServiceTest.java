@@ -3,7 +3,6 @@ package com.eskcti.algashop.ordering.domain.model.order;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -50,7 +49,8 @@ class BuyNowServiceTest {
     Quantity quantity = new Quantity(3);
     PaymentMethod paymentMethod = PaymentMethod.CREDIT_CARD;
 
-    Order order = buyNowService.buyNow(product, customer, billingInfo, shippingInfo, quantity, paymentMethod);
+    Order order = buyNowService.buyNow(product, customer, billingInfo, shippingInfo, quantity, paymentMethod,
+        new CreditCardId());
 
     assertThat(order).isNotNull();
     assertThat(order.id()).isNotNull();
@@ -86,7 +86,8 @@ class BuyNowServiceTest {
 
     when(orders.salesQuantityByCustomerInYear(eq(customer.id()), eq(Year.now()))).thenReturn(2L);
 
-    Order order = buyNowService.buyNow(product, customer, billingInfo, shippingInfo, quantity, paymentMethod);
+    Order order = buyNowService.buyNow(product, customer, billingInfo, shippingInfo, quantity, paymentMethod,
+        new CreditCardId());
 
     assertThat(order.shipping().cost()).isEqualTo(Money.ZERO);
     assertThat(order.totalAmount()).isEqualTo(product.price().multiply(quantity));
@@ -105,7 +106,8 @@ class BuyNowServiceTest {
 
     when(orders.salesQuantityByCustomerInYear(eq(customer.id()), eq(Year.now()))).thenReturn(0L);
 
-    Order order = buyNowService.buyNow(product, customer, billingInfo, shippingInfo, quantity, paymentMethod);
+    Order order = buyNowService.buyNow(product, customer, billingInfo, shippingInfo, quantity, paymentMethod,
+        new CreditCardId());
 
     assertThat(order.shipping().cost()).isEqualTo(Money.ZERO);
     assertThat(order.totalAmount()).isEqualTo(product.price().multiply(quantity));
@@ -124,7 +126,8 @@ class BuyNowServiceTest {
 
     when(orders.salesQuantityByCustomerInYear(eq(customer.id()), eq(Year.now()))).thenReturn(1L);
 
-    Order order = buyNowService.buyNow(product, customer, billingInfo, shippingInfo, quantity, paymentMethod);
+    Order order = buyNowService.buyNow(product, customer, billingInfo, shippingInfo, quantity, paymentMethod,
+        new CreditCardId());
 
     assertThat(order.shipping().cost()).isEqualTo(shippingInfo.cost());
     assertThat(order.totalAmount()).isEqualTo(product.price().multiply(quantity).add(shippingInfo.cost()));
@@ -141,7 +144,8 @@ class BuyNowServiceTest {
 
     assertThatExceptionOfType(ProductOutOfStockException.class)
         .isThrownBy(
-            () -> buyNowService.buyNow(product, customer, billingInfo, shippingInfo, quantity, paymentMethod));
+            () -> buyNowService.buyNow(product, customer, billingInfo, shippingInfo, quantity, paymentMethod,
+                new CreditCardId()));
   }
 
   @Test
@@ -155,7 +159,8 @@ class BuyNowServiceTest {
 
     assertThatExceptionOfType(IllegalArgumentException.class)
         .isThrownBy(
-            () -> buyNowService.buyNow(product, customer, billingInfo, shippingInfo, quantity, paymentMethod));
+            () -> buyNowService.buyNow(product, customer, billingInfo, shippingInfo, quantity, paymentMethod,
+                new CreditCardId()));
   }
 
 }

@@ -10,20 +10,6 @@ import org.junit.jupiter.api.Test;
 import com.eskcti.algashop.ordering.domain.model.commons.Money;
 import com.eskcti.algashop.ordering.domain.model.commons.Quantity;
 import com.eskcti.algashop.ordering.domain.model.customer.CustomerId;
-import com.eskcti.algashop.ordering.domain.model.order.Billing;
-import com.eskcti.algashop.ordering.domain.model.order.Order;
-import com.eskcti.algashop.ordering.domain.model.order.OrderCannotBeEditedException;
-import com.eskcti.algashop.ordering.domain.model.order.OrderCannotBePlacedException;
-import com.eskcti.algashop.ordering.domain.model.order.OrderDoesNotContainOrderItemException;
-import com.eskcti.algashop.ordering.domain.model.order.OrderId;
-import com.eskcti.algashop.ordering.domain.model.order.OrderInvalidShippingDeliveryDateException;
-import com.eskcti.algashop.ordering.domain.model.order.OrderItem;
-import com.eskcti.algashop.ordering.domain.model.order.OrderItemId;
-import com.eskcti.algashop.ordering.domain.model.order.OrderStatus;
-import com.eskcti.algashop.ordering.domain.model.order.OrderStatusCannotBeChangedException;
-import com.eskcti.algashop.ordering.domain.model.order.PaymentMethod;
-import com.eskcti.algashop.ordering.domain.model.order.Recipient;
-import com.eskcti.algashop.ordering.domain.model.order.Shipping;
 import com.eskcti.algashop.ordering.domain.model.product.Product;
 import com.eskcti.algashop.ordering.domain.model.product.ProductOutOfStockException;
 import com.eskcti.algashop.ordering.domain.model.product.ProductTestDataBuilder;
@@ -268,7 +254,7 @@ class OrderTest {
   void given_order_whenChangePaymentMethod_shouldUpdateField() {
     Order order = OrderTestDataBuilder.draftOrder();
 
-    order.changePaymentMethod(PaymentMethod.GATEWAY_BALANCE);
+    order.changePaymentMethod(PaymentMethod.GATEWAY_BALANCE, null);
 
     assertThat(order.paymentMethod()).isEqualTo(PaymentMethod.GATEWAY_BALANCE);
   }
@@ -278,7 +264,7 @@ class OrderTest {
     Order order = OrderTestDataBuilder.draftOrder();
 
     Assertions.assertThatNullPointerException()
-        .isThrownBy(() -> order.changePaymentMethod(null));
+        .isThrownBy(() -> order.changePaymentMethod(null, null));
   }
 
   @Test
@@ -507,7 +493,7 @@ class OrderTest {
     Order order = OrderTestDataBuilder.draftOrder();
     order.changeShipping(OrderTestDataBuilder.aShipping());
     order.changeBilling(OrderTestDataBuilder.aBilling());
-    order.changePaymentMethod(PaymentMethod.CREDIT_CARD);
+    order.changePaymentMethod(PaymentMethod.CREDIT_CARD, new CreditCardId());
     order.addItem(OrderItemTestDataBuilder.validProduct(), OrderItemTestDataBuilder.validQuantity());
     return order;
   }
@@ -516,7 +502,7 @@ class OrderTest {
     Order order = OrderTestDataBuilder.draftOrder();
     order.addItem(ProductTestDataBuilder.aProduct().build(), new Quantity(1));
     order.changeBilling(OrderTestDataBuilder.aBilling());
-    order.changePaymentMethod(PaymentMethod.CREDIT_CARD);
+    order.changePaymentMethod(PaymentMethod.CREDIT_CARD, new CreditCardId());
     return order;
   }
 
@@ -524,7 +510,7 @@ class OrderTest {
     Order order = OrderTestDataBuilder.draftOrder();
     order.addItem(ProductTestDataBuilder.aProduct().build(), new Quantity(1));
     order.changeShipping(OrderTestDataBuilder.aShipping());
-    order.changePaymentMethod(PaymentMethod.CREDIT_CARD);
+    order.changePaymentMethod(PaymentMethod.CREDIT_CARD, new CreditCardId());
     return order;
   }
 
@@ -672,7 +658,7 @@ class OrderTest {
     Order order = OrderTestDataBuilder.aPlacedOrder().build();
 
     Assertions.assertThatExceptionOfType(OrderCannotBeEditedException.class)
-        .isThrownBy(() -> order.changePaymentMethod(PaymentMethod.GATEWAY_BALANCE));
+        .isThrownBy(() -> order.changePaymentMethod(PaymentMethod.GATEWAY_BALANCE, null));
   }
 
   @Test
@@ -698,7 +684,7 @@ class OrderTest {
     Order order = aDraftOrderWithSingleItem();
     order.changeShipping(OrderTestDataBuilder.aShipping());
     order.changeBilling(OrderTestDataBuilder.aBilling());
-    order.changePaymentMethod(PaymentMethod.CREDIT_CARD);
+    order.changePaymentMethod(PaymentMethod.CREDIT_CARD, new CreditCardId());
     order.place();
     OrderItem item = order.items().iterator().next();
 
@@ -711,7 +697,7 @@ class OrderTest {
     Order order = aDraftOrderWithSingleItem();
     order.changeShipping(OrderTestDataBuilder.aShipping());
     order.changeBilling(OrderTestDataBuilder.aBilling());
-    order.changePaymentMethod(PaymentMethod.CREDIT_CARD);
+    order.changePaymentMethod(PaymentMethod.CREDIT_CARD, new CreditCardId());
     order.place();
     OrderItem item = order.items().iterator().next();
 

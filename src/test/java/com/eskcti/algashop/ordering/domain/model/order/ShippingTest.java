@@ -7,10 +7,6 @@ import org.junit.jupiter.api.Test;
 import com.eskcti.algashop.ordering.domain.model.commons.FullName;
 import com.eskcti.algashop.ordering.domain.model.commons.Money;
 import com.eskcti.algashop.ordering.domain.model.commons.ValueObjectTestFixtures;
-import com.eskcti.algashop.ordering.domain.model.order.OrderTestDataBuilder;
-import com.eskcti.algashop.ordering.domain.model.order.Recipient;
-import com.eskcti.algashop.ordering.domain.model.order.Shipping;
-
 import org.assertj.core.api.Assertions;
 
 class ShippingTest {

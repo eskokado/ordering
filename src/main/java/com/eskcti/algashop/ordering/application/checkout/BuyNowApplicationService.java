@@ -5,6 +5,7 @@ import java.util.Objects;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.eskcti.algashop.ordering.domain.model.DomainException;
 import com.eskcti.algashop.ordering.domain.model.commons.Quantity;
 import com.eskcti.algashop.ordering.domain.model.commons.ZipCode;
 import com.eskcti.algashop.ordering.domain.model.customer.Customer;
@@ -13,6 +14,7 @@ import com.eskcti.algashop.ordering.domain.model.customer.CustomerNotFoundExcept
 import com.eskcti.algashop.ordering.domain.model.customer.Customers;
 import com.eskcti.algashop.ordering.domain.model.order.Billing;
 import com.eskcti.algashop.ordering.domain.model.order.BuyNowService;
+import com.eskcti.algashop.ordering.domain.model.order.CreditCardId;
 import com.eskcti.algashop.ordering.domain.model.order.Order;
 import com.eskcti.algashop.ordering.domain.model.order.Orders;
 import com.eskcti.algashop.ordering.domain.model.order.PaymentMethod;
@@ -53,6 +55,14 @@ public class BuyNowApplicationService {
     Customer customer = customers.ofId(customerId).orElseThrow(() -> new CustomerNotFoundException(customerId));
 
     ProductId productId = new ProductId(input.getProductId());
+    CreditCardId creditCardId = null;
+
+    if (paymentMethod.equals(PaymentMethod.CREDIT_CARD)) {
+      if (input.getCreditCardId() == null) {
+        throw new DomainException("Credit card id is required");
+      }
+      creditCardId = new CreditCardId(input.getCreditCardId());
+    }
     Product product = productCatalogService.ofId(productId)
         .orElseThrow(() -> new ProductNotFoundException(productId));
 
@@ -64,7 +74,7 @@ public class BuyNowApplicationService {
     Billing billing = billingInputDisassembler.toDomainModel(input.getBilling());
 
     Order order = buyNowService.buyNow(
-        product, customer, billing, shipping, quantity, paymentMethod);
+        product, customer, billing, shipping, quantity, paymentMethod, creditCardId);
 
     orders.add(order);
 

@@ -1,5 +1,7 @@
 package com.eskcti.algashop.ordering.application.checkout;
 
+import java.util.UUID;
+
 import com.eskcti.algashop.ordering.application.commons.AddressData;
 import com.eskcti.algashop.ordering.application.order.query.RecipientData;
 import com.eskcti.algashop.ordering.domain.model.customer.CustomerTestDataBuilder;
@@ -13,6 +15,7 @@ public class BuyNowInputTestDataBuilder {
                 .customerId(CustomerTestDataBuilder.DEFAULT_CUSTOMER_ID.value())
                 .quantity(2)
                 .paymentMethod("CREDIT_CARD")
+                .creditCardId(UUID.randomUUID())
                 .shipping(ShippingInput.builder()
                         .recipient(RecipientData.builder()
                                 .firstName("John")

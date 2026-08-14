@@ -11,12 +11,6 @@ import com.eskcti.algashop.ordering.domain.model.commons.Phone;
 import com.eskcti.algashop.ordering.domain.model.commons.Quantity;
 import com.eskcti.algashop.ordering.domain.model.commons.ZipCode;
 import com.eskcti.algashop.ordering.domain.model.customer.CustomerId;
-import com.eskcti.algashop.ordering.domain.model.order.Billing;
-import com.eskcti.algashop.ordering.domain.model.order.Order;
-import com.eskcti.algashop.ordering.domain.model.order.OrderStatus;
-import com.eskcti.algashop.ordering.domain.model.order.PaymentMethod;
-import com.eskcti.algashop.ordering.domain.model.order.Recipient;
-import com.eskcti.algashop.ordering.domain.model.order.Shipping;
 import com.eskcti.algashop.ordering.domain.model.product.ProductTestDataBuilder;
 
 public class OrderTestDataBuilder {
@@ -31,6 +25,8 @@ public class OrderTestDataBuilder {
   private boolean withItems = true;
 
   private OrderStatus status = OrderStatus.DRAFT;
+
+  private CreditCardId creditCardId;
 
   private OrderTestDataBuilder() {
 
@@ -47,6 +43,7 @@ public class OrderTestDataBuilder {
   public static OrderTestDataBuilder aPlacedOrder() {
     return anOrder()
         .paymentMethod(PaymentMethod.CREDIT_CARD)
+        .creditCardId(new CreditCardId())
         .status(OrderStatus.PLACED);
   }
 
@@ -54,7 +51,7 @@ public class OrderTestDataBuilder {
     Order order = Order.draft(customerId);
     order.changeShipping(shipping);
     order.changeBilling(billing);
-    order.changePaymentMethod(paymentMethod);
+    order.changePaymentMethod(paymentMethod, creditCardId);
 
     if (withItems) {
       order.addItem(ProductTestDataBuilder.aProduct().build(),
@@ -165,6 +162,11 @@ public class OrderTestDataBuilder {
 
   public OrderTestDataBuilder status(OrderStatus status) {
     this.status = status;
+    return this;
+  }
+
+  public OrderTestDataBuilder creditCardId(CreditCardId creditCardId) {
+    this.creditCardId = creditCardId;
     return this;
   }
 

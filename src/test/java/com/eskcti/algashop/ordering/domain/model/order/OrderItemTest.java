@@ -4,9 +4,6 @@ import org.junit.jupiter.api.Test;
 
 import com.eskcti.algashop.ordering.domain.model.commons.Money;
 import com.eskcti.algashop.ordering.domain.model.commons.Quantity;
-import com.eskcti.algashop.ordering.domain.model.order.OrderId;
-import com.eskcti.algashop.ordering.domain.model.order.OrderItem;
-import com.eskcti.algashop.ordering.domain.model.order.OrderItemId;
 import com.eskcti.algashop.ordering.domain.model.product.Product;
 import com.eskcti.algashop.ordering.domain.model.product.ProductId;
 import com.eskcti.algashop.ordering.domain.model.product.ProductName;

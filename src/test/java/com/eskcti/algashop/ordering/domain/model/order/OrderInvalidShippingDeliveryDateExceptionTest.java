@@ -5,9 +5,6 @@ import static com.eskcti.algashop.ordering.domain.model.ErrorMessages.ERROR_ORDE
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import com.eskcti.algashop.ordering.domain.model.order.OrderId;
-import com.eskcti.algashop.ordering.domain.model.order.OrderInvalidShippingDeliveryDateException;
-
 class OrderInvalidShippingDeliveryDateExceptionTest {
 
   @Test
