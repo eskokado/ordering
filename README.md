@@ -19,7 +19,7 @@ Suba o stub da Rapidex antes de rodar integrações ou a aplicação completa:
 
 ```bash
 # na raiz do monorepo algashop
-docker compose up -d rapidexapi
+docker compose up -d wiremock
 ```
 
 Em seguida:
