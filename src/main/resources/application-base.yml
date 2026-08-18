@@ -12,3 +12,12 @@ spring:
 algashop:
   integrations:
     shipping.provider: RAPIDEX
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: always
