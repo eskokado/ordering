@@ -3,10 +3,10 @@ package com.eskcti.algashop.ordering.infrastructure.listener.order;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
-import com.eskcti.algashop.ordering.domain.model.order.OrderCanceledEvent;
-import com.eskcti.algashop.ordering.domain.model.order.OrderPaidEvent;
-import com.eskcti.algashop.ordering.domain.model.order.OrderPlacedEvent;
-import com.eskcti.algashop.ordering.domain.model.order.OrderReadyEvent;
+import com.eskcti.algashop.ordering.core.domain.model.order.OrderCanceledEvent;
+import com.eskcti.algashop.ordering.core.domain.model.order.OrderPaidEvent;
+import com.eskcti.algashop.ordering.core.domain.model.order.OrderPlacedEvent;
+import com.eskcti.algashop.ordering.core.domain.model.order.OrderReadyEvent;
 
 @Component
 public class OrderEventListener {

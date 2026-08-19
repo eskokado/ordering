@@ -1,11 +1,11 @@
 package com.eskcti.algashop.ordering.contract.base;
 
-import com.eskcti.algashop.ordering.application.shoppingcart.management.ShoppingCartManagementApplicationService;
-import com.eskcti.algashop.ordering.application.shoppingcart.query.ShoppingCartOutputTestDataBuilder;
-import com.eskcti.algashop.ordering.application.shoppingcart.query.ShoppingCartQueryService;
-import com.eskcti.algashop.ordering.domain.model.customer.CustomerNotFoundException;
-import com.eskcti.algashop.ordering.domain.model.product.ProductNotFoundException;
-import com.eskcti.algashop.ordering.domain.model.shoppingcart.ShoppingCartNotFoundException;
+import com.eskcti.algashop.ordering.core.application.shoppingcart.query.ShoppingCartOutputTestDataBuilder;
+import com.eskcti.algashop.ordering.core.application.shoppingcart.management.ShoppingCartManagementApplicationService;
+import com.eskcti.algashop.ordering.core.application.shoppingcart.query.ShoppingCartQueryService;
+import com.eskcti.algashop.ordering.core.domain.model.customer.CustomerNotFoundException;
+import com.eskcti.algashop.ordering.core.domain.model.product.ProductNotFoundException;
+import com.eskcti.algashop.ordering.core.domain.model.shoppingcart.ShoppingCartNotFoundException;
 import com.eskcti.algashop.ordering.presentation.shoppingcart.ShoppingCartController;
 
 import io.restassured.module.mockmvc.RestAssuredMockMvc;

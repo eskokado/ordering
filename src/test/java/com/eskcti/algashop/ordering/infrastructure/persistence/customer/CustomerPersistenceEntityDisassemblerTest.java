@@ -4,13 +4,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;
 
-import com.eskcti.algashop.ordering.domain.model.commons.Document;
-import com.eskcti.algashop.ordering.domain.model.commons.Email;
-import com.eskcti.algashop.ordering.domain.model.commons.FullName;
-import com.eskcti.algashop.ordering.domain.model.commons.Phone;
-import com.eskcti.algashop.ordering.domain.model.customer.BirthDate;
-import com.eskcti.algashop.ordering.domain.model.customer.Customer;
-import com.eskcti.algashop.ordering.domain.model.customer.LoyaltyPoints;
+import com.eskcti.algashop.ordering.core.domain.model.commons.Document;
+import com.eskcti.algashop.ordering.core.domain.model.commons.Email;
+import com.eskcti.algashop.ordering.core.domain.model.commons.FullName;
+import com.eskcti.algashop.ordering.core.domain.model.commons.Phone;
+import com.eskcti.algashop.ordering.core.domain.model.customer.BirthDate;
+import com.eskcti.algashop.ordering.core.domain.model.customer.Customer;
+import com.eskcti.algashop.ordering.core.domain.model.customer.LoyaltyPoints;
 import com.eskcti.algashop.ordering.infrastructure.persistence.customer.CustomerPersistenceEntity;
 import com.eskcti.algashop.ordering.infrastructure.persistence.customer.CustomerPersistenceEntityDisassembler;
 

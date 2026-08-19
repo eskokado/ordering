@@ -19,7 +19,7 @@ import org.springframework.test.context.jdbc.SqlConfig;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.eskcti.algashop.ordering.application.customer.query.CustomerOutput;
+import com.eskcti.algashop.ordering.core.application.customer.query.CustomerOutput;
 import com.eskcti.algashop.ordering.infrastructure.persistence.SpringDataAuditingConfig;
 import jakarta.persistence.EntityManager;
 

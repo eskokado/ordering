@@ -7,11 +7,11 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
-import com.eskcti.algashop.ordering.domain.model.customer.CustomerId;
-import com.eskcti.algashop.ordering.domain.model.product.ProductId;
-import com.eskcti.algashop.ordering.domain.model.shoppingcart.ShoppingCartCreatedEvent;
-import com.eskcti.algashop.ordering.domain.model.shoppingcart.ShoppingCartId;
-import com.eskcti.algashop.ordering.domain.model.shoppingcart.ShoppingCartItemAddedEvent;
+import com.eskcti.algashop.ordering.core.domain.model.customer.CustomerId;
+import com.eskcti.algashop.ordering.core.domain.model.product.ProductId;
+import com.eskcti.algashop.ordering.core.domain.model.shoppingcart.ShoppingCartCreatedEvent;
+import com.eskcti.algashop.ordering.core.domain.model.shoppingcart.ShoppingCartId;
+import com.eskcti.algashop.ordering.core.domain.model.shoppingcart.ShoppingCartItemAddedEvent;
 import com.eskcti.algashop.ordering.infrastructure.persistence.customer.CustomerPersistenceEntity;
 import com.eskcti.algashop.ordering.infrastructure.persistence.customer.CustomerPersistenceEntityTestDataBuilder;
 import com.eskcti.algashop.ordering.infrastructure.persistence.shoppingcart.ShoppingCartItemPersistenceEntity;

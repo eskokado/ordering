@@ -1,11 +1,11 @@
 package com.eskcti.algashop.ordering.presentation.shoppingcart;
 
-import com.eskcti.algashop.ordering.application.shoppingcart.management.ShoppingCartItemInput;
-import com.eskcti.algashop.ordering.application.shoppingcart.management.ShoppingCartManagementApplicationService;
-import com.eskcti.algashop.ordering.application.shoppingcart.query.ShoppingCartOutput;
-import com.eskcti.algashop.ordering.application.shoppingcart.query.ShoppingCartQueryService;
-import com.eskcti.algashop.ordering.domain.model.customer.CustomerNotFoundException;
-import com.eskcti.algashop.ordering.domain.model.product.ProductNotFoundException;
+import com.eskcti.algashop.ordering.core.application.shoppingcart.management.ShoppingCartItemInput;
+import com.eskcti.algashop.ordering.core.application.shoppingcart.management.ShoppingCartManagementApplicationService;
+import com.eskcti.algashop.ordering.core.application.shoppingcart.query.ShoppingCartOutput;
+import com.eskcti.algashop.ordering.core.application.shoppingcart.query.ShoppingCartQueryService;
+import com.eskcti.algashop.ordering.core.domain.model.customer.CustomerNotFoundException;
+import com.eskcti.algashop.ordering.core.domain.model.product.ProductNotFoundException;
 import com.eskcti.algashop.ordering.presentation.UnprocessableEntityException;
 
 import jakarta.validation.Valid;

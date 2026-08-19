@@ -1,10 +1,10 @@
 package com.eskcti.algashop.ordering.infrastructure.product.client.http;
 
-import com.eskcti.algashop.ordering.domain.model.commons.Money;
-import com.eskcti.algashop.ordering.domain.model.product.Product;
-import com.eskcti.algashop.ordering.domain.model.product.ProductCatalogService;
-import com.eskcti.algashop.ordering.domain.model.product.ProductId;
-import com.eskcti.algashop.ordering.domain.model.product.ProductName;
+import com.eskcti.algashop.ordering.core.domain.model.commons.Money;
+import com.eskcti.algashop.ordering.core.domain.model.product.Product;
+import com.eskcti.algashop.ordering.core.domain.model.product.ProductCatalogService;
+import com.eskcti.algashop.ordering.core.domain.model.product.ProductId;
+import com.eskcti.algashop.ordering.core.domain.model.product.ProductName;
 import com.eskcti.algashop.ordering.presentation.BadGatewayException;
 import com.eskcti.algashop.ordering.presentation.GatewayTimeoutException;
 

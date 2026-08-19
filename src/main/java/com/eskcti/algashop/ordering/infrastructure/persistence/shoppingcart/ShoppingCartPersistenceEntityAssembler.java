@@ -5,8 +5,8 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 
-import com.eskcti.algashop.ordering.domain.model.shoppingcart.ShoppingCart;
-import com.eskcti.algashop.ordering.domain.model.shoppingcart.ShoppingCartItem;
+import com.eskcti.algashop.ordering.core.domain.model.shoppingcart.ShoppingCart;
+import com.eskcti.algashop.ordering.core.domain.model.shoppingcart.ShoppingCartItem;
 import com.eskcti.algashop.ordering.infrastructure.persistence.customer.CustomerPersistenceEntityRepository;
 
 import lombok.RequiredArgsConstructor;

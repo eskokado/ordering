@@ -5,10 +5,10 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.eskcti.algashop.ordering.application.shoppingcart.query.ShoppingCartOutput;
-import com.eskcti.algashop.ordering.application.shoppingcart.query.ShoppingCartQueryService;
-import com.eskcti.algashop.ordering.application.utility.Mapper;
-import com.eskcti.algashop.ordering.domain.model.shoppingcart.ShoppingCartNotFoundException;
+import com.eskcti.algashop.ordering.core.application.shoppingcart.query.ShoppingCartOutput;
+import com.eskcti.algashop.ordering.core.application.shoppingcart.query.ShoppingCartQueryService;
+import com.eskcti.algashop.ordering.core.application.utility.Mapper;
+import com.eskcti.algashop.ordering.core.domain.model.shoppingcart.ShoppingCartNotFoundException;
 
 import lombok.RequiredArgsConstructor;
 

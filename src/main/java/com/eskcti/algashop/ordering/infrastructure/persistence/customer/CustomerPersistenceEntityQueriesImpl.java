@@ -3,7 +3,7 @@ package com.eskcti.algashop.ordering.infrastructure.persistence.customer;
 import java.util.Optional;
 import java.util.UUID;
 
-import com.eskcti.algashop.ordering.application.customer.query.CustomerOutput;
+import com.eskcti.algashop.ordering.core.application.customer.query.CustomerOutput;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
@@ -16,7 +16,7 @@ public class CustomerPersistenceEntityQueriesImpl implements CustomerPersistence
   private final EntityManager entityManager;
 
   private static final String findByIdAsOutputJPQL = """
-      SELECT new com.eskcti.algashop.ordering.application.customer.query.CustomerOutput(
+      SELECT new com.eskcti.algashop.ordering.core.application.customer.query.CustomerOutput(
           c.id,
           c.firstName,
           c.lastName,
@@ -29,7 +29,7 @@ public class CustomerPersistenceEntityQueriesImpl implements CustomerPersistence
           c.archivedAt,
           c.promotionNotificationsAllowed,
           c.archived,
-          new com.eskcti.algashop.ordering.application.commons.AddressData(
+          new com.eskcti.algashop.ordering.core.application.commons.AddressData(
               c.address.street,
               c.address.number,
               c.address.complement,

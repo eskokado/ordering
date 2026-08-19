@@ -9,13 +9,13 @@ import org.modelmapper.convention.NamingConventions;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.eskcti.algashop.ordering.application.customer.query.CustomerOutput;
-import com.eskcti.algashop.ordering.application.order.query.OrderDetailOutput;
-import com.eskcti.algashop.ordering.application.order.query.OrderItemDetailOutput;
-import com.eskcti.algashop.ordering.application.utility.Mapper;
-import com.eskcti.algashop.ordering.domain.model.commons.FullName;
-import com.eskcti.algashop.ordering.domain.model.customer.BirthDate;
-import com.eskcti.algashop.ordering.domain.model.customer.Customer;
+import com.eskcti.algashop.ordering.core.application.customer.query.CustomerOutput;
+import com.eskcti.algashop.ordering.core.application.order.query.OrderDetailOutput;
+import com.eskcti.algashop.ordering.core.application.order.query.OrderItemDetailOutput;
+import com.eskcti.algashop.ordering.core.application.utility.Mapper;
+import com.eskcti.algashop.ordering.core.domain.model.commons.FullName;
+import com.eskcti.algashop.ordering.core.domain.model.customer.BirthDate;
+import com.eskcti.algashop.ordering.core.domain.model.customer.Customer;
 import com.eskcti.algashop.ordering.infrastructure.persistence.order.OrderItemPersistenceEntity;
 import com.eskcti.algashop.ordering.infrastructure.persistence.order.OrderPersistenceEntity;
 

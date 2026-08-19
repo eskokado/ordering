@@ -2,8 +2,9 @@ package com.eskcti.algashop.ordering.infrastructure.persistence.order;
 
 import org.junit.jupiter.api.Test;
 
-import com.eskcti.algashop.ordering.domain.model.order.OrderTestDataBuilder;
-import com.eskcti.algashop.ordering.domain.model.order.Order;
+import com.eskcti.algashop.ordering.core.domain.model.order.Order;
+import com.eskcti.algashop.ordering.core.domain.model.order.OrderTestDataBuilder;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Set;

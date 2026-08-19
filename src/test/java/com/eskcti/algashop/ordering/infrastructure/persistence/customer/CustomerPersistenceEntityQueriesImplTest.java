@@ -9,7 +9,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.eskcti.algashop.ordering.application.customer.query.CustomerOutput;
+import com.eskcti.algashop.ordering.core.application.customer.query.CustomerOutput;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;

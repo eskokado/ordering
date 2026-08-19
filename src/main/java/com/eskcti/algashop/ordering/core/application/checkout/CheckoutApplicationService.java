@@ -1,0 +1,84 @@
+package com.eskcti.algashop.ordering.core.application.checkout;
+
+import java.util.Objects;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.eskcti.algashop.ordering.core.domain.model.DomainException;
+import com.eskcti.algashop.ordering.core.domain.model.commons.ZipCode;
+import com.eskcti.algashop.ordering.core.domain.model.customer.Customer;
+import com.eskcti.algashop.ordering.core.domain.model.customer.CustomerNotFoundException;
+import com.eskcti.algashop.ordering.core.domain.model.customer.Customers;
+import com.eskcti.algashop.ordering.core.domain.model.order.CheckoutService;
+import com.eskcti.algashop.ordering.core.domain.model.order.CreditCardId;
+import com.eskcti.algashop.ordering.core.domain.model.order.Order;
+import com.eskcti.algashop.ordering.core.domain.model.order.Orders;
+import com.eskcti.algashop.ordering.core.domain.model.order.PaymentMethod;
+import com.eskcti.algashop.ordering.core.domain.model.order.shipping.OriginAddressService;
+import com.eskcti.algashop.ordering.core.domain.model.order.shipping.ShippingCostService;
+import com.eskcti.algashop.ordering.core.domain.model.product.ProductCatalogService;
+import com.eskcti.algashop.ordering.core.domain.model.shoppingcart.ShoppingCart;
+import com.eskcti.algashop.ordering.core.domain.model.shoppingcart.ShoppingCartId;
+import com.eskcti.algashop.ordering.core.domain.model.shoppingcart.ShoppingCartNotFoundException;
+import com.eskcti.algashop.ordering.core.domain.model.shoppingcart.ShoppingCarts;
+
+import lombok.RequiredArgsConstructor;
+
+@Service
+@RequiredArgsConstructor
+public class CheckoutApplicationService {
+
+  private final Orders orders;
+  private final ShoppingCarts shoppingCarts;
+  private final Customers customers;
+
+  private final CheckoutService checkoutService;
+
+  private final BillingInputDisassembler billingInputDisassembler;
+  private final ShippingInputDisassembler shippingInputDisassembler;
+
+  private final ShippingCostService shippingCostService;
+  private final OriginAddressService originAddressService;
+  private final ProductCatalogService productCatalogService;
+
+  @Transactional
+  public String checkout(CheckoutInput input) {
+    Objects.requireNonNull(input);
+    PaymentMethod paymentMethod = PaymentMethod.valueOf(input.getPaymentMethod());
+
+    CreditCardId creditCardId = null;
+
+    if (paymentMethod.equals(PaymentMethod.CREDIT_CARD)) {
+      if (input.getCreditCardId() == null) {
+        throw new DomainException("Credit card id is required");
+      }
+      creditCardId = new CreditCardId(input.getCreditCardId());
+    }
+
+    ShoppingCartId shoppingCartId = new ShoppingCartId(input.getShoppingCartId());
+    ShoppingCart shoppingCart = shoppingCarts.ofId(shoppingCartId)
+        .orElseThrow(() -> new ShoppingCartNotFoundException());
+
+    Customer customer = customers.ofId(shoppingCart.customerId()).orElseThrow(() -> new CustomerNotFoundException());
+
+    var shippingCalculationResult = calculateShippingCost(input.getShipping());
+
+    Order order = checkoutService.checkout(customer, shoppingCart,
+        billingInputDisassembler.toDomainModel(input.getBilling()),
+        shippingInputDisassembler.toDomainModel(input.getShipping(), shippingCalculationResult),
+        paymentMethod, creditCardId);
+
+    orders.add(order);
+    shoppingCarts.add(shoppingCart);
+
+    return order.id().toString();
+  }
+
+  private ShippingCostService.CalculationResult calculateShippingCost(ShippingInput shipping) {
+    ZipCode origin = originAddressService.originAddress().zipCode();
+    ZipCode destination = new ZipCode(shipping.getAddress().getZipCode());
+    return shippingCostService.calculate(new ShippingCostService.CalculationRequest(origin, destination));
+  }
+
+}

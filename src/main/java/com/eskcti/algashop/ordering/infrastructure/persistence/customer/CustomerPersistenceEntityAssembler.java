@@ -2,8 +2,8 @@ package com.eskcti.algashop.ordering.infrastructure.persistence.customer;
 
 import org.springframework.stereotype.Component;
 
-import com.eskcti.algashop.ordering.domain.model.commons.Address;
-import com.eskcti.algashop.ordering.domain.model.customer.Customer;
+import com.eskcti.algashop.ordering.core.domain.model.commons.Address;
+import com.eskcti.algashop.ordering.core.domain.model.customer.Customer;
 import com.eskcti.algashop.ordering.infrastructure.persistence.commons.AddressEmbeddable;
 
 @Component

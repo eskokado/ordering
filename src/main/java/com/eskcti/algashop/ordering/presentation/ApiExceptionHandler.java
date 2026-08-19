@@ -17,9 +17,9 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-import com.eskcti.algashop.ordering.domain.model.DomainEntityNotFoundException;
-import com.eskcti.algashop.ordering.domain.model.DomainException;
-import com.eskcti.algashop.ordering.domain.model.customer.CustomerEmailIsInUseException;
+import com.eskcti.algashop.ordering.core.domain.model.DomainEntityNotFoundException;
+import com.eskcti.algashop.ordering.core.domain.model.DomainException;
+import com.eskcti.algashop.ordering.core.domain.model.customer.CustomerEmailIsInUseException;
 
 import java.net.URI;
 import java.util.Map;

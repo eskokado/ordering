@@ -10,14 +10,14 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.eskcti.algashop.ordering.application.order.query.CustomerMinimalOutput;
-import com.eskcti.algashop.ordering.application.order.query.OrderDetailOutput;
-import com.eskcti.algashop.ordering.application.order.query.OrderFilter;
-import com.eskcti.algashop.ordering.application.order.query.OrderQueryService;
-import com.eskcti.algashop.ordering.application.order.query.OrderSummaryOutput;
-import com.eskcti.algashop.ordering.application.utility.Mapper;
-import com.eskcti.algashop.ordering.domain.model.order.OrderId;
-import com.eskcti.algashop.ordering.domain.model.order.OrderNotFoundException;
+import com.eskcti.algashop.ordering.core.application.order.query.CustomerMinimalOutput;
+import com.eskcti.algashop.ordering.core.application.order.query.OrderDetailOutput;
+import com.eskcti.algashop.ordering.core.application.order.query.OrderFilter;
+import com.eskcti.algashop.ordering.core.application.order.query.OrderQueryService;
+import com.eskcti.algashop.ordering.core.application.order.query.OrderSummaryOutput;
+import com.eskcti.algashop.ordering.core.application.utility.Mapper;
+import com.eskcti.algashop.ordering.core.domain.model.order.OrderId;
+import com.eskcti.algashop.ordering.core.domain.model.order.OrderNotFoundException;
 import com.eskcti.algashop.ordering.infrastructure.persistence.customer.CustomerPersistenceEntity;
 
 import jakarta.persistence.EntityManager;

@@ -20,11 +20,11 @@ import org.springframework.test.context.jdbc.SqlConfig;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.eskcti.algashop.ordering.domain.model.customer.Customer;
-import com.eskcti.algashop.ordering.domain.model.customer.Customers;
-import com.eskcti.algashop.ordering.domain.model.customer.CustomerTestDataBuilder;
-import com.eskcti.algashop.ordering.domain.model.shoppingcart.ShoppingCart;
-import com.eskcti.algashop.ordering.domain.model.shoppingcart.ShoppingCarts;
+import com.eskcti.algashop.ordering.core.domain.model.customer.Customer;
+import com.eskcti.algashop.ordering.core.domain.model.customer.CustomerTestDataBuilder;
+import com.eskcti.algashop.ordering.core.domain.model.customer.Customers;
+import com.eskcti.algashop.ordering.core.domain.model.shoppingcart.ShoppingCart;
+import com.eskcti.algashop.ordering.core.domain.model.shoppingcart.ShoppingCarts;
 import com.eskcti.algashop.ordering.infrastructure.persistence.customer.CustomerPersistenceEntityAssembler;
 import com.eskcti.algashop.ordering.infrastructure.persistence.customer.CustomerPersistenceEntityDisassembler;
 import com.eskcti.algashop.ordering.infrastructure.persistence.customer.CustomerPersistenceEntityRepository;
@@ -112,7 +112,7 @@ class ShoppingCartsPersistenceProviderIT {
     shoppingCarts.add(shoppingCart);
     Long initialVersion = shoppingCart.version();
 
-    setField(shoppingCart, "totalItems", new com.eskcti.algashop.ordering.domain.model.commons.Quantity(5));
+    setField(shoppingCart, "totalItems", new com.eskcti.algashop.ordering.core.domain.model.commons.Quantity(5));
     shoppingCarts.add(shoppingCart);
     Long versionAfterUpdate = shoppingCart.version();
 
@@ -131,7 +131,7 @@ class ShoppingCartsPersistenceProviderIT {
         () -> shoppingCarts.ofId(shoppingCart.id()).orElseThrow());
 
     setField(cartFromAnotherTransaction, "totalItems",
-        new com.eskcti.algashop.ordering.domain.model.commons.Quantity(5));
+        new com.eskcti.algashop.ordering.core.domain.model.commons.Quantity(5));
 
     inNewTransaction(() -> shoppingCarts.add(shoppingCart));
 

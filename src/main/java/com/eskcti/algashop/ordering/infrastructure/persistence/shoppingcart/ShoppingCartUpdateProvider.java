@@ -3,9 +3,9 @@ package com.eskcti.algashop.ordering.infrastructure.persistence.shoppingcart;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.eskcti.algashop.ordering.domain.model.commons.Money;
-import com.eskcti.algashop.ordering.domain.model.product.ProductId;
-import com.eskcti.algashop.ordering.domain.model.shoppingcart.ShoppingCartProductAdjustmentService;
+import com.eskcti.algashop.ordering.core.domain.model.commons.Money;
+import com.eskcti.algashop.ordering.core.domain.model.product.ProductId;
+import com.eskcti.algashop.ordering.core.domain.model.shoppingcart.ShoppingCartProductAdjustmentService;
 
 import lombok.RequiredArgsConstructor;
 

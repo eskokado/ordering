@@ -7,11 +7,11 @@ import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
 
-import com.eskcti.algashop.ordering.domain.model.commons.Email;
-import com.eskcti.algashop.ordering.domain.model.commons.FullName;
-import com.eskcti.algashop.ordering.domain.model.customer.CustomerArchivedEvent;
-import com.eskcti.algashop.ordering.domain.model.customer.CustomerId;
-import com.eskcti.algashop.ordering.domain.model.customer.CustomerRegisteredEvent;
+import com.eskcti.algashop.ordering.core.domain.model.commons.Email;
+import com.eskcti.algashop.ordering.core.domain.model.commons.FullName;
+import com.eskcti.algashop.ordering.core.domain.model.customer.CustomerArchivedEvent;
+import com.eskcti.algashop.ordering.core.domain.model.customer.CustomerId;
+import com.eskcti.algashop.ordering.core.domain.model.customer.CustomerRegisteredEvent;
 
 class CustomerPersistenceEntityTest {
 

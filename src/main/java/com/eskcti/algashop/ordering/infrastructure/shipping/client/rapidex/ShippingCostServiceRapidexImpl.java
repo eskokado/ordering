@@ -5,8 +5,8 @@ import java.time.LocalDate;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
-import com.eskcti.algashop.ordering.domain.model.commons.Money;
-import com.eskcti.algashop.ordering.domain.model.order.shipping.ShippingCostService;
+import com.eskcti.algashop.ordering.core.domain.model.commons.Money;
+import com.eskcti.algashop.ordering.core.domain.model.order.shipping.ShippingCostService;
 
 import lombok.RequiredArgsConstructor;
 

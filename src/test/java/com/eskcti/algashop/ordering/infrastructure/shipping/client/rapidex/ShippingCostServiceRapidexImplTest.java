@@ -11,9 +11,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.eskcti.algashop.ordering.domain.model.commons.Money;
-import com.eskcti.algashop.ordering.domain.model.commons.ZipCode;
-import com.eskcti.algashop.ordering.domain.model.order.shipping.ShippingCostService.CalculationRequest;
+import com.eskcti.algashop.ordering.core.domain.model.commons.Money;
+import com.eskcti.algashop.ordering.core.domain.model.commons.ZipCode;
+import com.eskcti.algashop.ordering.core.domain.model.order.shipping.ShippingCostService.CalculationRequest;
 import com.eskcti.algashop.ordering.infrastructure.shipping.client.rapidex.DeliveryCostRequest;
 import com.eskcti.algashop.ordering.infrastructure.shipping.client.rapidex.DeliveryCostResponse;
 import com.eskcti.algashop.ordering.infrastructure.shipping.client.rapidex.RapiDexAPIClient;

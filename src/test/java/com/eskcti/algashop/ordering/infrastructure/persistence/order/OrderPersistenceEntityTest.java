@@ -4,10 +4,10 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import com.eskcti.algashop.ordering.domain.model.customer.CustomerId;
-import com.eskcti.algashop.ordering.domain.model.order.OrderCanceledEvent;
-import com.eskcti.algashop.ordering.domain.model.order.OrderPaidEvent;
-import com.eskcti.algashop.ordering.domain.model.order.OrderPlacedEvent;
+import com.eskcti.algashop.ordering.core.domain.model.customer.CustomerId;
+import com.eskcti.algashop.ordering.core.domain.model.order.OrderCanceledEvent;
+import com.eskcti.algashop.ordering.core.domain.model.order.OrderPaidEvent;
+import com.eskcti.algashop.ordering.core.domain.model.order.OrderPlacedEvent;
 import com.eskcti.algashop.ordering.infrastructure.persistence.customer.CustomerPersistenceEntityTestDataBuilder;
 import com.eskcti.algashop.ordering.infrastructure.persistence.order.OrderItemPersistenceEntity;
 import com.eskcti.algashop.ordering.infrastructure.persistence.order.OrderPersistenceEntity;
@@ -111,11 +111,11 @@ class OrderPersistenceEntityTest {
     final var entity = OrderPersistenceEntityTestDataBuilder.existingOrder().build();
     final var customerId = new CustomerId(entity.getCustomerId());
     final var placedEvent = new OrderPlacedEvent(
-        new com.eskcti.algashop.ordering.domain.model.order.OrderId(entity.getId()),
+        new com.eskcti.algashop.ordering.core.domain.model.order.OrderId(entity.getId()),
         customerId,
         entity.getPlacedAt());
     final var paidEvent = new OrderPaidEvent(
-        new com.eskcti.algashop.ordering.domain.model.order.OrderId(entity.getId()),
+        new com.eskcti.algashop.ordering.core.domain.model.order.OrderId(entity.getId()),
         customerId,
         entity.getPaidAt());
 

@@ -1,0 +1,272 @@
+package com.eskcti.algashop.ordering.core.application.shoppingcart.management;
+
+import java.util.Optional;
+import java.util.UUID;
+
+import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.jdbc.Sql;
+import org.springframework.test.context.jdbc.SqlConfig;
+
+import com.eskcti.algashop.ordering.core.application.shoppingcart.management.ShoppingCartItemInput;
+import com.eskcti.algashop.ordering.core.application.shoppingcart.management.ShoppingCartManagementApplicationService;
+import com.eskcti.algashop.ordering.core.domain.model.commons.Quantity;
+import com.eskcti.algashop.ordering.core.domain.model.customer.Customer;
+import com.eskcti.algashop.ordering.core.domain.model.customer.CustomerAlreadyHaveShoppingCartException;
+import com.eskcti.algashop.ordering.core.domain.model.customer.CustomerNotFoundException;
+import com.eskcti.algashop.ordering.core.domain.model.customer.CustomerTestDataBuilder;
+import com.eskcti.algashop.ordering.core.domain.model.customer.Customers;
+import com.eskcti.algashop.ordering.core.domain.model.product.Product;
+import com.eskcti.algashop.ordering.core.domain.model.product.ProductCatalogService;
+import com.eskcti.algashop.ordering.core.domain.model.product.ProductNotFoundException;
+import com.eskcti.algashop.ordering.core.domain.model.product.ProductOutOfStockException;
+import com.eskcti.algashop.ordering.core.domain.model.product.ProductTestDataBuilder;
+import com.eskcti.algashop.ordering.core.domain.model.shoppingcart.ShoppingCart;
+import com.eskcti.algashop.ordering.core.domain.model.shoppingcart.ShoppingCartCreatedEvent;
+import com.eskcti.algashop.ordering.core.domain.model.shoppingcart.ShoppingCartDoesNotContainItemException;
+import com.eskcti.algashop.ordering.core.domain.model.shoppingcart.ShoppingCartEmptiedEvent;
+import com.eskcti.algashop.ordering.core.domain.model.shoppingcart.ShoppingCartId;
+import com.eskcti.algashop.ordering.core.domain.model.shoppingcart.ShoppingCartItem;
+import com.eskcti.algashop.ordering.core.domain.model.shoppingcart.ShoppingCartItemAddedEvent;
+import com.eskcti.algashop.ordering.core.domain.model.shoppingcart.ShoppingCartItemRemovedEvent;
+import com.eskcti.algashop.ordering.core.domain.model.shoppingcart.ShoppingCartNotFoundException;
+import com.eskcti.algashop.ordering.core.domain.model.shoppingcart.ShoppingCarts;
+import com.eskcti.algashop.ordering.infrastructure.listener.shoppingcart.ShoppingCartEventListener;
+
+@SpringBootTest
+
+@Sql(scripts = "classpath:sql/clean-database.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS, config = @SqlConfig(transactionMode = SqlConfig.TransactionMode.ISOLATED))
+@Sql(scripts = "classpath:sql/clean-database.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD, config = @SqlConfig(transactionMode = SqlConfig.TransactionMode.ISOLATED))
+@Transactional(propagation = Propagation.NOT_SUPPORTED)
+@ActiveProfiles("it")
+class ShoppingCartManagementApplicationServiceIT {
+
+  @Autowired
+  private ShoppingCartManagementApplicationService service;
+
+  @Autowired
+  private ShoppingCarts shoppingCarts;
+
+  @Autowired
+  private Customers customers;
+
+  @MockitoBean
+  private ProductCatalogService productCatalogService;
+
+  @MockitoSpyBean
+  private ShoppingCartEventListener shoppingCartEventListener;
+
+  @Test
+  void shouldCreateNewShoppingCartForExistingCustomer() {
+    Customer customer = CustomerTestDataBuilder.brandNewCustomer().build();
+    customers.add(customer);
+
+    UUID newShoppingCartId = service.createNew(customer.id().value());
+
+    Assertions.assertThat(newShoppingCartId).isNotNull();
+    Optional<ShoppingCart> createdCart = shoppingCarts.ofId(new ShoppingCartId(newShoppingCartId));
+    Assertions.assertThat(createdCart).isPresent();
+    Assertions.assertThat(createdCart.get().customerId().value()).isEqualTo(customer.id().value());
+    Assertions.assertThat(createdCart.get().isEmpty()).isTrue();
+
+    Mockito.verify(shoppingCartEventListener, Mockito.times(1))
+        .listen(Mockito.any(ShoppingCartCreatedEvent.class));
+  }
+
+  @Test
+  void shouldThrowCustomerNotFoundExceptionWhenCreatingNewShoppingCartForNonExistingCustomer() {
+    UUID nonExistingCustomerId = UUID.randomUUID();
+
+    Assertions.assertThatExceptionOfType(CustomerNotFoundException.class)
+        .isThrownBy(() -> service.createNew(nonExistingCustomerId));
+  }
+
+  @Test
+  void shouldThrowCustomerAlreadyHaveShoppingCartExceptionWhenCreatingNewShoppingCartForCustomerWithExistingCart() {
+    Customer customer = CustomerTestDataBuilder.brandNewCustomer().build();
+    customers.add(customer);
+    ShoppingCart existingCart = ShoppingCart.startShopping(customer.id());
+    shoppingCarts.add(existingCart);
+
+    Assertions.assertThatExceptionOfType(CustomerAlreadyHaveShoppingCartException.class)
+        .isThrownBy(() -> service.createNew(customer.id().value()));
+  }
+
+  @Test
+  void shouldAddItemToShoppingCartSuccessfully() {
+    Customer customer = CustomerTestDataBuilder.brandNewCustomer().build();
+    customers.add(customer);
+    ShoppingCart shoppingCart = ShoppingCart.startShopping(customer.id());
+    shoppingCarts.add(shoppingCart);
+
+    Product product = ProductTestDataBuilder.aProduct().inStock(true).build();
+    Mockito.when(productCatalogService.ofId(product.id())).thenReturn(Optional.of(product));
+
+    ShoppingCartItemInput input = ShoppingCartItemInput.builder()
+        .shoppingCartId(shoppingCart.id().value())
+        .productId(product.id().value())
+        .quantity(2)
+        .build();
+
+    service.addItem(input);
+
+    ShoppingCart updatedCart = shoppingCarts.ofId(shoppingCart.id()).orElseThrow();
+    Assertions.assertThat(updatedCart.items()).hasSize(1);
+    Assertions.assertThat(updatedCart.items().iterator().next().productId()).isEqualTo(product.id());
+    Assertions.assertThat(updatedCart.items().iterator().next().quantity().value()).isEqualTo(2);
+
+    Mockito.verify(shoppingCartEventListener, Mockito.times(1))
+        .listen(Mockito.any(ShoppingCartItemAddedEvent.class));
+  }
+
+  @Test
+  void shouldThrowShoppingCartNotFoundExceptionWhenAddingItemToNonExistingShoppingCart() {
+    UUID nonExistingCartId = UUID.randomUUID();
+    Product product = ProductTestDataBuilder.aProduct().inStock(true).build();
+    Mockito.when(productCatalogService.ofId(product.id())).thenReturn(Optional.of(product));
+
+    ShoppingCartItemInput input = ShoppingCartItemInput.builder()
+        .shoppingCartId(nonExistingCartId)
+        .productId(product.id().value())
+        .quantity(1)
+        .build();
+
+    Assertions.assertThatExceptionOfType(ShoppingCartNotFoundException.class)
+        .isThrownBy(() -> service.addItem(input));
+  }
+
+  @Test
+  void shouldThrowProductNotFoundExceptionWhenAddingNonExistingProduct() {
+    Customer customer = CustomerTestDataBuilder.brandNewCustomer().build();
+    customers.add(customer);
+    ShoppingCart shoppingCart = ShoppingCart.startShopping(customer.id());
+    shoppingCarts.add(shoppingCart);
+
+    Mockito.when(productCatalogService.ofId(Mockito.any())).thenReturn(Optional.empty());
+
+    ShoppingCartItemInput input = ShoppingCartItemInput.builder()
+        .shoppingCartId(shoppingCart.id().value())
+        .productId(UUID.randomUUID())
+        .quantity(1)
+        .build();
+
+    Assertions.assertThatExceptionOfType(ProductNotFoundException.class)
+        .isThrownBy(() -> service.addItem(input));
+  }
+
+  @Test
+  void shouldThrowProductOutOfStockExceptionWhenAddingOutOfStockProduct() {
+    Customer customer = CustomerTestDataBuilder.brandNewCustomer().build();
+    customers.add(customer);
+    ShoppingCart shoppingCart = ShoppingCart.startShopping(customer.id());
+    shoppingCarts.add(shoppingCart);
+
+    Product outOfStockProduct = ProductTestDataBuilder.aProduct().inStock(false).build();
+    Mockito.when(productCatalogService.ofId(outOfStockProduct.id())).thenReturn(Optional.of(outOfStockProduct));
+
+    ShoppingCartItemInput input = ShoppingCartItemInput.builder()
+        .shoppingCartId(shoppingCart.id().value())
+        .productId(outOfStockProduct.id().value())
+        .quantity(1)
+        .build();
+
+    Assertions.assertThatExceptionOfType(ProductOutOfStockException.class)
+        .isThrownBy(() -> service.addItem(input));
+  }
+
+  @Test
+  void shouldRemoveItemFromShoppingCartSuccessfully() {
+    Customer customer = CustomerTestDataBuilder.brandNewCustomer().build();
+    customers.add(customer);
+    ShoppingCart shoppingCart = ShoppingCart.startShopping(customer.id());
+    Product product = ProductTestDataBuilder.aProduct().inStock(true).build();
+    shoppingCart.addItem(product, new Quantity(1));
+    shoppingCarts.add(shoppingCart);
+
+    ShoppingCartItem itemToRemove = shoppingCart.items().iterator().next();
+
+    service.removeItem(shoppingCart.id().value(), itemToRemove.id().value());
+
+    ShoppingCart updatedCart = shoppingCarts.ofId(shoppingCart.id()).orElseThrow();
+    Assertions.assertThat(updatedCart.items()).isEmpty();
+
+    Mockito.verify(shoppingCartEventListener, Mockito.times(1))
+        .listen(Mockito.any(ShoppingCartItemRemovedEvent.class));
+  }
+
+  @Test
+  void shouldThrowShoppingCartNotFoundExceptionWhenRemovingItemFromNonExistingShoppingCart() {
+    UUID nonExistingCartId = UUID.randomUUID();
+    UUID dummyItemId = UUID.randomUUID();
+
+    Assertions.assertThatExceptionOfType(ShoppingCartNotFoundException.class)
+        .isThrownBy(() -> service.removeItem(nonExistingCartId, dummyItemId));
+  }
+
+  @Test
+  void shouldThrowShoppingCartDoesNotContainItemExceptionWhenRemovingNonExistingItem() {
+    Customer customer = CustomerTestDataBuilder.brandNewCustomer().build();
+    customers.add(customer);
+    ShoppingCart shoppingCart = ShoppingCart.startShopping(customer.id());
+    shoppingCarts.add(shoppingCart);
+
+    UUID nonExistingItemId = UUID.randomUUID();
+
+    Assertions.assertThatExceptionOfType(ShoppingCartDoesNotContainItemException.class)
+        .isThrownBy(() -> service.removeItem(shoppingCart.id().value(), nonExistingItemId));
+  }
+
+  @Test
+  void shouldEmptyShoppingCartSuccessfully() {
+    Customer customer = CustomerTestDataBuilder.brandNewCustomer().build();
+    customers.add(customer);
+    ShoppingCart shoppingCart = ShoppingCart.startShopping(customer.id());
+    shoppingCart.addItem(ProductTestDataBuilder.aProduct().inStock(true).build(), new Quantity(1));
+    shoppingCarts.add(shoppingCart);
+
+    service.empty(shoppingCart.id().value());
+
+    ShoppingCart updatedCart = shoppingCarts.ofId(shoppingCart.id()).orElseThrow();
+    Assertions.assertThat(updatedCart.isEmpty()).isTrue();
+
+    Mockito.verify(shoppingCartEventListener, Mockito.times(1))
+        .listen(Mockito.any(ShoppingCartEmptiedEvent.class));
+  }
+
+  @Test
+  void shouldThrowShoppingCartNotFoundExceptionWhenEmptyingNonExistingShoppingCart() {
+    UUID nonExistingCartId = UUID.randomUUID();
+
+    Assertions.assertThatExceptionOfType(ShoppingCartNotFoundException.class)
+        .isThrownBy(() -> service.empty(nonExistingCartId));
+  }
+
+  @Test
+  void shouldDeleteShoppingCartSuccessfully() {
+    Customer customer = CustomerTestDataBuilder.brandNewCustomer().build();
+    customers.add(customer);
+    ShoppingCart shoppingCart = ShoppingCart.startShopping(customer.id());
+    shoppingCarts.add(shoppingCart);
+
+    service.delete(shoppingCart.id().value());
+
+    Optional<ShoppingCart> deletedCart = shoppingCarts.ofId(shoppingCart.id());
+    Assertions.assertThat(deletedCart).isNotPresent();
+  }
+
+  @Test
+  void shouldThrowShoppingCartNotFoundExceptionWhenDeletingNonExistingShoppingCart() {
+    UUID nonExistingCartId = UUID.randomUUID();
+
+    Assertions.assertThatExceptionOfType(ShoppingCartNotFoundException.class)
+        .isThrownBy(() -> service.delete(nonExistingCartId));
+  }
+}

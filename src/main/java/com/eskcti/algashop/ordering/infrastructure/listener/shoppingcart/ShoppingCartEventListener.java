@@ -3,10 +3,10 @@ package com.eskcti.algashop.ordering.infrastructure.listener.shoppingcart;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
-import com.eskcti.algashop.ordering.domain.model.shoppingcart.ShoppingCartCreatedEvent;
-import com.eskcti.algashop.ordering.domain.model.shoppingcart.ShoppingCartEmptiedEvent;
-import com.eskcti.algashop.ordering.domain.model.shoppingcart.ShoppingCartItemAddedEvent;
-import com.eskcti.algashop.ordering.domain.model.shoppingcart.ShoppingCartItemRemovedEvent;
+import com.eskcti.algashop.ordering.core.domain.model.shoppingcart.ShoppingCartCreatedEvent;
+import com.eskcti.algashop.ordering.core.domain.model.shoppingcart.ShoppingCartEmptiedEvent;
+import com.eskcti.algashop.ordering.core.domain.model.shoppingcart.ShoppingCartItemAddedEvent;
+import com.eskcti.algashop.ordering.core.domain.model.shoppingcart.ShoppingCartItemRemovedEvent;
 
 @Component
 public class ShoppingCartEventListener {

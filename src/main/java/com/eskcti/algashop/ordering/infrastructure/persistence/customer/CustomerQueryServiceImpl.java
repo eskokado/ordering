@@ -11,12 +11,12 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.eskcti.algashop.ordering.application.customer.query.CustomerFilter;
-import com.eskcti.algashop.ordering.application.customer.query.CustomerOutput;
-import com.eskcti.algashop.ordering.application.customer.query.CustomerQueryService;
-import com.eskcti.algashop.ordering.application.customer.query.CustomerSummaryOutput;
-import com.eskcti.algashop.ordering.application.utility.Mapper;
-import com.eskcti.algashop.ordering.domain.model.customer.CustomerNotFoundException;
+import com.eskcti.algashop.ordering.core.application.customer.query.CustomerFilter;
+import com.eskcti.algashop.ordering.core.application.customer.query.CustomerOutput;
+import com.eskcti.algashop.ordering.core.application.customer.query.CustomerQueryService;
+import com.eskcti.algashop.ordering.core.application.customer.query.CustomerSummaryOutput;
+import com.eskcti.algashop.ordering.core.application.utility.Mapper;
+import com.eskcti.algashop.ordering.core.domain.model.customer.CustomerNotFoundException;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
@@ -37,7 +37,7 @@ public class CustomerQueryServiceImpl implements CustomerQueryService {
   private final EntityManager entityManager;
 
   private static final String findByIdAsOutputJPQL = """
-      SELECT new com.eskcti.algashop.ordering.application.customer.query.CustomerOutput(
+      SELECT new com.eskcti.algashop.ordering.core.application.customer.query.CustomerOutput(
           c.id,
           c.firstName,
           c.lastName,
@@ -50,7 +50,7 @@ public class CustomerQueryServiceImpl implements CustomerQueryService {
           c.archivedAt,
           c.promotionNotificationsAllowed,
           c.archived,
-          new com.eskcti.algashop.ordering.application.commons.AddressData(
+          new com.eskcti.algashop.ordering.core.application.commons.AddressData(
               c.address.street,
               c.address.number,
               c.address.complement,

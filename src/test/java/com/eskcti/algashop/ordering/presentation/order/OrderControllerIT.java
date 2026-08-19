@@ -1,9 +1,9 @@
 package com.eskcti.algashop.ordering.presentation.order;
 
-import com.eskcti.algashop.ordering.application.checkout.BuyNowInput;
-import com.eskcti.algashop.ordering.application.checkout.BuyNowInputTestDataBuilder;
-import com.eskcti.algashop.ordering.application.order.query.OrderDetailOutput;
-import com.eskcti.algashop.ordering.domain.model.order.OrderId;
+import com.eskcti.algashop.ordering.core.application.checkout.BuyNowInputTestDataBuilder;
+import com.eskcti.algashop.ordering.core.application.checkout.BuyNowInput;
+import com.eskcti.algashop.ordering.core.application.order.query.OrderDetailOutput;
+import com.eskcti.algashop.ordering.core.domain.model.order.OrderId;
 import com.eskcti.algashop.ordering.infrastructure.persistence.customer.CustomerPersistenceEntityRepository;
 import com.eskcti.algashop.ordering.infrastructure.persistence.customer.CustomerPersistenceEntityTestDataBuilder;
 import com.eskcti.algashop.ordering.infrastructure.persistence.order.OrderPersistenceEntityRepository;

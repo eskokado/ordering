@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;
 
-import com.eskcti.algashop.ordering.domain.model.commons.ZipCode;
+import com.eskcti.algashop.ordering.core.domain.model.commons.ZipCode;
 
 class FixedOriginAddressServiceTest {
 

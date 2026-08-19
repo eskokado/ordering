@@ -12,11 +12,11 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.SqlConfig;
 
-import com.eskcti.algashop.ordering.domain.model.customer.Customer;
-import com.eskcti.algashop.ordering.domain.model.customer.CustomerTestDataBuilder;
-import com.eskcti.algashop.ordering.domain.model.order.OrderTestDataBuilder;
-import com.eskcti.algashop.ordering.domain.model.order.Order;
-import com.eskcti.algashop.ordering.domain.model.order.OrderStatus;
+import com.eskcti.algashop.ordering.core.domain.model.customer.Customer;
+import com.eskcti.algashop.ordering.core.domain.model.customer.CustomerTestDataBuilder;
+import com.eskcti.algashop.ordering.core.domain.model.order.Order;
+import com.eskcti.algashop.ordering.core.domain.model.order.OrderStatus;
+import com.eskcti.algashop.ordering.core.domain.model.order.OrderTestDataBuilder;
 import com.eskcti.algashop.ordering.infrastructure.persistence.SpringDataAuditingConfig;
 import com.eskcti.algashop.ordering.infrastructure.persistence.customer.CustomerPersistenceEntityAssembler;
 import com.eskcti.algashop.ordering.infrastructure.persistence.customer.CustomerPersistenceEntityDisassembler;

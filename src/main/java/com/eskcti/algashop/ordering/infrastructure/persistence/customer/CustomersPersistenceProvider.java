@@ -8,10 +8,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ReflectionUtils;
 
-import com.eskcti.algashop.ordering.domain.model.commons.Email;
-import com.eskcti.algashop.ordering.domain.model.customer.Customer;
-import com.eskcti.algashop.ordering.domain.model.customer.CustomerId;
-import com.eskcti.algashop.ordering.domain.model.customer.Customers;
+import com.eskcti.algashop.ordering.core.domain.model.commons.Email;
+import com.eskcti.algashop.ordering.core.domain.model.customer.Customer;
+import com.eskcti.algashop.ordering.core.domain.model.customer.CustomerId;
+import com.eskcti.algashop.ordering.core.domain.model.customer.Customers;
 
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;

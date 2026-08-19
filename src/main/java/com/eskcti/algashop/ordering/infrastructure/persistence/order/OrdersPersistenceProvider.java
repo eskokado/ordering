@@ -1,11 +1,5 @@
 package com.eskcti.algashop.ordering.infrastructure.persistence.order;
 
-import com.eskcti.algashop.ordering.domain.model.commons.Money;
-import com.eskcti.algashop.ordering.domain.model.customer.CustomerId;
-import com.eskcti.algashop.ordering.domain.model.order.Order;
-import com.eskcti.algashop.ordering.domain.model.order.OrderId;
-import com.eskcti.algashop.ordering.domain.model.order.Orders;
-
 import jakarta.persistence.EntityManager;
 import lombok.SneakyThrows;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +7,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ReflectionUtils;
+
+import com.eskcti.algashop.ordering.core.domain.model.commons.Money;
+import com.eskcti.algashop.ordering.core.domain.model.customer.CustomerId;
+import com.eskcti.algashop.ordering.core.domain.model.order.Order;
+import com.eskcti.algashop.ordering.core.domain.model.order.OrderId;
+import com.eskcti.algashop.ordering.core.domain.model.order.Orders;
 
 import java.lang.reflect.Field;
 import java.time.Year;
