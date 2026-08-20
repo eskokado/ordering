@@ -7,8 +7,8 @@ import com.eskcti.algashop.ordering.core.application.customer.query.CustomerFilt
 import com.eskcti.algashop.ordering.core.application.customer.query.CustomerOutput;
 import com.eskcti.algashop.ordering.core.application.customer.query.CustomerQueryService;
 import com.eskcti.algashop.ordering.core.application.customer.query.CustomerSummaryOutput;
-import com.eskcti.algashop.ordering.core.application.shoppingcart.query.ShoppingCartOutput;
-import com.eskcti.algashop.ordering.core.application.shoppingcart.query.ShoppingCartQueryService;
+import com.eskcti.algashop.ordering.core.application.shoppingcart.ShoppingCartQueryService;
+import com.eskcti.algashop.ordering.core.ports.out.shoppingcart.ShoppingCartOutput;
 import com.eskcti.algashop.ordering.presentation.PageModel;
 
 import jakarta.servlet.http.HttpServletResponse;

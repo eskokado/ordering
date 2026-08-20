@@ -12,10 +12,10 @@ import com.eskcti.algashop.ordering.core.domain.model.product.ProductId;
 import com.eskcti.algashop.ordering.core.domain.model.shoppingcart.ShoppingCartCreatedEvent;
 import com.eskcti.algashop.ordering.core.domain.model.shoppingcart.ShoppingCartId;
 import com.eskcti.algashop.ordering.core.domain.model.shoppingcart.ShoppingCartItemAddedEvent;
+import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.shoppingcart.ShoppingCartItemPersistenceEntity;
+import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.shoppingcart.ShoppingCartPersistenceEntity;
 import com.eskcti.algashop.ordering.infrastructure.persistence.customer.CustomerPersistenceEntity;
 import com.eskcti.algashop.ordering.infrastructure.persistence.customer.CustomerPersistenceEntityTestDataBuilder;
-import com.eskcti.algashop.ordering.infrastructure.persistence.shoppingcart.ShoppingCartItemPersistenceEntity;
-import com.eskcti.algashop.ordering.infrastructure.persistence.shoppingcart.ShoppingCartPersistenceEntity;
 
 class ShoppingCartPersistenceEntityTest {
 

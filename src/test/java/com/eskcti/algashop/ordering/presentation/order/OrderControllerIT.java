@@ -4,10 +4,10 @@ import com.eskcti.algashop.ordering.core.application.checkout.BuyNowInputTestDat
 import com.eskcti.algashop.ordering.core.application.checkout.BuyNowInput;
 import com.eskcti.algashop.ordering.core.application.order.query.OrderDetailOutput;
 import com.eskcti.algashop.ordering.core.domain.model.order.OrderId;
+import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.shoppingcart.ShoppingCartPersistenceEntityRepository;
 import com.eskcti.algashop.ordering.infrastructure.persistence.customer.CustomerPersistenceEntityRepository;
 import com.eskcti.algashop.ordering.infrastructure.persistence.customer.CustomerPersistenceEntityTestDataBuilder;
 import com.eskcti.algashop.ordering.infrastructure.persistence.order.OrderPersistenceEntityRepository;
-import com.eskcti.algashop.ordering.infrastructure.persistence.shoppingcart.ShoppingCartPersistenceEntityRepository;
 import com.eskcti.algashop.ordering.presentation.utils.AlgaShopResourceUtils;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.extension.responsetemplating.ResponseTemplateTransformer;

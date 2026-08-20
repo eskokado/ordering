@@ -25,13 +25,13 @@ import com.eskcti.algashop.ordering.core.application.customer.query.CustomerFilt
 import com.eskcti.algashop.ordering.core.application.customer.query.CustomerOutput;
 import com.eskcti.algashop.ordering.core.application.customer.query.CustomerQueryService;
 import com.eskcti.algashop.ordering.core.application.customer.query.CustomerSummaryOutput;
-import com.eskcti.algashop.ordering.core.application.shoppingcart.query.ShoppingCartItemOutput;
-import com.eskcti.algashop.ordering.core.application.shoppingcart.query.ShoppingCartOutput;
-import com.eskcti.algashop.ordering.core.application.shoppingcart.query.ShoppingCartQueryService;
+import com.eskcti.algashop.ordering.core.application.shoppingcart.ShoppingCartQueryService;
 import com.eskcti.algashop.ordering.core.domain.model.DomainException;
 import com.eskcti.algashop.ordering.core.domain.model.customer.CustomerArchivedException;
 import com.eskcti.algashop.ordering.core.domain.model.customer.CustomerEmailIsInUseException;
 import com.eskcti.algashop.ordering.core.domain.model.customer.CustomerNotFoundException;
+import com.eskcti.algashop.ordering.core.ports.out.shoppingcart.ShoppingCartItemOutput;
+import com.eskcti.algashop.ordering.core.ports.out.shoppingcart.ShoppingCartOutput;
 import com.eskcti.algashop.ordering.presentation.BadGatewayException;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;

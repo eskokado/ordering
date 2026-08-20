@@ -1,4 +1,4 @@
-package com.eskcti.algashop.ordering.core.application.shoppingcart.query;
+package com.eskcti.algashop.ordering.core.ports.out.shoppingcart;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -15,11 +15,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ShoppingCartOutput {
-  private UUID id;
-  private UUID customerId;
-  private Integer totalItems;
-  private BigDecimal totalAmount;
-
-  @Builder.Default
-  private List<ShoppingCartItemOutput> items = new ArrayList<>();
+	private UUID id;
+	private UUID customerId;
+	private Integer totalItems;
+	private BigDecimal totalAmount;
+	@Builder.Default
+	private List<ShoppingCartItemOutput> items = new ArrayList<>();
 }

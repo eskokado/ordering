@@ -10,13 +10,14 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.SqlConfig;
 
-import com.eskcti.algashop.ordering.core.application.shoppingcart.query.ShoppingCartOutput;
-import com.eskcti.algashop.ordering.core.application.shoppingcart.query.ShoppingCartQueryService;
+import com.eskcti.algashop.ordering.core.application.shoppingcart.ShoppingCartQueryService;
 import com.eskcti.algashop.ordering.core.domain.model.customer.Customer;
 import com.eskcti.algashop.ordering.core.domain.model.customer.CustomerTestDataBuilder;
 import com.eskcti.algashop.ordering.core.domain.model.customer.Customers;
 import com.eskcti.algashop.ordering.core.domain.model.shoppingcart.ShoppingCart;
 import com.eskcti.algashop.ordering.core.domain.model.shoppingcart.ShoppingCarts;
+import com.eskcti.algashop.ordering.core.ports.in.shoppingcart.ForQueryingShoppingCarts;
+import com.eskcti.algashop.ordering.core.ports.out.shoppingcart.ShoppingCartOutput;
 
 @SpringBootTest
 
@@ -27,7 +28,7 @@ import com.eskcti.algashop.ordering.core.domain.model.shoppingcart.ShoppingCarts
 class ShoppingCartQueryServiceIT {
 
   @Autowired
-  private ShoppingCartQueryService queryService;
+  private ForQueryingShoppingCarts forQueryingShoppingCarts;
 
   @Autowired
   private ShoppingCarts shoppingCarts;
@@ -42,7 +43,7 @@ class ShoppingCartQueryServiceIT {
     ShoppingCart shoppingCart = ShoppingCart.startShopping(customer.id());
     shoppingCarts.add(shoppingCart);
 
-    ShoppingCartOutput output = queryService.findById(shoppingCart.id().value());
+    ShoppingCartOutput output = forQueryingShoppingCarts.findById(shoppingCart.id().value());
     Assertions.assertWith(output,
         o -> Assertions.assertThat(o.getId()).isEqualTo(shoppingCart.id().value()),
         o -> Assertions.assertThat(o.getCustomerId()).isEqualTo(shoppingCart.customerId().value()));
@@ -55,7 +56,7 @@ class ShoppingCartQueryServiceIT {
     ShoppingCart shoppingCart = ShoppingCart.startShopping(customer.id());
     shoppingCarts.add(shoppingCart);
 
-    ShoppingCartOutput output = queryService.findByCustomerId(customer.id().value());
+    ShoppingCartOutput output = forQueryingShoppingCarts.findByCustomerId(customer.id().value());
     Assertions.assertWith(output,
         o -> Assertions.assertThat(o.getId()).isEqualTo(shoppingCart.id().value()),
         o -> Assertions.assertThat(o.getCustomerId()).isEqualTo(shoppingCart.customerId().value()));

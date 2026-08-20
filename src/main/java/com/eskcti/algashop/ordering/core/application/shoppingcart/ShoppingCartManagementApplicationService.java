@@ -1,4 +1,4 @@
-package com.eskcti.algashop.ordering.core.application.shoppingcart.management;
+package com.eskcti.algashop.ordering.core.application.shoppingcart;
 
 import java.util.Objects;
 import java.util.UUID;
@@ -6,7 +6,8 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.eskcti.algashop.ordering.core.application.shoppingcart.management.ShoppingCartItemInput;
+import com.eskcti.algashop.ordering.core.ports.in.shoppingcart.ForManagingShoppingCarts;
+import com.eskcti.algashop.ordering.core.ports.in.shoppingcart.ShoppingCartItemInput;
 import com.eskcti.algashop.ordering.core.domain.model.commons.Quantity;
 import com.eskcti.algashop.ordering.core.domain.model.customer.CustomerId;
 import com.eskcti.algashop.ordering.core.domain.model.product.Product;
@@ -24,7 +25,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class ShoppingCartManagementApplicationService {
+public class ShoppingCartManagementApplicationService implements ForManagingShoppingCarts {
 
   private final ShoppingCarts shoppingCarts;
   private final ProductCatalogService productCatalogService;

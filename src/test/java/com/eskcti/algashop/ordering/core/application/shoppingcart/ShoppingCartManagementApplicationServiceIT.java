@@ -1,4 +1,4 @@
-package com.eskcti.algashop.ordering.core.application.shoppingcart.management;
+package com.eskcti.algashop.ordering.core.application.shoppingcart;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -16,8 +16,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.SqlConfig;
 
-import com.eskcti.algashop.ordering.core.application.shoppingcart.management.ShoppingCartItemInput;
-import com.eskcti.algashop.ordering.core.application.shoppingcart.management.ShoppingCartManagementApplicationService;
+import com.eskcti.algashop.ordering.core.ports.in.shoppingcart.ShoppingCartItemInput;
 import com.eskcti.algashop.ordering.core.domain.model.commons.Quantity;
 import com.eskcti.algashop.ordering.core.domain.model.customer.Customer;
 import com.eskcti.algashop.ordering.core.domain.model.customer.CustomerAlreadyHaveShoppingCartException;
