@@ -15,12 +15,12 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.SqlConfig;
 
+import com.eskcti.algashop.ordering.core.application.customer.CustomerManagementApplicationService;
+import com.eskcti.algashop.ordering.core.application.customer.CustomerQueryService;
 import com.eskcti.algashop.ordering.core.application.customer.management.CustomerInput;
-import com.eskcti.algashop.ordering.core.application.customer.management.CustomerManagementApplicationService;
 import com.eskcti.algashop.ordering.core.application.customer.management.CustomerUpdateInput;
 import com.eskcti.algashop.ordering.core.application.customer.notification.CustomerNotificationApplicationService;
 import com.eskcti.algashop.ordering.core.application.customer.query.CustomerOutput;
-import com.eskcti.algashop.ordering.core.application.customer.query.CustomerQueryService;
 import com.eskcti.algashop.ordering.core.domain.model.customer.CustomerArchivedEvent;
 import com.eskcti.algashop.ordering.core.domain.model.customer.CustomerArchivedException;
 import com.eskcti.algashop.ordering.core.domain.model.customer.CustomerEmailIsInUseException;

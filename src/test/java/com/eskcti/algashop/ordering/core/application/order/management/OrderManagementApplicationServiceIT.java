@@ -16,7 +16,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.test.context.ActiveProfiles;
 
-import com.eskcti.algashop.ordering.core.application.customer.loyaltypoints.CustomerLoyaltyPointsApplicationService;
+import com.eskcti.algashop.ordering.core.application.customer.CustomerLoyaltyPointsApplicationService;
 import com.eskcti.algashop.ordering.core.application.order.management.OrderManagementApplicationService;
 import com.eskcti.algashop.ordering.core.domain.model.customer.CustomerTestDataBuilder;
 import com.eskcti.algashop.ordering.core.domain.model.customer.Customers;

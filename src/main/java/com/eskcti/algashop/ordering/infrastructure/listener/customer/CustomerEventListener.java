@@ -3,7 +3,7 @@ package com.eskcti.algashop.ordering.infrastructure.listener.customer;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
-import com.eskcti.algashop.ordering.core.application.customer.loyaltypoints.CustomerLoyaltyPointsApplicationService;
+import com.eskcti.algashop.ordering.core.application.customer.CustomerLoyaltyPointsApplicationService;
 import com.eskcti.algashop.ordering.core.application.customer.notification.CustomerNotificationApplicationService;
 import com.eskcti.algashop.ordering.core.application.customer.notification.CustomerNotificationApplicationService.NotifyNewRegistrationInput;
 import com.eskcti.algashop.ordering.core.domain.model.customer.CustomerArchivedEvent;

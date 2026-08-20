@@ -15,7 +15,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.SqlConfig;
 
-import com.eskcti.algashop.ordering.core.application.customer.loyaltypoints.CustomerLoyaltyPointsApplicationService;
+import com.eskcti.algashop.ordering.core.application.customer.CustomerLoyaltyPointsApplicationService;
 import com.eskcti.algashop.ordering.core.domain.model.commons.Email;
 import com.eskcti.algashop.ordering.core.domain.model.commons.Money;
 import com.eskcti.algashop.ordering.core.domain.model.commons.Quantity;

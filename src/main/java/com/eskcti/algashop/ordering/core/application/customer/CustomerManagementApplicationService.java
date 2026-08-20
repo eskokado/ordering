@@ -1,4 +1,4 @@
-package com.eskcti.algashop.ordering.core.application.customer.management;
+package com.eskcti.algashop.ordering.core.application.customer;
 
 import java.util.Objects;
 import java.util.UUID;
@@ -6,7 +6,6 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.eskcti.algashop.ordering.core.application.commons.AddressData;
 import com.eskcti.algashop.ordering.core.domain.model.commons.Address;
 import com.eskcti.algashop.ordering.core.domain.model.commons.Document;
 import com.eskcti.algashop.ordering.core.domain.model.commons.Email;
@@ -19,12 +18,16 @@ import com.eskcti.algashop.ordering.core.domain.model.customer.CustomerId;
 import com.eskcti.algashop.ordering.core.domain.model.customer.CustomerNotFoundException;
 import com.eskcti.algashop.ordering.core.domain.model.customer.CustomerRegistrationService;
 import com.eskcti.algashop.ordering.core.domain.model.customer.Customers;
+import com.eskcti.algashop.ordering.core.ports.in.commons.AddressData;
+import com.eskcti.algashop.ordering.core.ports.in.customer.CustomerInput;
+import com.eskcti.algashop.ordering.core.ports.in.customer.CustomerUpdateInput;
+import com.eskcti.algashop.ordering.core.ports.in.customer.ForManagingCustomers;
 
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class CustomerManagementApplicationService {
+public class CustomerManagementApplicationService implements ForManagingCustomers {
 
   private final CustomerRegistrationService customerRegistration;
   private final Customers customers;

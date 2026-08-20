@@ -1,4 +1,4 @@
-package com.eskcti.algashop.ordering.core.application.customer.loyaltypoints;
+package com.eskcti.algashop.ordering.core.application.customer;
 
 import java.util.UUID;
 
@@ -14,12 +14,13 @@ import com.eskcti.algashop.ordering.core.domain.model.order.Order;
 import com.eskcti.algashop.ordering.core.domain.model.order.OrderId;
 import com.eskcti.algashop.ordering.core.domain.model.order.OrderNotFoundException;
 import com.eskcti.algashop.ordering.core.domain.model.order.Orders;
+import com.eskcti.algashop.ordering.core.ports.in.customer.ForAddingLoyaltyPoints;
 
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class CustomerLoyaltyPointsApplicationService {
+public class CustomerLoyaltyPointsApplicationService implements ForAddingLoyaltyPoints {
 
   private final CustomerLoyaltyPointsService customerLoyaltyPointsService;
   private final Orders orders;

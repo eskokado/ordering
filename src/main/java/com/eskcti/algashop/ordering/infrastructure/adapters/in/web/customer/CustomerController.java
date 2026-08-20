@@ -1,68 +1,67 @@
-package com.eskcti.algashop.ordering.presentation.customer;
+package com.eskcti.algashop.ordering.infrastructure.adapters.in.web.customer;
 
-import com.eskcti.algashop.ordering.core.application.customer.CustomerManagementApplicationService;
-import com.eskcti.algashop.ordering.core.application.customer.CustomerQueryService;
-import com.eskcti.algashop.ordering.core.application.shoppingcart.ShoppingCartQueryService;
+import com.eskcti.algashop.ordering.core.ports.in.customer.*;
+import com.eskcti.algashop.ordering.core.ports.in.shoppingcart.ForQueryingShoppingCarts;
 import com.eskcti.algashop.ordering.core.ports.out.shoppingcart.ShoppingCartOutput;
 import com.eskcti.algashop.ordering.presentation.PageModel;
-
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
-import static org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder.*;
 
 import java.util.UUID;
+
+import static org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder.fromMethodCall;
+import static org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder.on;
 
 @RestController
 @RequestMapping("/api/v1/customers")
 @RequiredArgsConstructor
 public class CustomerController {
 
-    private final CustomerManagementApplicationService customerManagementApplicationService;
-    private final CustomerQueryService customerQueryService;
-    private final ShoppingCartQueryService shoppingCartQueryService;
+    private final ForManagingCustomers forManagingCustomers;
+    private final ForQueryingCustomers forQueryingCustomers;
+    private final ForQueryingShoppingCarts forQueryingShoppingCarts;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public CustomerOutput create(@RequestBody @Valid CustomerInput input, HttpServletResponse httpServletResponse) {
-        UUID customerId = customerManagementApplicationService.create(input);
+        UUID customerId = forManagingCustomers.create(input);
 
         UriComponentsBuilder builder = fromMethodCall(on(CustomerController.class).findById(customerId));
         httpServletResponse.addHeader("Location", builder.toUriString());
 
-        return customerQueryService.findById(customerId);
+        return forQueryingCustomers.findById(customerId);
     }
 
     @GetMapping
     public PageModel<CustomerSummaryOutput> findAll(CustomerFilter customerFilter) {
-        return PageModel.of(customerQueryService.filter(customerFilter));
+        return PageModel.of(forQueryingCustomers.filter(customerFilter));
     }
 
     @GetMapping("/{customerId}")
     public CustomerOutput findById(@PathVariable UUID customerId) {
-        return customerQueryService.findById(customerId);
+        return forQueryingCustomers.findById(customerId);
+    }
+
+    @GetMapping("/{customerId}/shopping-cart")
+    public ShoppingCartOutput findShoppingCartByCustomerId(@PathVariable UUID customerId) {
+        return forQueryingShoppingCarts.findByCustomerId(customerId);
     }
 
     @PutMapping("/{customerId}")
     public CustomerOutput update(@PathVariable UUID customerId,
             @RequestBody @Valid CustomerUpdateInput input) {
-        customerManagementApplicationService.update(customerId, input);
-        return customerQueryService.findById(customerId);
-    }
-
-    @GetMapping("/{customerId}/shopping-cart")
-    public ShoppingCartOutput findShoppingCartByCustomerId(@PathVariable UUID customerId) {
-        return shoppingCartQueryService.findByCustomerId(customerId);
+        forManagingCustomers.update(customerId, input);
+        return forQueryingCustomers.findById(customerId);
     }
 
     @DeleteMapping("/{customerId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable UUID customerId) {
-        customerManagementApplicationService.archive(customerId);
+        forManagingCustomers.archive(customerId);
     }
 
 }
