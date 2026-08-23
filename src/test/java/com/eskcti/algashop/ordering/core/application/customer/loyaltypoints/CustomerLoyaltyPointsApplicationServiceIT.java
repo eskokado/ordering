@@ -36,7 +36,7 @@ import com.eskcti.algashop.ordering.core.domain.model.order.OrderTestDataBuilder
 import com.eskcti.algashop.ordering.core.domain.model.order.Orders;
 import com.eskcti.algashop.ordering.core.domain.model.product.Product;
 import com.eskcti.algashop.ordering.core.domain.model.product.ProductTestDataBuilder;
-import com.eskcti.algashop.ordering.infrastructure.listener.customer.CustomerEventListener;
+import com.eskcti.algashop.ordering.infrastructure.adapters.in.listener.customer.CustomerEventListener;
 
 import io.hypersistence.tsid.TSID;
 

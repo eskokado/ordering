@@ -1,4 +1,4 @@
-package com.eskcti.algashop.ordering.infrastructure.persistence.customer;
+package com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.customer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -6,8 +6,8 @@ import org.junit.jupiter.api.Test;
 
 import com.eskcti.algashop.ordering.core.domain.model.customer.Customer;
 import com.eskcti.algashop.ordering.core.domain.model.customer.CustomerTestDataBuilder;
-import com.eskcti.algashop.ordering.infrastructure.persistence.customer.CustomerPersistenceEntity;
-import com.eskcti.algashop.ordering.infrastructure.persistence.customer.CustomerPersistenceEntityAssembler;
+import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.customer.CustomerPersistenceEntity;
+import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.customer.CustomerPersistenceEntityAssembler;
 
 class CustomerPersistenceEntityAssemblerTest {
     private final CustomerPersistenceEntityAssembler assembler = new CustomerPersistenceEntityAssembler();

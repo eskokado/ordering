@@ -29,10 +29,10 @@ import com.eskcti.algashop.ordering.core.domain.model.customer.CustomerEmailIsIn
 import com.eskcti.algashop.ordering.core.domain.model.customer.CustomerRegistrationService;
 import com.eskcti.algashop.ordering.core.domain.model.customer.Customers;
 import com.eskcti.algashop.ordering.infrastructure.persistence.SpringDataAuditingConfig;
-import com.eskcti.algashop.ordering.infrastructure.persistence.customer.CustomerPersistenceEntityAssembler;
-import com.eskcti.algashop.ordering.infrastructure.persistence.customer.CustomerPersistenceEntityDisassembler;
-import com.eskcti.algashop.ordering.infrastructure.persistence.customer.CustomerPersistenceEntityRepository;
-import com.eskcti.algashop.ordering.infrastructure.persistence.customer.CustomersPersistenceProvider;
+import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.customer.CustomerPersistenceEntityAssembler;
+import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.customer.CustomerPersistenceEntityDisassembler;
+import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.customer.CustomerPersistenceEntityRepository;
+import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.customer.CustomersPersistenceProvider;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)

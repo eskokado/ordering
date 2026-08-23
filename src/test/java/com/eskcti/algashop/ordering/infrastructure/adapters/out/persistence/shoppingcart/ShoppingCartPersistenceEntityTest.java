@@ -1,4 +1,4 @@
-package com.eskcti.algashop.ordering.infrastructure.persistence.shoppingcart;
+package com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.shoppingcart;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -14,8 +14,8 @@ import com.eskcti.algashop.ordering.core.domain.model.shoppingcart.ShoppingCartI
 import com.eskcti.algashop.ordering.core.domain.model.shoppingcart.ShoppingCartItemAddedEvent;
 import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.shoppingcart.ShoppingCartItemPersistenceEntity;
 import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.shoppingcart.ShoppingCartPersistenceEntity;
-import com.eskcti.algashop.ordering.infrastructure.persistence.customer.CustomerPersistenceEntity;
-import com.eskcti.algashop.ordering.infrastructure.persistence.customer.CustomerPersistenceEntityTestDataBuilder;
+import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.customer.CustomerPersistenceEntity;
+import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.customer.CustomerPersistenceEntityTestDataBuilder;
 
 class ShoppingCartPersistenceEntityTest {
 

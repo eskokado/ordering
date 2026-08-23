@@ -44,7 +44,7 @@ import com.eskcti.algashop.ordering.core.domain.model.shoppingcart.ShoppingCartC
 import com.eskcti.algashop.ordering.core.domain.model.shoppingcart.ShoppingCartNotFoundException;
 import com.eskcti.algashop.ordering.core.domain.model.shoppingcart.ShoppingCartTestDataBuilder;
 import com.eskcti.algashop.ordering.core.domain.model.shoppingcart.ShoppingCarts;
-import com.eskcti.algashop.ordering.infrastructure.listener.order.OrderEventListener;
+import com.eskcti.algashop.ordering.infrastructure.adapters.in.listener.order.OrderEventListener;
 
 @SpringBootTest
 

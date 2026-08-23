@@ -2,8 +2,8 @@ package com.eskcti.algashop.ordering.core.application.customer.management;
 
 import java.time.LocalDate;
 
-import com.eskcti.algashop.ordering.core.application.commons.AddressData;
-import com.eskcti.algashop.ordering.core.application.customer.management.CustomerInput;
+import com.eskcti.algashop.ordering.core.ports.in.commons.AddressData;
+import com.eskcti.algashop.ordering.core.ports.in.customer.CustomerInput;
 
 public class CustomerInputTestDataBuilder {
 

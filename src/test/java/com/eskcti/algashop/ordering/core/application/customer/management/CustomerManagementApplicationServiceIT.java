@@ -17,16 +17,16 @@ import org.springframework.test.context.jdbc.SqlConfig;
 
 import com.eskcti.algashop.ordering.core.application.customer.CustomerManagementApplicationService;
 import com.eskcti.algashop.ordering.core.application.customer.CustomerQueryService;
-import com.eskcti.algashop.ordering.core.application.customer.management.CustomerInput;
-import com.eskcti.algashop.ordering.core.application.customer.management.CustomerUpdateInput;
-import com.eskcti.algashop.ordering.core.application.customer.notification.CustomerNotificationApplicationService;
-import com.eskcti.algashop.ordering.core.application.customer.query.CustomerOutput;
+import com.eskcti.algashop.ordering.core.ports.in.customer.CustomerInput;
+import com.eskcti.algashop.ordering.core.ports.in.customer.CustomerUpdateInput;
+import com.eskcti.algashop.ordering.core.ports.out.customer.ForNotifyingCustomers;
+import com.eskcti.algashop.ordering.core.ports.in.customer.CustomerOutput;
 import com.eskcti.algashop.ordering.core.domain.model.customer.CustomerArchivedEvent;
 import com.eskcti.algashop.ordering.core.domain.model.customer.CustomerArchivedException;
 import com.eskcti.algashop.ordering.core.domain.model.customer.CustomerEmailIsInUseException;
 import com.eskcti.algashop.ordering.core.domain.model.customer.CustomerNotFoundException;
 import com.eskcti.algashop.ordering.core.domain.model.customer.CustomerRegisteredEvent;
-import com.eskcti.algashop.ordering.infrastructure.listener.customer.CustomerEventListener;
+import com.eskcti.algashop.ordering.infrastructure.adapters.in.listener.customer.CustomerEventListener;
 
 @SpringBootTest
 
@@ -46,7 +46,7 @@ class CustomerManagementApplicationServiceIT {
   private CustomerEventListener customerEventListener;
 
   @MockitoSpyBean
-  private CustomerNotificationApplicationService customerNotificationApplicationService;
+  private ForNotifyingCustomers customerNotificationApplicationService;
 
   @Test
   public void shouldRegister() {
@@ -80,7 +80,7 @@ class CustomerManagementApplicationServiceIT {
         .listen(Mockito.any(CustomerArchivedEvent.class));
 
     Mockito.verify(customerNotificationApplicationService)
-        .notifyNewRegistration(Mockito.any(CustomerNotificationApplicationService.NotifyNewRegistrationInput.class));
+        .notifyNewRegistration(Mockito.any(ForNotifyingCustomers.NotifyNewRegistrationInput.class));
   }
 
   @Test

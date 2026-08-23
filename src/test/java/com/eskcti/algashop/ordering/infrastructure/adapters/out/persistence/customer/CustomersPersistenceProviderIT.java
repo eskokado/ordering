@@ -1,4 +1,4 @@
-package com.eskcti.algashop.ordering.infrastructure.persistence.customer;
+package com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.customer;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;

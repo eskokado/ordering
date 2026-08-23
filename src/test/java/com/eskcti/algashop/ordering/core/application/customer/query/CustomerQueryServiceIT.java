@@ -14,9 +14,9 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.SqlConfig;
 
 import com.eskcti.algashop.ordering.core.application.customer.CustomerQueryService;
-import com.eskcti.algashop.ordering.core.application.customer.query.CustomerFilter;
-import com.eskcti.algashop.ordering.core.application.customer.query.CustomerOutput;
-import com.eskcti.algashop.ordering.core.application.customer.query.CustomerSummaryOutput;
+import com.eskcti.algashop.ordering.core.ports.in.customer.CustomerFilter;
+import com.eskcti.algashop.ordering.core.ports.in.customer.CustomerOutput;
+import com.eskcti.algashop.ordering.core.ports.in.customer.CustomerSummaryOutput;
 import com.eskcti.algashop.ordering.core.domain.model.commons.Email;
 import com.eskcti.algashop.ordering.core.domain.model.commons.FullName;
 import com.eskcti.algashop.ordering.core.domain.model.customer.Customer;

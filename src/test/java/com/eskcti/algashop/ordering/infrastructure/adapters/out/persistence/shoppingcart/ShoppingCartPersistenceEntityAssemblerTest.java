@@ -1,4 +1,4 @@
-package com.eskcti.algashop.ordering.infrastructure.persistence.shoppingcart;
+package com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.shoppingcart;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -16,9 +16,9 @@ import com.eskcti.algashop.ordering.core.domain.model.shoppingcart.ShoppingCartC
 import com.eskcti.algashop.ordering.core.domain.model.shoppingcart.ShoppingCartTestDataBuilder;
 import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.shoppingcart.ShoppingCartPersistenceEntity;
 import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.shoppingcart.ShoppingCartPersistenceEntityAssembler;
-import com.eskcti.algashop.ordering.infrastructure.persistence.customer.CustomerPersistenceEntity;
-import com.eskcti.algashop.ordering.infrastructure.persistence.customer.CustomerPersistenceEntityRepository;
-import com.eskcti.algashop.ordering.infrastructure.persistence.customer.CustomerPersistenceEntityTestDataBuilder;
+import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.customer.CustomerPersistenceEntity;
+import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.customer.CustomerPersistenceEntityRepository;
+import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.customer.CustomerPersistenceEntityTestDataBuilder;
 
 @ExtendWith(MockitoExtension.class)
 class ShoppingCartPersistenceEntityAssemblerTest {

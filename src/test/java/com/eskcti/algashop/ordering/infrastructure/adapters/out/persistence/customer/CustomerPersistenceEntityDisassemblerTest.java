@@ -1,4 +1,4 @@
-package com.eskcti.algashop.ordering.infrastructure.persistence.customer;
+package com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.customer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -11,8 +11,8 @@ import com.eskcti.algashop.ordering.core.domain.model.commons.Phone;
 import com.eskcti.algashop.ordering.core.domain.model.customer.BirthDate;
 import com.eskcti.algashop.ordering.core.domain.model.customer.Customer;
 import com.eskcti.algashop.ordering.core.domain.model.customer.LoyaltyPoints;
-import com.eskcti.algashop.ordering.infrastructure.persistence.customer.CustomerPersistenceEntity;
-import com.eskcti.algashop.ordering.infrastructure.persistence.customer.CustomerPersistenceEntityDisassembler;
+import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.customer.CustomerPersistenceEntity;
+import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.customer.CustomerPersistenceEntityDisassembler;
 
 class CustomerPersistenceEntityDisassemblerTest {
     private final CustomerPersistenceEntityDisassembler disassembler = new CustomerPersistenceEntityDisassembler();

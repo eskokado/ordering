@@ -7,7 +7,7 @@ import java.util.Set;
 
 import com.eskcti.algashop.ordering.core.domain.model.IdGenerator;
 import com.eskcti.algashop.ordering.infrastructure.persistence.commons.AddressEmbeddable;
-import com.eskcti.algashop.ordering.infrastructure.persistence.customer.CustomerPersistenceEntityTestDataBuilder;
+import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.customer.CustomerPersistenceEntityTestDataBuilder;
 import com.eskcti.algashop.ordering.infrastructure.persistence.order.BillingEmbeddable;
 import com.eskcti.algashop.ordering.infrastructure.persistence.order.OrderItemPersistenceEntity;
 import com.eskcti.algashop.ordering.infrastructure.persistence.order.OrderPersistenceEntity;

@@ -38,7 +38,7 @@ import com.eskcti.algashop.ordering.core.domain.model.shoppingcart.ShoppingCartI
 import com.eskcti.algashop.ordering.core.domain.model.shoppingcart.ShoppingCartItemRemovedEvent;
 import com.eskcti.algashop.ordering.core.domain.model.shoppingcart.ShoppingCartNotFoundException;
 import com.eskcti.algashop.ordering.core.domain.model.shoppingcart.ShoppingCarts;
-import com.eskcti.algashop.ordering.infrastructure.listener.shoppingcart.ShoppingCartEventListener;
+import com.eskcti.algashop.ordering.infrastructure.adapters.in.listener.shoppingcart.ShoppingCartEventListener;
 
 @SpringBootTest
 

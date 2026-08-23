@@ -1,4 +1,4 @@
-package com.eskcti.algashop.ordering.infrastructure.persistence.shoppingcart;
+package com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.shoppingcart;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

@@ -1,4 +1,4 @@
-package com.eskcti.algashop.ordering.infrastructure.persistence.customer;
+package com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.customer;
 
 import static com.eskcti.algashop.ordering.core.domain.model.customer.CustomerTestDataBuilder.*;
 

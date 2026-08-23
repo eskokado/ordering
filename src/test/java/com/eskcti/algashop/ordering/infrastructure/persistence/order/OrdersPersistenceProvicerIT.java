@@ -18,9 +18,9 @@ import com.eskcti.algashop.ordering.core.domain.model.order.Order;
 import com.eskcti.algashop.ordering.core.domain.model.order.OrderStatus;
 import com.eskcti.algashop.ordering.core.domain.model.order.OrderTestDataBuilder;
 import com.eskcti.algashop.ordering.infrastructure.persistence.SpringDataAuditingConfig;
-import com.eskcti.algashop.ordering.infrastructure.persistence.customer.CustomerPersistenceEntityAssembler;
-import com.eskcti.algashop.ordering.infrastructure.persistence.customer.CustomerPersistenceEntityDisassembler;
-import com.eskcti.algashop.ordering.infrastructure.persistence.customer.CustomersPersistenceProvider;
+import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.customer.CustomerPersistenceEntityAssembler;
+import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.customer.CustomerPersistenceEntityDisassembler;
+import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.customer.CustomersPersistenceProvider;
 
 @DataJpaTest
 @Import({

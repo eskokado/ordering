@@ -8,7 +8,7 @@ import com.eskcti.algashop.ordering.core.domain.model.customer.CustomerId;
 import com.eskcti.algashop.ordering.core.domain.model.order.OrderCanceledEvent;
 import com.eskcti.algashop.ordering.core.domain.model.order.OrderPaidEvent;
 import com.eskcti.algashop.ordering.core.domain.model.order.OrderPlacedEvent;
-import com.eskcti.algashop.ordering.infrastructure.persistence.customer.CustomerPersistenceEntityTestDataBuilder;
+import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.customer.CustomerPersistenceEntityTestDataBuilder;
 import com.eskcti.algashop.ordering.infrastructure.persistence.order.OrderItemPersistenceEntity;
 import com.eskcti.algashop.ordering.infrastructure.persistence.order.OrderPersistenceEntity;
 

@@ -30,8 +30,8 @@ import com.eskcti.algashop.ordering.core.domain.model.order.OrderStatus;
 import com.eskcti.algashop.ordering.core.domain.model.order.OrderStatusCannotBeChangedException;
 import com.eskcti.algashop.ordering.core.domain.model.order.OrderTestDataBuilder;
 import com.eskcti.algashop.ordering.core.domain.model.order.Orders;
-import com.eskcti.algashop.ordering.infrastructure.listener.customer.CustomerEventListener;
-import com.eskcti.algashop.ordering.infrastructure.listener.order.OrderEventListener;
+import com.eskcti.algashop.ordering.infrastructure.adapters.in.listener.customer.CustomerEventListener;
+import com.eskcti.algashop.ordering.infrastructure.adapters.in.listener.order.OrderEventListener;
 
 @SpringBootTest
 
