@@ -14,7 +14,7 @@ import com.eskcti.algashop.ordering.core.domain.model.order.OrderItem;
 import com.eskcti.algashop.ordering.core.domain.model.order.Recipient;
 import com.eskcti.algashop.ordering.core.domain.model.order.Shipping;
 import com.eskcti.algashop.ordering.infrastructure.persistence.commons.AddressEmbeddable;
-import com.eskcti.algashop.ordering.infrastructure.persistence.customer.CustomerPersistenceEntityRepository;
+import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.customer.CustomerPersistenceEntityRepository;
 
 import lombok.RequiredArgsConstructor;
 

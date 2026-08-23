@@ -116,12 +116,9 @@ public class ForObtainingCustomersEntiyManagerImpl implements ForObtainingCustom
                         root.get("archived")));
 
         Predicate[] predicates = toPredicates(builder, root, filter);
-        Order sortOrder = toSortOrder(builder, root, filter);
 
         criteriaQuery.where(predicates);
-        if (sortOrder != null) {
-            criteriaQuery.orderBy(sortOrder);
-        }
+        criteriaQuery.orderBy(toSortOrder(builder, root, filter));
 
         TypedQuery<CustomerSummaryOutput> typedQuery = entityManager.createQuery(criteriaQuery);
 
@@ -136,15 +133,11 @@ public class ForObtainingCustomersEntiyManagerImpl implements ForObtainingCustom
     private Order toSortOrder(CriteriaBuilder builder, Root<CustomerPersistenceEntity> root, CustomerFilter filter) {
         String propertyName = filter.getSortByPropertyOrDefault().getPropertyName();
 
-        if (filter.getSortDirectionOrDefault() == Sort.Direction.ASC) {
-            return builder.asc(root.get(propertyName));
-        }
-
         if (filter.getSortDirectionOrDefault() == Sort.Direction.DESC) {
             return builder.desc(root.get(propertyName));
         }
 
-        return null;
+        return builder.asc(root.get(propertyName));
     }
 
     private Predicate[] toPredicates(CriteriaBuilder builder,

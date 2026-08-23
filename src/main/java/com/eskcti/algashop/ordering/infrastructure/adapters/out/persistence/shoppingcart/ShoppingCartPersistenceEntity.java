@@ -14,7 +14,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.domain.AbstractAggregateRoot;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import com.eskcti.algashop.ordering.infrastructure.persistence.customer.CustomerPersistenceEntity;
+import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.customer.CustomerPersistenceEntity;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;

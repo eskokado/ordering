@@ -9,7 +9,7 @@ import org.modelmapper.convention.NamingConventions;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.eskcti.algashop.ordering.core.application.customer.query.CustomerOutput;
+import com.eskcti.algashop.ordering.core.ports.in.customer.CustomerOutput;
 import com.eskcti.algashop.ordering.core.application.order.query.OrderDetailOutput;
 import com.eskcti.algashop.ordering.core.application.order.query.OrderItemDetailOutput;
 import com.eskcti.algashop.ordering.core.application.utility.Mapper;

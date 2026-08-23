@@ -18,7 +18,7 @@ import com.eskcti.algashop.ordering.core.application.order.query.OrderSummaryOut
 import com.eskcti.algashop.ordering.core.application.utility.Mapper;
 import com.eskcti.algashop.ordering.core.domain.model.order.OrderId;
 import com.eskcti.algashop.ordering.core.domain.model.order.OrderNotFoundException;
-import com.eskcti.algashop.ordering.infrastructure.persistence.customer.CustomerPersistenceEntity;
+import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.customer.CustomerPersistenceEntity;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
