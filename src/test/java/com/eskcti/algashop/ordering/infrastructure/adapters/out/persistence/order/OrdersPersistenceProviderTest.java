@@ -1,4 +1,4 @@
-package com.eskcti.algashop.ordering.infrastructure.persistence.order;
+package com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.order;
 
 import org.junit.jupiter.api.Test;
 

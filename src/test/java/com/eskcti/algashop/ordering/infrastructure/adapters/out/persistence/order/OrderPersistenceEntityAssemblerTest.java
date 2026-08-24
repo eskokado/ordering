@@ -1,4 +1,4 @@
-package com.eskcti.algashop.ordering.infrastructure.persistence.order;
+package com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.order;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -21,9 +21,9 @@ import com.eskcti.algashop.ordering.core.domain.model.order.OrderItem;
 import com.eskcti.algashop.ordering.core.domain.model.order.OrderTestDataBuilder;
 import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.customer.CustomerPersistenceEntityRepository;
 import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.customer.CustomerPersistenceEntityTestDataBuilder;
-import com.eskcti.algashop.ordering.infrastructure.persistence.order.OrderItemPersistenceEntity;
-import com.eskcti.algashop.ordering.infrastructure.persistence.order.OrderPersistenceEntity;
-import com.eskcti.algashop.ordering.infrastructure.persistence.order.OrderPersistenceEntityAssembler;
+import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.order.OrderItemPersistenceEntity;
+import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.order.OrderPersistenceEntity;
+import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.order.OrderPersistenceEntityAssembler;
 
 @ExtendWith(MockitoExtension.class)
 class OrderPersistenceEntityAssemblerTest {

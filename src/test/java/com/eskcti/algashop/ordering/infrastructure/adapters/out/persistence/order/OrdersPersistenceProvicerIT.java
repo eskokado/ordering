@@ -1,4 +1,4 @@
-package com.eskcti.algashop.ordering.infrastructure.persistence.order;
+package com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.order;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -17,7 +17,7 @@ import com.eskcti.algashop.ordering.core.domain.model.customer.CustomerTestDataB
 import com.eskcti.algashop.ordering.core.domain.model.order.Order;
 import com.eskcti.algashop.ordering.core.domain.model.order.OrderStatus;
 import com.eskcti.algashop.ordering.core.domain.model.order.OrderTestDataBuilder;
-import com.eskcti.algashop.ordering.infrastructure.persistence.SpringDataAuditingConfig;
+import com.eskcti.algashop.ordering.infrastructure.config.auditing.SpringDataAuditingConfig;
 import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.customer.CustomerPersistenceEntityAssembler;
 import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.customer.CustomerPersistenceEntityDisassembler;
 import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.customer.CustomersPersistenceProvider;

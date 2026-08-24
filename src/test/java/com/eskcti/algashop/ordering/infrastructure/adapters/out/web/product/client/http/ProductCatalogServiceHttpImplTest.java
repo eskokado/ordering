@@ -1,9 +1,9 @@
-package com.eskcti.algashop.ordering.infrastructure.product.client.http;
+package com.eskcti.algashop.ordering.infrastructure.adapters.out.web.product.client.http;
 
 import com.eskcti.algashop.ordering.core.domain.model.product.Product;
 import com.eskcti.algashop.ordering.core.domain.model.product.ProductId;
-import com.eskcti.algashop.ordering.presentation.BadGatewayException;
-import com.eskcti.algashop.ordering.presentation.GatewayTimeoutException;
+import com.eskcti.algashop.ordering.infrastructure.adapters.in.web.exceptionhandler.BadGatewayException;
+import com.eskcti.algashop.ordering.infrastructure.adapters.in.web.exceptionhandler.GatewayTimeoutException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

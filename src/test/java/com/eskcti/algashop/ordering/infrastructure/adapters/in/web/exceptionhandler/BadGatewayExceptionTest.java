@@ -1,13 +1,13 @@
-package com.eskcti.algashop.ordering.presentation;
+package com.eskcti.algashop.ordering.infrastructure.adapters.in.web.exceptionhandler;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-class GatewayTimeoutExceptionTest {
+class BadGatewayExceptionTest {
 
   @Test
   void shouldCreateExceptionWithoutArgs() {
-    GatewayTimeoutException exception = new GatewayTimeoutException();
+    BadGatewayException exception = new BadGatewayException();
 
     Assertions.assertThat(exception).isInstanceOf(RuntimeException.class);
     Assertions.assertThat(exception.getMessage()).isNull();
@@ -16,11 +16,11 @@ class GatewayTimeoutExceptionTest {
 
   @Test
   void shouldCreateExceptionWithMessageAndCause() {
-    RuntimeException cause = new RuntimeException("connection timed out");
+    RuntimeException cause = new RuntimeException("upstream failure");
 
-    GatewayTimeoutException exception = new GatewayTimeoutException("Product Catalog API Timeout", cause);
+    BadGatewayException exception = new BadGatewayException("Product Catalog API Bad Gateway", cause);
 
-    Assertions.assertThat(exception.getMessage()).isEqualTo("Product Catalog API Timeout");
+    Assertions.assertThat(exception.getMessage()).isEqualTo("Product Catalog API Bad Gateway");
     Assertions.assertThat(exception.getCause()).isSameAs(cause);
   }
 }

@@ -1,4 +1,4 @@
-package com.eskcti.algashop.ordering.infrastructure.shipping.client.rapidex;
+package com.eskcti.algashop.ordering.infrastructure.adapters.out.web.shipping.client.rapidex;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
@@ -14,10 +14,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.eskcti.algashop.ordering.core.domain.model.commons.Money;
 import com.eskcti.algashop.ordering.core.domain.model.commons.ZipCode;
 import com.eskcti.algashop.ordering.core.domain.model.order.shipping.ShippingCostService.CalculationRequest;
-import com.eskcti.algashop.ordering.infrastructure.shipping.client.rapidex.DeliveryCostRequest;
-import com.eskcti.algashop.ordering.infrastructure.shipping.client.rapidex.DeliveryCostResponse;
-import com.eskcti.algashop.ordering.infrastructure.shipping.client.rapidex.RapiDexAPIClient;
-import com.eskcti.algashop.ordering.infrastructure.shipping.client.rapidex.ShippingCostServiceRapidexImpl;
+import com.eskcti.algashop.ordering.infrastructure.adapters.out.web.shipping.client.rapidex.DeliveryCostRequest;
+import com.eskcti.algashop.ordering.infrastructure.adapters.out.web.shipping.client.rapidex.DeliveryCostResponse;
+import com.eskcti.algashop.ordering.infrastructure.adapters.out.web.shipping.client.rapidex.RapiDexAPIClient;
+import com.eskcti.algashop.ordering.infrastructure.adapters.out.web.shipping.client.rapidex.ShippingCostServiceRapidexImpl;
 
 @ExtendWith(MockitoExtension.class)
 class ShippingCostServiceRapidexImplTest {

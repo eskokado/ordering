@@ -17,7 +17,7 @@ import com.eskcti.algashop.ordering.core.domain.model.commons.FullName;
 import com.eskcti.algashop.ordering.core.domain.model.customer.Customer;
 import com.eskcti.algashop.ordering.core.domain.model.customer.CustomerId;
 import com.eskcti.algashop.ordering.core.domain.model.customer.CustomerTestDataBuilder;
-import com.eskcti.algashop.ordering.infrastructure.persistence.SpringDataAuditingConfig;
+import com.eskcti.algashop.ordering.infrastructure.config.auditing.SpringDataAuditingConfig;
 
 @DataJpaTest
 @Import({

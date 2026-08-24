@@ -1,4 +1,4 @@
-package com.eskcti.algashop.ordering.infrastructure.shipping.client.fake;
+package com.eskcti.algashop.ordering.infrastructure.adapters.out.web.shipping.client.fake;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

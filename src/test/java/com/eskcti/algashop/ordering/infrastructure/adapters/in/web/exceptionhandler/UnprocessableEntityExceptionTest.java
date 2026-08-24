@@ -1,4 +1,4 @@
-package com.eskcti.algashop.ordering.presentation;
+package com.eskcti.algashop.ordering.infrastructure.adapters.in.web.exceptionhandler;
 
 import org.junit.jupiter.api.Test;
 

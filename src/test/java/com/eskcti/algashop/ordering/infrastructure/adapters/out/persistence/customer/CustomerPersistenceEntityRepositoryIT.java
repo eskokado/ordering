@@ -18,7 +18,7 @@ import org.springframework.test.context.jdbc.SqlConfig;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.eskcti.algashop.ordering.infrastructure.persistence.SpringDataAuditingConfig;
+import com.eskcti.algashop.ordering.infrastructure.config.auditing.SpringDataAuditingConfig;
 import jakarta.persistence.EntityManager;
 
 @DataJpaTest

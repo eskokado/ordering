@@ -2,7 +2,7 @@ package com.eskcti.algashop.ordering.infrastructure.adapters.in.web.customer;
 
 import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.customer.CustomerPersistenceEntityRepository;
 import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.customer.CustomerPersistenceEntityTestDataBuilder;
-import com.eskcti.algashop.ordering.presentation.utils.AlgaShopResourceUtils;
+import com.eskcti.algashop.ordering.utils.AlgaShopResourceUtils;
 
 import io.restassured.RestAssured;
 import io.restassured.path.json.config.JsonPathConfig;

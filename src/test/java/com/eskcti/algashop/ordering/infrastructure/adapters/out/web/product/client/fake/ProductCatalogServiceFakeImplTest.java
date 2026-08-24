@@ -1,4 +1,4 @@
-package com.eskcti.algashop.ordering.infrastructure.product.client.fake;
+package com.eskcti.algashop.ordering.infrastructure.adapters.out.web.product.client.fake;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -8,7 +8,7 @@ import com.eskcti.algashop.ordering.core.domain.model.commons.Money;
 import com.eskcti.algashop.ordering.core.domain.model.product.Product;
 import com.eskcti.algashop.ordering.core.domain.model.product.ProductId;
 import com.eskcti.algashop.ordering.core.domain.model.product.ProductName;
-import com.eskcti.algashop.ordering.infrastructure.product.client.fake.ProductCatalogServiceFakeImpl;
+import com.eskcti.algashop.ordering.infrastructure.adapters.out.web.product.client.fake.ProductCatalogServiceFakeImpl;
 
 class ProductCatalogServiceFakeImplTest {
 

@@ -1,4 +1,4 @@
-package com.eskcti.algashop.ordering.infrastructure.persistence.order;
+package com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.order;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -6,8 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import com.eskcti.algashop.ordering.infrastructure.persistence.order.OrderItemPersistenceEntity;
-import com.eskcti.algashop.ordering.infrastructure.persistence.order.OrderPersistenceEntity;
+import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.order.OrderItemPersistenceEntity;
+import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.order.OrderPersistenceEntity;
 
 class OrderItemPersistenceEntityTest {
   private OrderItemPersistenceEntity itemEntity;

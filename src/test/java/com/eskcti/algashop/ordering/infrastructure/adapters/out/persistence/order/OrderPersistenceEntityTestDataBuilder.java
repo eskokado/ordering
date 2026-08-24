@@ -1,4 +1,4 @@
-package com.eskcti.algashop.ordering.infrastructure.persistence.order;
+package com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.order;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -6,14 +6,14 @@ import java.time.OffsetDateTime;
 import java.util.Set;
 
 import com.eskcti.algashop.ordering.core.domain.model.IdGenerator;
-import com.eskcti.algashop.ordering.infrastructure.persistence.commons.AddressEmbeddable;
+import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.commons.AddressEmbeddable;
 import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.customer.CustomerPersistenceEntityTestDataBuilder;
-import com.eskcti.algashop.ordering.infrastructure.persistence.order.BillingEmbeddable;
-import com.eskcti.algashop.ordering.infrastructure.persistence.order.OrderItemPersistenceEntity;
-import com.eskcti.algashop.ordering.infrastructure.persistence.order.OrderPersistenceEntity;
-import com.eskcti.algashop.ordering.infrastructure.persistence.order.RecipientEmbeddable;
-import com.eskcti.algashop.ordering.infrastructure.persistence.order.ShippingEmbeddable;
-import com.eskcti.algashop.ordering.infrastructure.persistence.order.OrderPersistenceEntity.OrderPersistenceEntityBuilder;
+import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.order.BillingEmbeddable;
+import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.order.OrderItemPersistenceEntity;
+import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.order.OrderPersistenceEntity;
+import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.order.RecipientEmbeddable;
+import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.order.ShippingEmbeddable;
+import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.order.OrderPersistenceEntity.OrderPersistenceEntityBuilder;
 
 public class OrderPersistenceEntityTestDataBuilder {
 

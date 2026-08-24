@@ -1,5 +1,5 @@
 
-package com.eskcti.algashop.ordering.infrastructure.persistence.order;
+package com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.order;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -10,8 +10,8 @@ import com.eskcti.algashop.ordering.core.domain.model.commons.Quantity;
 import com.eskcti.algashop.ordering.core.domain.model.order.Order;
 import com.eskcti.algashop.ordering.core.domain.model.order.OrderStatus;
 import com.eskcti.algashop.ordering.core.domain.model.order.PaymentMethod;
-import com.eskcti.algashop.ordering.infrastructure.persistence.order.OrderPersistenceEntity;
-import com.eskcti.algashop.ordering.infrastructure.persistence.order.OrderPersistenceEntityDisassembler;
+import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.order.OrderPersistenceEntity;
+import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.order.OrderPersistenceEntityDisassembler;
 
 class OrderPersistenceEntityDisassemblerTest {
 

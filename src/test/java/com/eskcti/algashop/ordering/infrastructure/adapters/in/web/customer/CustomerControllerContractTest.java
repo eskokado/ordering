@@ -32,7 +32,7 @@ import com.eskcti.algashop.ordering.core.domain.model.customer.CustomerEmailIsIn
 import com.eskcti.algashop.ordering.core.domain.model.customer.CustomerNotFoundException;
 import com.eskcti.algashop.ordering.core.ports.out.shoppingcart.ShoppingCartItemOutput;
 import com.eskcti.algashop.ordering.core.ports.out.shoppingcart.ShoppingCartOutput;
-import com.eskcti.algashop.ordering.presentation.BadGatewayException;
+import com.eskcti.algashop.ordering.infrastructure.adapters.in.web.exceptionhandler.BadGatewayException;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.time.format.DateTimeFormatter;

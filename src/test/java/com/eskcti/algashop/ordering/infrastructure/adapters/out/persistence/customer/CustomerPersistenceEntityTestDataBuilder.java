@@ -4,7 +4,7 @@ import static com.eskcti.algashop.ordering.core.domain.model.customer.CustomerTe
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
-import com.eskcti.algashop.ordering.infrastructure.persistence.commons.AddressEmbeddable;
+import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.commons.AddressEmbeddable;
 
 public class CustomerPersistenceEntityTestDataBuilder {
 

@@ -1,14 +1,15 @@
-package com.eskcti.algashop.ordering.presentation.order;
+package com.eskcti.algashop.ordering.infrastructure.adapters.in.web.order;
 
 import com.eskcti.algashop.ordering.core.application.checkout.BuyNowInputTestDataBuilder;
 import com.eskcti.algashop.ordering.core.application.checkout.BuyNowInput;
 import com.eskcti.algashop.ordering.core.application.order.query.OrderDetailOutput;
 import com.eskcti.algashop.ordering.core.domain.model.order.OrderId;
+import com.eskcti.algashop.ordering.utils.AlgaShopResourceUtils;
+
 import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.shoppingcart.ShoppingCartPersistenceEntityRepository;
 import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.customer.CustomerPersistenceEntityRepository;
 import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.customer.CustomerPersistenceEntityTestDataBuilder;
-import com.eskcti.algashop.ordering.infrastructure.persistence.order.OrderPersistenceEntityRepository;
-import com.eskcti.algashop.ordering.presentation.utils.AlgaShopResourceUtils;
+import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.order.OrderPersistenceEntityRepository;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.extension.responsetemplating.ResponseTemplateTransformer;
 
