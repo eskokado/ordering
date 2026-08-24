@@ -6,7 +6,7 @@ import com.eskcti.algashop.ordering.core.ports.in.shoppingcart.ShoppingCartItemI
 import com.eskcti.algashop.ordering.core.ports.out.shoppingcart.ShoppingCartOutput;
 import com.eskcti.algashop.ordering.core.domain.model.customer.CustomerNotFoundException;
 import com.eskcti.algashop.ordering.core.domain.model.product.ProductNotFoundException;
-import com.eskcti.algashop.ordering.presentation.UnprocessableEntityException;
+import com.eskcti.algashop.ordering.infrastructure.adapters.in.web.exceptionhandler.UnprocessableEntityException;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
