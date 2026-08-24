@@ -1,184 +1,195 @@
 buildscript {
-	dependencies {
-		classpath 'org.flywaydb:flyway-core:11.13.0'
-		classpath 'org.flywaydb:flyway-database-postgresql:11.13.0'
-	}
+    dependencies {
+        classpath 'org.flywaydb:flyway-core:11.13.0'
+        classpath 'org.flywaydb:flyway-database-postgresql:11.13.0'
+    }
 }
 
 plugins {
-	id 'java'
-	id 'org.springframework.boot' version '3.5.5'
-	id 'io.spring.dependency-management' version '1.1.7'
-	id 'org.springframework.cloud.contract' version '4.3.0'
-	id 'org.flywaydb.flyway' version '11.13.0'
-	id 'jacoco'
+    id 'java'
+    id 'org.springframework.boot' version '3.5.5'
+    id 'io.spring.dependency-management' version '1.1.7'
+    id 'org.springframework.cloud.contract' version '4.3.0'
+    id 'org.flywaydb.flyway' version '11.13.0'
+    id 'jacoco'
 }
 
 group = 'com.eskcti.algashop'
 version = '0.0.1-SNAPSHOT'
 
 java {
-	toolchain {
-		languageVersion = JavaLanguageVersion.of(21)
-	}
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+sourceSets {
+    main {
+        java { exclude '.opencode/**' }
+        resources { exclude '.opencode/**', '.agents/**' }
+    }
+    test {
+        java { exclude '.opencode/**' }
+        resources { exclude '.opencode/**', '.agents/**' }
+    }
 }
 
 configurations {
-	compileOnly {
-		extendsFrom annotationProcessor
-	}
-	mockitoAgent
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+    mockitoAgent
 }
 
 repositories {
-	mavenCentral()
+    mavenCentral()
 }
 
 ext {
-	set('springCloudVersion', "2025.0.0")
+    set('springCloudVersion', "2025.0.0")
 }
 
 dependencyManagement {
-	imports {
-		mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
-	}
+    imports {
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+    }
 }
 
-
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-web'
-	implementation 'com.fasterxml.uuid:java-uuid-generator:5.1.0'
-	implementation 'commons-validator:commons-validator:1.9.0'
-	implementation 'io.hypersistence:hypersistence-tsid:2.1.4'
-  implementation 'org.junit.jupiter:junit-jupiter:5.8.1'
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-	implementation 'org.modelmapper:modelmapper:3.2.4'
-	implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'com.fasterxml.uuid:java-uuid-generator:5.1.0'
+    implementation 'commons-validator:commons-validator:1.9.0'
+    implementation 'io.hypersistence:hypersistence-tsid:2.1.4'
+    implementation 'org.junit.jupiter:junit-jupiter:5.8.1'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.modelmapper:modelmapper:3.2.4'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
-	runtimeOnly 'org.postgresql:postgresql'
-	implementation 'org.flywaydb:flyway-core'
-	implementation 'org.flywaydb:flyway-database-postgresql'
-  compileOnly 'org.projectlombok:lombok'
-	annotationProcessor 'org.projectlombok:lombok'
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	testImplementation 'org.springframework.cloud:spring-cloud-starter-contract-verifier'
-	testImplementation 'org.assertj:assertj-core:3.27.3'
-	testImplementation 'io.rest-assured:rest-assured'
-	testImplementation 'io.rest-assured:spring-mock-mvc'
-	testImplementation 'org.springframework.cloud:spring-cloud-starter-contract-stub-runner'
-	testCompileOnly 'org.projectlombok:lombok'
-	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-	testRuntimeOnly 'com.h2database:h2'
-	testAnnotationProcessor 'org.projectlombok:lombok'
-	mockitoAgent('org.mockito:mockito-core:5.14.2') {transitive = false}
+    runtimeOnly 'org.postgresql:postgresql'
+    implementation 'org.flywaydb:flyway-core'
+    implementation 'org.flywaydb:flyway-database-postgresql'
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.cloud:spring-cloud-starter-contract-verifier'
+    testImplementation 'org.assertj:assertj-core:3.27.3'
+    testImplementation 'io.rest-assured:rest-assured'
+    testImplementation 'io.rest-assured:spring-mock-mvc'
+    testCompileOnly 'org.projectlombok:lombok'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    testRuntimeOnly 'com.h2database:h2'
+    testAnnotationProcessor 'org.projectlombok:lombok'
+    mockitoAgent('org.mockito:mockito-core:5.14.2') {transitive = false}
 }
 
 contracts {
-	packageWithBaseClasses = "com.eskcti.algashop.ordering.contract.base"
+    packageWithBaseClasses = "com.eskcti.algashop.ordering.contract.base"
 }
 
 tasks.named('contractTest') {
-	useJUnitPlatform()
-	systemProperty 'spring.profiles.active', 'test'
-	jvmArgs "-javaagent:${configurations.mockitoAgent.asPath}"
+    useJUnitPlatform()
+    systemProperty 'spring.profiles.active', 'test'
+    jvmArgs "-javaagent:${configurations.mockitoAgent.asPath}"
 }
 
-
 tasks.named('test') {
-	useJUnitPlatform()
+    useJUnitPlatform()
 }
 
 tasks.withType(Test).configureEach {
-	maxParallelForks = 1
-	jvmArgs '-Djdk.attach.allowAttachSelf=true', '-XX:+EnableDynamicAgentLoading'
+    maxParallelForks = 1
+    jvmArgs '-Djdk.attach.allowAttachSelf=true', '-XX:+EnableDynamicAgentLoading'
 }
 
 test {
-	filter {
-		excludeTestsMatching("*IT")
-	}
-	systemProperty 'spring.profiles.active', 'test'
-	jvmArgs += "-javaagent:${configurations.mockitoAgent.asPath}"
+    filter {
+        excludeTestsMatching("*IT")
+    }
+    systemProperty 'spring.profiles.active', 'test'
+    jvmArgs += "-javaagent:${configurations.mockitoAgent.asPath}"
 }
-
 tasks.named('check') {
-	dependsOn(test, integrationTest, contractTest)
+    dependsOn(test, integrationTest, contractTest)
 }
 
 tasks.register('integrationTest', Test) {
-  description = 'Run integration tests.'
-  group = 'verification'
-	systemProperty 'spring.profiles.active', 'it'
-	jvmArgs += "-javaagent:${configurations.mockitoAgent.asPath}"
+    description = 'Run integration tests.'
+    group = 'verification'
+    systemProperty 'spring.profiles.active', 'it'
+    jvmArgs += "-javaagent:${configurations.mockitoAgent.asPath}"
 
-  testClassesDirs = sourceSets.test.output.classesDirs
-  classpath = sourceSets.test.runtimeClasspath
+    testClassesDirs = sourceSets.test.output.classesDirs
+    classpath = sourceSets.test.runtimeClasspath
 
-  shouldRunAfter test
+    shouldRunAfter test
 
-  useJUnitPlatform()
+    useJUnitPlatform()
 
-  testLogging {
-    events "passed"
-  }
+    testLogging {
+        events "passed"
+    }
 
-  filter {
-    includeTestsMatching "*IT"
-    excludeTestsMatching "*Test"
-  }
+    filter {
+        includeTestsMatching "*IT"
+        excludeTestsMatching "*Test"
+    }
 }
 
 bootJar {
-	archiveFileName = 'ordering.jar'
+    archiveFileName = 'ordering.jar'
+    exclude '.opencode/**', '.agents/**'
 }
 
 tasks.register('dockerBuild', Exec) {
-	description = 'Builds a multi-platform Docker image using Buildx'
-	group = 'build'
-	dependsOn('bootJar')
-	workingDir project.rootDir
-	commandLine 'docker', 'buildx', 'build', '--platform', 'linux/arm64/v8,linux/amd64',
-			'--tag', 'algashop/ordering:dev', '.'
+    description = 'Builds a multi-platform Docker image using Buildx'
+    group = 'build'
+    dependsOn('bootJar')
+    workingDir project.rootDir
+    commandLine 'docker', 'buildx', 'build', '--platform', 'linux/arm64/v8,linux/amd64',
+            '--tag', 'algashop/ordering:dev', '.'
 }
 
 def jacocoCoverageExcludes = [
-	'**/OrderingApplication.class',
-	'**/DomainServiceScanConfig.class',
-	'**/SpringDataAuditingConfig.class',
-	'**/RapiDexAPIClientConfig.class',
-	'**/ModelMapperConfig.class',
-	'**/CreditCardId.class'
+    '**/OrderingApplication.class',
+    '**/DomainServiceScanConfig.class',
+    '**/SpringDataAuditingConfig.class',
+    '**/RapiDexAPIClientConfig.class',
+    '**/ModelMapperConfig.class',
+    '**/CreditCardId.class',
+    '**/AlgaShopResourceUtils.class',
+    '.opencode/**',
+    '.agents/**'
 ]
 
 jacocoTestReport {
-	dependsOn test, integrationTest, contractTest
-	executionData(test, integrationTest, contractTest)
-	reports {
-		xml.required = true
-		html.required = true
-	}
-	afterEvaluate {
-		classDirectories.setFrom(files(classDirectories.files.collect {
-			fileTree(dir: it, exclude: jacocoCoverageExcludes)
-		}))
-	}
+    dependsOn test, integrationTest, contractTest
+    executionData(test, integrationTest, contractTest)
+    reports {
+        xml.required = true
+        html.required = true
+    }
+    afterEvaluate {
+        classDirectories.setFrom(files(classDirectories.files.collect {
+            fileTree(dir: it, exclude: jacocoCoverageExcludes)
+        }))
+    }
 }
 
 jacocoTestCoverageVerification {
-	dependsOn test, integrationTest, contractTest
-	executionData(test, integrationTest, contractTest)
-	violationRules {
-		rule {
-			limit {
-				minimum = 0.9
-			}
-		}
-	}
-	afterEvaluate {
-		classDirectories.setFrom(files(classDirectories.files.collect {
-			fileTree(dir: it, exclude: jacocoCoverageExcludes)
-		}))
-	}
+    dependsOn test, integrationTest, contractTest
+    executionData(test, integrationTest, contractTest)
+    violationRules {
+        rule {
+            limit {
+                minimum = 0.9
+            }
+        }
+    }
+    afterEvaluate {
+        classDirectories.setFrom(files(classDirectories.files.collect {
+            fileTree(dir: it, exclude: jacocoCoverageExcludes)
+        }))
+    }
 }
 
 check.dependsOn jacocoTestCoverageVerification
