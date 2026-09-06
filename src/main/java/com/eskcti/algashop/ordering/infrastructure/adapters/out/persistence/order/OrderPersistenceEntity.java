@@ -42,7 +42,7 @@ public class OrderPersistenceEntity extends AbstractAggregateRoot<OrderPersisten
   @EqualsAndHashCode.Include
   private Long id;
 
-  @JoinColumn
+  @JoinColumn(name = "customer_id")
   @ManyToOne(optional = false)
   private CustomerPersistenceEntity customer;
 
@@ -82,7 +82,7 @@ public class OrderPersistenceEntity extends AbstractAggregateRoot<OrderPersisten
       @AttributeOverride(name = "address.neighborhood", column = @Column(name = "billing_address_neighborhood")),
       @AttributeOverride(name = "address.city", column = @Column(name = "billing_address_city")),
       @AttributeOverride(name = "address.state", column = @Column(name = "billing_address_state")),
-      @AttributeOverride(name = "address.zipCode", column = @Column(name = "billing_address_zipCode"))
+      @AttributeOverride(name = "address.zipCode", column = @Column(name = "billing_address_zip_code"))
   })
   private BillingEmbeddable billing;
 
@@ -100,7 +100,7 @@ public class OrderPersistenceEntity extends AbstractAggregateRoot<OrderPersisten
       @AttributeOverride(name = "address.neighborhood", column = @Column(name = "shipping_address_neighborhood")),
       @AttributeOverride(name = "address.city", column = @Column(name = "shipping_address_city")),
       @AttributeOverride(name = "address.state", column = @Column(name = "shipping_address_state")),
-      @AttributeOverride(name = "address.zipCode", column = @Column(name = "shipping_address_zipCode"))
+      @AttributeOverride(name = "address.zipCode", column = @Column(name = "shipping_address_zip_code"))
   })
   private ShippingEmbeddable shipping;
 

@@ -19,7 +19,7 @@ import com.eskcti.algashop.ordering.core.domain.model.order.shipping.ShippingCos
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.extension.responsetemplating.ResponseTemplateTransformer;
 
-import static org.springframework.cloud.contract.wiremock.WireMockSpring.options;
+import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 
 @SpringBootTest
 
@@ -48,7 +48,7 @@ class ShippingCostServiceIT {
   }
 
   private void initWireMock() {
-    wireMockRapidex = new WireMockServer(options()
+    wireMockRapidex = new WireMockServer(WireMockConfiguration.options()
         .port(8780)
         .usingFilesUnderDirectory("src/test/resources/wiremock/rapidex")
         .extensions(new ResponseTemplateTransformer(true)));

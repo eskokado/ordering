@@ -47,7 +47,7 @@ public class ShoppingCartPersistenceEntity extends AbstractAggregateRoot<Shoppin
   private BigDecimal totalAmount;
   private Integer totalItems;
 
-  @JoinColumn
+  @JoinColumn(name = "customer_id")
   @ManyToOne(optional = false)
   private CustomerPersistenceEntity customer;
 
