@@ -6,11 +6,12 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.util.UUID;
+import java.io.Serializable;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ProductResponse {
+public class ProductResponse implements Serializable {
     private UUID id;
     private String name;
     private BigDecimal salePrice;
