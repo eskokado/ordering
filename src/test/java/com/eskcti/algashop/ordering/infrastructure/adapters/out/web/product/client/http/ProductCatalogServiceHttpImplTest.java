@@ -2,33 +2,24 @@ package com.eskcti.algashop.ordering.infrastructure.adapters.out.web.product.cli
 
 import com.eskcti.algashop.ordering.core.domain.model.product.Product;
 import com.eskcti.algashop.ordering.core.domain.model.product.ProductId;
-import com.eskcti.algashop.ordering.infrastructure.adapters.in.web.exceptionhandler.BadGatewayException;
-import com.eskcti.algashop.ordering.infrastructure.adapters.in.web.exceptionhandler.GatewayTimeoutException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.ResourceAccessException;
-import org.springframework.web.client.RestClientException;
 
 import java.math.BigDecimal;
-import java.net.SocketTimeoutException;
-import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ProductCatalogServiceHttpImplTest {
 
     @Mock
-    private ProductCatalogAPIClient productCatalogAPIClient;
+    private ResilientProductCatalogAPIClient resilientProductCatalogAPIClient;
 
     @InjectMocks
     private ProductCatalogServiceHttpImpl productCatalogService;
@@ -42,7 +33,8 @@ class ProductCatalogServiceHttpImplTest {
                 new BigDecimal("1000.00"),
                 true);
 
-        when(productCatalogAPIClient.getById(productId)).thenReturn(response);
+        when(resilientProductCatalogAPIClient.getById(productId))
+                .thenReturn(Optional.of(response));
 
         Optional<Product> product = productCatalogService.ofId(new ProductId(productId));
 
@@ -54,64 +46,14 @@ class ProductCatalogServiceHttpImplTest {
     }
 
     @Test
-    void shouldReturnEmptyWhenCatalogRespondsNotFound() {
+    void shouldReturnEmptyWhenCatalogReturnsEmpty() {
         UUID productId = UUID.fromString("21651a12-b126-4213-ac21-19f66ff4642e");
-        HttpClientErrorException notFound = HttpClientErrorException.create(
-                HttpStatus.NOT_FOUND,
-                "Not Found",
-                null,
-                null,
-                StandardCharsets.UTF_8);
 
-        when(productCatalogAPIClient.getById(productId)).thenThrow(notFound);
+        when(resilientProductCatalogAPIClient.getById(productId))
+                .thenReturn(Optional.empty());
 
         Optional<Product> product = productCatalogService.ofId(new ProductId(productId));
 
         assertThat(product).isEmpty();
-    }
-
-    @Test
-    void shouldThrowBadGatewayWhenCatalogRespondsWithOtherClientError() {
-        UUID productId = UUID.randomUUID();
-        HttpClientErrorException badRequest = HttpClientErrorException.create(
-                HttpStatus.BAD_REQUEST,
-                "Bad Request",
-                null,
-                null,
-                StandardCharsets.UTF_8);
-
-        when(productCatalogAPIClient.getById(productId)).thenThrow(badRequest);
-
-        assertThatThrownBy(() -> productCatalogService.ofId(new ProductId(productId)))
-                .isInstanceOf(BadGatewayException.class)
-                .hasMessage("Product Catalog API Bad Gateway")
-                .hasCause(badRequest);
-    }
-
-    @Test
-    void shouldThrowGatewayTimeoutWhenCatalogIsUnreachable() {
-        UUID productId = UUID.randomUUID();
-        ResourceAccessException timeout = new ResourceAccessException("Connection timed out");
-
-        when(productCatalogAPIClient.getById(productId)).thenThrow(timeout);
-
-        assertThatThrownBy(() -> productCatalogService.ofId(new ProductId(productId)))
-                .isInstanceOf(GatewayTimeoutException.class)
-                .hasMessage("Product Catalog API Timeout")
-                .hasCause(timeout);
-    }
-
-    @Test
-    void shouldThrowGatewayTimeoutWhenRestClientThrowsSocketTimeoutException() {
-        UUID productId = UUID.randomUUID();
-        SocketTimeoutException socketTimeout = new SocketTimeoutException("Read timed out");
-        RestClientException restClientException = new RestClientException("Timeout", socketTimeout);
-
-        when(productCatalogAPIClient.getById(productId)).thenThrow(restClientException);
-
-        assertThatThrownBy(() -> productCatalogService.ofId(new ProductId(productId)))
-                .isInstanceOf(GatewayTimeoutException.class)
-                .hasMessage("Product Catalog API Timeout")
-                .hasCause(restClientException);
     }
 }
