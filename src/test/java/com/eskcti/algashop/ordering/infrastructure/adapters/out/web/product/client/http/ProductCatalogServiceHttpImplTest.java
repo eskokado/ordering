@@ -12,8 +12,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.ResourceAccessException;
+import org.springframework.web.client.RestClientException;
 
 import java.math.BigDecimal;
+import java.net.SocketTimeoutException;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import java.util.UUID;
@@ -97,5 +99,19 @@ class ProductCatalogServiceHttpImplTest {
                 .isInstanceOf(GatewayTimeoutException.class)
                 .hasMessage("Product Catalog API Timeout")
                 .hasCause(timeout);
+    }
+
+    @Test
+    void shouldThrowGatewayTimeoutWhenRestClientThrowsSocketTimeoutException() {
+        UUID productId = UUID.randomUUID();
+        SocketTimeoutException socketTimeout = new SocketTimeoutException("Read timed out");
+        RestClientException restClientException = new RestClientException("Timeout", socketTimeout);
+
+        when(productCatalogAPIClient.getById(productId)).thenThrow(restClientException);
+
+        assertThatThrownBy(() -> productCatalogService.ofId(new ProductId(productId)))
+                .isInstanceOf(GatewayTimeoutException.class)
+                .hasMessage("Product Catalog API Timeout")
+                .hasCause(restClientException);
     }
 }

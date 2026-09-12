@@ -79,4 +79,19 @@ class ShippingCostServiceRapidexImplTest {
         .isInstanceOf(BadGatewayException.class)
         .hasMessage("Rapidex API Bad Gateway");
   }
+
+  @Test
+  void shouldThrowGatewayTimeoutWhenResourceAccessException() {
+    CalculationRequest request = CalculationRequest.builder()
+        .origin(new ZipCode("12345"))
+        .destination(new ZipCode("54321"))
+        .build();
+
+    ResourceAccessException ex = new ResourceAccessException("Connection timed out");
+    when(rapiDexAPIClient.calculate(new DeliveryCostRequest("12345", "54321"))).thenThrow(ex);
+
+    assertThatThrownBy(() -> shippingCostService.calculate(request))
+        .isInstanceOf(GatewayTimeoutException.class)
+        .hasMessage("Rapidex API Timeout");
+  }
 }
