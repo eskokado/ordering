@@ -9,6 +9,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClientException;
 
@@ -136,5 +137,32 @@ class ResilientProductCatalogAPIClientTest {
                 .isInstanceOf(BadGatewayException.class)
                 .hasMessage("Product Catalog API Bad Gateway")
                 .hasCause(restClientException);
+    }
+
+    @Test
+    void shouldThrowBadGatewayServerErrorWhenCatalogReturnsServerError() {
+        UUID productId = UUID.randomUUID();
+        HttpServerErrorException serverError = HttpServerErrorException.create(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                "Internal Server Error",
+                null,
+                null,
+                StandardCharsets.UTF_8);
+
+        when(productCatalogAPIClient.getById(productId)).thenThrow(serverError);
+
+        assertThatThrownBy(() -> resilientClient.getById(productId))
+                .isInstanceOf(BadGatewayException.ServerErrorException.class)
+                .hasMessage("Product Catalog API Bad Gateway")
+                .hasCause(serverError);
+    }
+
+    @Test
+    void shouldInstantiateBadGatewayExceptions() {
+        BadGatewayException.ServerErrorException serverError = new BadGatewayException.ServerErrorException();
+        assertThat(serverError).isInstanceOf(BadGatewayException.class);
+
+        BadGatewayException.ClientErrorException clientError = new BadGatewayException.ClientErrorException();
+        assertThat(clientError).isInstanceOf(BadGatewayException.class);
     }
 }
