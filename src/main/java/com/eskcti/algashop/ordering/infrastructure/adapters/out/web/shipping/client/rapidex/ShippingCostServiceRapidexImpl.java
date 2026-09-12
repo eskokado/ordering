@@ -1,14 +1,17 @@
 package com.eskcti.algashop.ordering.infrastructure.adapters.out.web.shipping.client.rapidex;
 
-import java.time.LocalDate;
-
+import com.eskcti.algashop.ordering.core.domain.model.order.shipping.ShippingCostService;
+import com.eskcti.algashop.ordering.core.domain.model.commons.Money;
+import com.eskcti.algashop.ordering.infrastructure.adapters.in.web.exceptionhandler.BadGatewayException;
+import com.eskcti.algashop.ordering.infrastructure.adapters.in.web.exceptionhandler.GatewayTimeoutException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.ResourceAccessException;
+import org.springframework.web.client.RestClientException;
 
-import com.eskcti.algashop.ordering.core.domain.model.commons.Money;
-import com.eskcti.algashop.ordering.core.domain.model.order.shipping.ShippingCostService;
-
-import lombok.RequiredArgsConstructor;
+import java.net.SocketTimeoutException;
+import java.time.LocalDate;
 
 @Component
 @RequiredArgsConstructor
@@ -19,16 +22,29 @@ public class ShippingCostServiceRapidexImpl implements ShippingCostService {
 
   @Override
   public CalculationResult calculate(CalculationRequest request) {
-    DeliveryCostResponse response = rapiDexAPIClient.calculate(
-        new DeliveryCostRequest(
-            request.origin().value(),
-            request.destination().value()));
+        DeliveryCostResponse response;
 
-    LocalDate expectedDeliveryDate = LocalDate.now().plusDays(response.getEstimatedDaysToDeliver());
+        try {
+            response = rapiDexAPIClient.calculate(
+                    new DeliveryCostRequest(
+                            request.origin().value(),
+                            request.destination().value()
+                    )
+            );
+        } catch (ResourceAccessException e) {
+            throw new GatewayTimeoutException("Rapidex API Timeout", e);
+        } catch (RestClientException e) {
+            if (e.getCause() instanceof SocketTimeoutException) {
+                throw new GatewayTimeoutException("Rapidex API Timeout", e);
+            }
+            throw new BadGatewayException("Rapidex API Bad Gateway", e);
+        }
 
-    return CalculationResult.builder()
-        .cost(new Money(response.getDeliveryCost()))
-        .expectedDate(expectedDeliveryDate)
-        .build();
+        LocalDate expectedDeliveryDate = LocalDate.now().plusDays(response.getEstimatedDaysToDeliver());
+
+        return CalculationResult.builder()
+                .cost(new Money(response.getDeliveryCost()))
+                .expectedDate(expectedDeliveryDate)
+                .build();
   }
 }

@@ -6,7 +6,9 @@ import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.cust
 import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.customer.CustomerPersistenceEntityTestDataBuilder;
 import com.eskcti.algashop.ordering.utils.AlgaShopResourceUtils;
 import com.github.tomakehurst.wiremock.WireMockServer;
+import com.github.tomakehurst.wiremock.common.ClasspathFileSource;
 import com.github.tomakehurst.wiremock.extension.responsetemplating.ResponseTemplateTransformer;
+import com.github.tomakehurst.wiremock.extension.responsetemplating.TemplateEngine;
 import io.restassured.RestAssured;
 import io.restassured.path.json.config.JsonPathConfig;
 import org.assertj.core.api.Assertions;
@@ -26,6 +28,7 @@ import org.springframework.test.context.jdbc.SqlConfig;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.UUID;
 
@@ -71,12 +74,20 @@ public class ShoppingCartControllerIT {
         wireMockRapidex = new WireMockServer(options()
                 .port(8780)
                 .usingFilesUnderDirectory("src/test/resources/wiremock/rapidex")
-                .extensions(new ResponseTemplateTransformer(true)));
+                .extensions(new ResponseTemplateTransformer(
+                    TemplateEngine.defaultTemplateEngine(),
+                    true,
+                    new ClasspathFileSource("src/test/resources/wiremock/rapidex"),
+                    Collections.emptyList())));
 
         wireMockProductCatalog = new WireMockServer(options()
                 .port(8781)
                 .usingFilesUnderDirectory("src/test/resources/wiremock/product-catalog")
-                .extensions(new ResponseTemplateTransformer(true)));
+                .extensions(new ResponseTemplateTransformer(
+                    TemplateEngine.defaultTemplateEngine(),
+                    true,
+                    new ClasspathFileSource("src/test/resources/wiremock/product-catalog"),
+                    Collections.emptyList())));
 
         wireMockRapidex.start();
         wireMockProductCatalog.start();

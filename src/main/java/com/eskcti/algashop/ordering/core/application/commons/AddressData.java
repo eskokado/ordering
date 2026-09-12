@@ -1,6 +1,7 @@
 package com.eskcti.algashop.ordering.core.application.commons;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -29,5 +30,6 @@ public class AddressData {
   private String state;
 
   @NotBlank
+  @Size(min = 5, max = 5, message = "Zip code must have exactly 5 digits")
   private String zipCode;
 }
