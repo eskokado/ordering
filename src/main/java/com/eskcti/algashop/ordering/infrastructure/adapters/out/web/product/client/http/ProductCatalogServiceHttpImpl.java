@@ -9,23 +9,40 @@ import com.eskcti.algashop.ordering.infrastructure.adapters.in.web.exceptionhand
 import com.eskcti.algashop.ordering.infrastructure.adapters.in.web.exceptionhandler.GatewayTimeoutException;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.resilience.annotation.ConcurrencyLimit;
+import org.springframework.resilience.annotation.Retryable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClientException;
 
 import java.net.SocketTimeoutException;
+import java.time.Duration;
 import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class ProductCatalogServiceHttpImpl implements ProductCatalogService {
 
     private final ProductCatalogAPIClient productCatalogAPIClient;
 
+
+    @ConcurrencyLimit(10)
+    @Retryable(maxRetries = 3, delayString = "3s", multiplier = 2, includes = { GatewayTimeoutException.class,
+            BadGatewayException.class })
     @Override
     public Optional<Product> ofId(ProductId productId) {
+        log.info("Trying to load product {}", productId);
+        try {
+            Thread.sleep(Duration.ofSeconds(3));
+        } catch (Exception e) {
+
+        }
+
         ProductResponse productResponse;
+        log.info("Loading product {}", productId);
         try {
             productResponse = productCatalogAPIClient.getById(productId.value());
         } catch (ResourceAccessException e) {
