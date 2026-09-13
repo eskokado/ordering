@@ -2,6 +2,8 @@ spring:
   config:
     activate:
       on-profile: it
+  cache:
+    type: none
   datasource:
     url: jdbc:postgresql://localhost:5432/ordering_test
     username: postgres
