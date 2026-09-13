@@ -22,6 +22,40 @@ spring:
       password: algashop
       database: 1
       timeout: 20
+  cloud:
+    circuitbreaker:
+      retry:
+        enabled: true
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      productCatalogCB:
+        slidingWindowSize: 10
+        failureRateThreshold: 50
+        waitDurationInOpenState: 25s
+        permittedNumberOfCallsInHalfOpenState: 3
+        slidingWindowType: TIME_BASED
+        minimumNumberOfCalls: 5
+  retry:
+    instances:
+      productCatalogCB:
+        maxAttempts: 4
+        waitDuration: 3s
+        enableExponentialBackoff: true
+        exponentialBackoffMultiplier: 2
+        retryExceptions:
+          - com.eskcti.algashop.ordering.infrastructure.adapters.in.web.exceptionhandler.GatewayTimeoutException
+          - com.eskcti.algashop.ordering.infrastructure.adapters.in.web.exceptionhandler.BadGatewayException$ServerErrorException
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,circuitbreakers,circuitbreakerevents
+  endpoint:
+    health:
+      show-details: always
 
 algashop:
   integrations:
