@@ -4,6 +4,10 @@ public class BadGatewayException extends RuntimeException {
     public BadGatewayException() {
     }
 
+    public BadGatewayException(String message) {
+        super(message);
+    }
+
     public BadGatewayException(String message, Throwable cause) {
         super(message, cause);
     }
@@ -19,6 +23,10 @@ public class BadGatewayException extends RuntimeException {
 
     public static class ClientErrorException extends BadGatewayException {
         public ClientErrorException() {
+        }
+
+        public ClientErrorException(String message) {
+            super(message);
         }
 
         public ClientErrorException(String message, Throwable cause) {

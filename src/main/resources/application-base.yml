@@ -12,6 +12,10 @@ spring:
 algashop:
   integrations:
     shipping.provider: RAPIDEX
+    rapidex:
+      fallback:
+        cost: "20.0"
+        estimated-days: 10
 
 management:
   endpoints:

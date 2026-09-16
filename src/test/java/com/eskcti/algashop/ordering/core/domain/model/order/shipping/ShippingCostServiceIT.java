@@ -5,13 +5,20 @@ import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 
 import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.Timeout;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.SqlConfig;
 import org.springframework.test.context.TestPropertySource;
@@ -22,8 +29,6 @@ import com.eskcti.algashop.ordering.core.domain.model.commons.ZipCode;
 import com.eskcti.algashop.ordering.core.domain.model.order.shipping.OriginAddressService;
 import com.eskcti.algashop.ordering.core.domain.model.order.shipping.ShippingCostService;
 import com.eskcti.algashop.ordering.core.domain.model.order.shipping.ShippingCostService.CalculationRequest;
-import com.eskcti.algashop.ordering.infrastructure.adapters.in.web.exceptionhandler.BadGatewayException;
-import com.eskcti.algashop.ordering.infrastructure.adapters.in.web.exceptionhandler.GatewayTimeoutException;
 import com.github.tomakehurst.wiremock.WireMockServer;
 
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
@@ -34,6 +39,7 @@ import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 @Sql(scripts = "classpath:sql/clean-database.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD, config = @SqlConfig(transactionMode = SqlConfig.TransactionMode.ISOLATED))
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 @ActiveProfiles("it")
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class ShippingCostServiceIT {
 
   @Autowired
@@ -42,26 +48,30 @@ class ShippingCostServiceIT {
   @Autowired
   private OriginAddressService originAddressService;
 
-  private WireMockServer wireMockRapidex;
+  private static WireMockServer wireMockRapidex;
+
+  @DynamicPropertySource
+  static void configureProperties(DynamicPropertyRegistry registry) {
+    wireMockRapidex = new WireMockServer(WireMockConfiguration.options().dynamicPort());
+    wireMockRapidex.start();
+    registry.add("algashop.integrations.rapidex.url",
+        () -> "http://localhost:" + wireMockRapidex.port());
+  }
+
+  @AfterAll
+  static void cleanupAll() {
+    if (wireMockRapidex != null && wireMockRapidex.isRunning()) {
+      wireMockRapidex.stop();
+    }
+  }
 
   @BeforeEach
-  public void setup() {
-    initWireMock();
-  }
-
-  @AfterEach
-  public void clean() {
-    wireMockRapidex.stop();
-  }
-
-  private void initWireMock() {
-    wireMockRapidex = new WireMockServer(WireMockConfiguration.options()
-        .port(8780));
-
-    wireMockRapidex.start();
+  void resetStubs() {
+    wireMockRapidex.resetAll();
   }
 
   @Test
+  @Order(1)
   void shouldCalculate() {
     wireMockRapidex.stubFor(post(urlPathEqualTo("/api/delivery-cost"))
         .willReturn(aResponse()
@@ -80,7 +90,8 @@ class ShippingCostServiceIT {
   }
 
   @Test
-  void shouldThrowBadGatewayWhenApiReturns500() {
+  @Order(2)
+  void shouldReturnFallbackWhenApiReturns500() {
     wireMockRapidex.stubFor(post(urlPathEqualTo("/api/delivery-cost"))
         .willReturn(aResponse()
             .withStatus(500)
@@ -90,13 +101,17 @@ class ShippingCostServiceIT {
     ZipCode origin = originAddressService.originAddress().zipCode();
     ZipCode destination = new ZipCode("12346");
 
-    Assertions.assertThatThrownBy(() ->
-            shippingCostService.calculate(new CalculationRequest(origin, destination)))
-        .isInstanceOf(BadGatewayException.class);
+    var result = shippingCostService
+        .calculate(new CalculationRequest(origin, destination));
+
+    Assertions.assertThat(result.cost()).isNotNull();
+    Assertions.assertThat(result.expectedDate()).isNotNull();
   }
 
   @Test
-  void shouldThrowGatewayTimeoutWhenApiIsSlow() {
+  @Order(3)
+  @Timeout(60)
+  void shouldReturnFallbackWhenApiIsSlow() {
     wireMockRapidex.stubFor(post(urlPathEqualTo("/api/delivery-cost"))
         .willReturn(aResponse()
             .withStatus(200)
@@ -107,8 +122,10 @@ class ShippingCostServiceIT {
     ZipCode origin = originAddressService.originAddress().zipCode();
     ZipCode destination = new ZipCode("12347");
 
-    Assertions.assertThatThrownBy(() ->
-            shippingCostService.calculate(new CalculationRequest(origin, destination)))
-        .isInstanceOf(GatewayTimeoutException.class);
+    var result = shippingCostService
+        .calculate(new CalculationRequest(origin, destination));
+
+    Assertions.assertThat(result.cost()).isNotNull();
+    Assertions.assertThat(result.expectedDate()).isNotNull();
   }
 }

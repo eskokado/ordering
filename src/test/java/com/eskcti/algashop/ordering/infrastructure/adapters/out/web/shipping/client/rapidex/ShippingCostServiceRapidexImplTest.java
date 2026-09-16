@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.when;
 
-import java.net.SocketTimeoutException;
 import java.time.LocalDate;
 
 import org.junit.jupiter.api.Test;
@@ -12,16 +11,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.web.client.ResourceAccessException;
-import org.springframework.web.client.RestClientException;
 
 import com.eskcti.algashop.ordering.core.domain.model.commons.Money;
 import com.eskcti.algashop.ordering.core.domain.model.commons.ZipCode;
 import com.eskcti.algashop.ordering.core.domain.model.order.shipping.ShippingCostService.CalculationRequest;
-import com.eskcti.algashop.ordering.infrastructure.adapters.out.web.shipping.client.rapidex.DeliveryCostRequest;
-import com.eskcti.algashop.ordering.infrastructure.adapters.out.web.shipping.client.rapidex.DeliveryCostResponse;
-import com.eskcti.algashop.ordering.infrastructure.adapters.out.web.shipping.client.rapidex.RapiDexAPIClient;
-import com.eskcti.algashop.ordering.infrastructure.adapters.out.web.shipping.client.rapidex.ShippingCostServiceRapidexImpl;
 import com.eskcti.algashop.ordering.infrastructure.adapters.in.web.exceptionhandler.BadGatewayException;
 import com.eskcti.algashop.ordering.infrastructure.adapters.in.web.exceptionhandler.GatewayTimeoutException;
 
@@ -29,7 +22,7 @@ import com.eskcti.algashop.ordering.infrastructure.adapters.in.web.exceptionhand
 class ShippingCostServiceRapidexImplTest {
 
   @Mock
-  private RapiDexAPIClient rapiDexAPIClient;
+  private ResilientRapiDexAPIClient rapiDexAPIClient;
 
   @InjectMocks
   private ShippingCostServiceRapidexImpl shippingCostService;
@@ -51,14 +44,29 @@ class ShippingCostServiceRapidexImplTest {
   }
 
   @Test
-  void shouldThrowGatewayTimeoutWhenRestClientExceptionCausedBySocketTimeout() {
+  void shouldThrowClientErrorWhenResponseIsNull() {
     CalculationRequest request = CalculationRequest.builder()
         .origin(new ZipCode("12345"))
         .destination(new ZipCode("54321"))
         .build();
 
-    RestClientException ex = new RestClientException("timeout", new SocketTimeoutException("Read timed out"));
-    when(rapiDexAPIClient.calculate(new DeliveryCostRequest("12345", "54321"))).thenThrow(ex);
+    when(rapiDexAPIClient.calculate(new DeliveryCostRequest("12345", "54321")))
+        .thenReturn(null);
+
+    assertThatThrownBy(() -> shippingCostService.calculate(request))
+        .isInstanceOf(BadGatewayException.ClientErrorException.class)
+        .hasMessage("Rapidex API Client Error");
+  }
+
+  @Test
+  void shouldThrowGatewayTimeoutWhenResilientClientThrowsTimeoutException() {
+    CalculationRequest request = CalculationRequest.builder()
+        .origin(new ZipCode("12345"))
+        .destination(new ZipCode("54321"))
+        .build();
+
+    when(rapiDexAPIClient.calculate(new DeliveryCostRequest("12345", "54321")))
+        .thenThrow(new GatewayTimeoutException("Rapidex API Timeout"));
 
     assertThatThrownBy(() -> shippingCostService.calculate(request))
         .isInstanceOf(GatewayTimeoutException.class)
@@ -66,32 +74,17 @@ class ShippingCostServiceRapidexImplTest {
   }
 
   @Test
-  void shouldThrowBadGatewayWhenRestClientExceptionWithOtherCause() {
+  void shouldThrowBadGatewayWhenResilientClientThrowsBadGatewayException() {
     CalculationRequest request = CalculationRequest.builder()
         .origin(new ZipCode("12345"))
         .destination(new ZipCode("54321"))
         .build();
 
-    RestClientException ex = new RestClientException("connection refused", new RuntimeException("connection refused"));
-    when(rapiDexAPIClient.calculate(new DeliveryCostRequest("12345", "54321"))).thenThrow(ex);
+    when(rapiDexAPIClient.calculate(new DeliveryCostRequest("12345", "54321")))
+        .thenThrow(new BadGatewayException.ServerErrorException("Rapidex API Bad Gateway", new RuntimeException()));
 
     assertThatThrownBy(() -> shippingCostService.calculate(request))
         .isInstanceOf(BadGatewayException.class)
         .hasMessage("Rapidex API Bad Gateway");
-  }
-
-  @Test
-  void shouldThrowGatewayTimeoutWhenResourceAccessException() {
-    CalculationRequest request = CalculationRequest.builder()
-        .origin(new ZipCode("12345"))
-        .destination(new ZipCode("54321"))
-        .build();
-
-    ResourceAccessException ex = new ResourceAccessException("Connection timed out");
-    when(rapiDexAPIClient.calculate(new DeliveryCostRequest("12345", "54321"))).thenThrow(ex);
-
-    assertThatThrownBy(() -> shippingCostService.calculate(request))
-        .isInstanceOf(GatewayTimeoutException.class)
-        .hasMessage("Rapidex API Timeout");
   }
 }
