@@ -7,8 +7,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreaker;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
 import org.springframework.cloud.client.circuitbreaker.NoFallbackAvailableException;
 import org.springframework.cloud.circuitbreaker.retry.FrameworkRetryCircuitBreakerFactory;
+import org.springframework.core.retry.RetryException;
 import org.springframework.core.retry.RetryPolicy;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.client.HttpClientErrorException;
@@ -25,7 +28,9 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -527,5 +532,44 @@ class ResilientProductCatalogAPIClientTest {
         assertThat(result).isNotInstanceOf(BadGatewayException.ClientErrorException.class);
         assertThat(result.getMessage()).isEqualTo("Product Catalog API Bad Gateway");
         assertThat(result.getCause()).isEqualTo(genericException);
+    }
+
+    @Test
+    void shouldRethrowNoFallbackAvailableExceptionWhenRetryExceptionCauseIsNotKnownType() {
+        UUID productId = UUID.randomUUID();
+
+        CircuitBreakerFactory mockFactory = mock(CircuitBreakerFactory.class);
+        CircuitBreaker mockCB = mock(CircuitBreaker.class);
+        when(mockFactory.create("productCatalogCB")).thenReturn(mockCB);
+
+        RetryException retryException = new RetryException("retry exhausted",
+                new IllegalStateException("something else"));
+        when(mockCB.run(any())).thenThrow(
+                new NoFallbackAvailableException("No fallback available", retryException));
+
+        ResilientProductCatalogAPIClient testClient =
+                new ResilientProductCatalogAPIClient(mockFactory, productCatalogAPIClient);
+
+        assertThatThrownBy(() -> testClient.getById(productId))
+                .isInstanceOf(NoFallbackAvailableException.class);
+    }
+
+    @Test
+    void shouldRethrowNoFallbackAvailableExceptionWhenCauseIsNotRetryExceptionDirectly() {
+        UUID productId = UUID.randomUUID();
+
+        CircuitBreakerFactory mockFactory = mock(CircuitBreakerFactory.class);
+        CircuitBreaker mockCB = mock(CircuitBreaker.class);
+        when(mockFactory.create("productCatalogCB")).thenReturn(mockCB);
+
+        when(mockCB.run(any())).thenThrow(
+                new NoFallbackAvailableException("No fallback available",
+                        new IllegalStateException("unexpected")));
+
+        ResilientProductCatalogAPIClient testClient =
+                new ResilientProductCatalogAPIClient(mockFactory, productCatalogAPIClient);
+
+        assertThatThrownBy(() -> testClient.getById(productId))
+                .isInstanceOf(NoFallbackAvailableException.class);
     }
 }
