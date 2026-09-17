@@ -8,6 +8,11 @@ spring:
   flyway:
     enabled: false
     locations: classpath:db/migration
+  cloud:
+    discovery:
+      client:
+        composite-indicator:
+          enabled: false
 
 algashop:
   integrations:
@@ -18,10 +23,25 @@ algashop:
         estimated-days: 10
 
 management:
+  info:
+    env.enabled: true
+  health:
+    db:
+      enabled: true
+    diskspace:
+      enabled: true
   endpoints:
     web:
       exposure:
-        include: health
+        include: health,info
   endpoint:
     health:
       show-details: always
+      group:
+        readiness:
+          include: db,readinessState
+      status:
+        order: "DOWN, OUT_OF_SERVICE, UNKNOWN, DEGRADED, UP"
+
+info:
+  app.name: AlgaShop Ordering API
