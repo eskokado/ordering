@@ -10,10 +10,11 @@ spring:
       host: algashop-redis
       port: 6379
       database: 1
-      timeout: 20
+      password: algashop
+      timeout: 5s
 
 algashop:
   integrations:
     shipping.provider: RAPIDEX
     rapidex.url: http://wiremock:8080
-    product-catalog.url: http://wiremock:8080
+    product-catalog.url: http://algashop-product-catalog:8084
