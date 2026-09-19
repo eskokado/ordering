@@ -14,6 +14,8 @@ import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClientException;
 
+import static com.eskcti.algashop.ordering.infrastructure.config.resilience.SpringCircuitBreakerConfig.rapidexAPICBId;
+
 import java.net.SocketTimeoutException;
 
 @Component
@@ -31,7 +33,7 @@ public class ResilientRapiDexAPIClient {
             @org.springframework.beans.factory.annotation.Value("${algashop.integrations.rapidex.fallback.cost:20.0}") String fallbackCost,
             @org.springframework.beans.factory.annotation.Value("${algashop.integrations.rapidex.fallback.estimated-days:10}") long fallbackEstimatedDays) {
         this.rapiDexAPIClient = rapiDexAPIClient;
-        this.circuitBreaker = (FrameworkRetryCircuitBreaker) circuitBreakerFactory.create("rapidexCB");
+        this.circuitBreaker = (FrameworkRetryCircuitBreaker) circuitBreakerFactory.create(rapidexAPICBId);
         this.fallbackCost = fallbackCost;
         this.fallbackEstimatedDays = fallbackEstimatedDays;
     }

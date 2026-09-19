@@ -16,6 +16,8 @@ import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClientException;
 
+import static com.eskcti.algashop.ordering.infrastructure.config.resilience.SpringCircuitBreakerConfig.productCatalogCBId;
+
 import java.net.SocketTimeoutException;
 import java.util.Optional;
 import java.util.UUID;
@@ -38,7 +40,7 @@ public class ResilientProductCatalogAPIClient {
     public Optional<ProductResponse> getById(UUID productId) {
         log.info("Trying to load product {}", productId);
         try {
-            return circuitBreakerFactory.create("productCatalogCB").run(()->loadProduct(productId));
+            return circuitBreakerFactory.create(productCatalogCBId).run(()->loadProduct(productId));
         } catch (NoFallbackAvailableException e) {
             if (e.getCause() instanceof RetryException re) {
                 if (re.getCause() instanceof GatewayTimeoutException gte) {
