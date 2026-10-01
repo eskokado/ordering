@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import static com.eskcti.algashop.ordering.infrastructure.config.security.SecurityAnnotations.*;
+
 @RestController
 @RequiredArgsConstructor
 public class ShippingCostController {
@@ -16,6 +18,7 @@ public class ShippingCostController {
     private final ShippingApplicationService shippingApplicationService;
 
     @PostMapping("/api/v1/shipping-cost-previews")
+    @CanReadOrders
     public ShippingCostPreviewOutput previewShippingCost(@RequestBody @Valid ShippingCostPreviewInput input) {
         return shippingApplicationService.previewCost(input);
     }

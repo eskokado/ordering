@@ -26,6 +26,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import static com.eskcti.algashop.ordering.infrastructure.config.security.SecurityAnnotations.*;
+
 @RestController
 @RequestMapping("/api/v1/orders")
 @RequiredArgsConstructor
@@ -36,17 +38,20 @@ public class OrderController {
   private final BuyNowApplicationService buyNowApplicationService;
 
   @GetMapping
+  @CanReadOrders
   public PageModel<OrderSummaryOutput> findAll(OrderFilter orderFilter) {
     return PageModel.of(orderQueryService.filter(orderFilter));
   }
 
   @GetMapping("/{orderId}")
+  @CanReadOrders
   public OrderDetailOutput findById(@PathVariable String orderId) {
     return orderQueryService.findById(orderId);
   }
 
   @PostMapping(consumes = "application/vnd.order-with-product.v1+json")
   @ResponseStatus(HttpStatus.CREATED)
+  @CanWriteOrders
   public OrderDetailOutput createWithProduct(@Valid @RequestBody BuyNowInput input) {
     String orderId;
     try {
@@ -59,6 +64,7 @@ public class OrderController {
 
   @PostMapping(consumes = "application/vnd.order-with-shopping-cart.v1+json")
   @ResponseStatus(HttpStatus.CREATED)
+  @CanWriteOrders
   public OrderDetailOutput createWithShoppingCart(@Valid @RequestBody CheckoutInput input) {
     String orderId;
     try {

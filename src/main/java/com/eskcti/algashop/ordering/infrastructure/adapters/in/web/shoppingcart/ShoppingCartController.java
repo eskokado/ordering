@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
+import static com.eskcti.algashop.ordering.infrastructure.config.security.SecurityAnnotations.*;
+
 @RestController
 @RequestMapping("/api/v1/shopping-carts")
 @RequiredArgsConstructor
@@ -25,6 +27,7 @@ public class ShoppingCartController {
 
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
+	@CanWriteShoppingCarts
 	public ShoppingCartOutput create(@RequestBody @Valid ShoppingCartInput input) {
 		UUID shoppingCartId;
 		try {
@@ -36,29 +39,34 @@ public class ShoppingCartController {
 	}
 
 	@GetMapping("/{shoppingCartId}")
+	@CanReadShoppingCarts
 	public ShoppingCartOutput getById(@PathVariable UUID shoppingCartId) {
 		return forQueryingShoppingCarts.findById(shoppingCartId);
 	}
 
 	@GetMapping("/{shoppingCartId}/items")
+	@CanReadShoppingCarts
 	public ShoppingCartItemListModel getItems(@PathVariable UUID shoppingCartId) {
 		var items = forQueryingShoppingCarts.findById(shoppingCartId).getItems();
 		return new ShoppingCartItemListModel(items);
 	}
 
 	@DeleteMapping("/{shoppingCartId}")
+	@CanWriteShoppingCarts
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void delete(@PathVariable UUID shoppingCartId) {
 		forManagingShoppingCarts.delete(shoppingCartId);
 	}
 
 	@DeleteMapping("/{shoppingCartId}/items")
+	@CanWriteShoppingCarts
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void empty(@PathVariable UUID shoppingCartId) {
 		forManagingShoppingCarts.empty(shoppingCartId);
 	}
 
 	@PostMapping("/{shoppingCartId}/items")
+	@CanWriteShoppingCarts
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void addItem(@PathVariable UUID shoppingCartId,
 			@RequestBody @Valid ShoppingCartItemInput input) {
@@ -71,6 +79,7 @@ public class ShoppingCartController {
 	}
 
 	@DeleteMapping("/{shoppingCartId}/items/{itemId}")
+	@CanWriteShoppingCarts
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void removeItem(@PathVariable UUID shoppingCartId,
 			@PathVariable UUID itemId) {
