@@ -2,6 +2,7 @@ package com.eskcti.algashop.ordering.infrastructure.adapters.out.web.shipping.cl
 
 import com.eskcti.algashop.ordering.infrastructure.adapters.in.web.exceptionhandler.BadGatewayException;
 import com.eskcti.algashop.ordering.infrastructure.adapters.in.web.exceptionhandler.GatewayTimeoutException;
+import com.eskcti.algashop.ordering.infrastructure.config.resilience.SpringCircuitBreakerConfig;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -48,7 +49,7 @@ class ResilientRapiDexAPIClientTest {
                 .retryPolicy(retryPolicy)
                 .openTimeout(Duration.ofSeconds(10))
                 .resetTimeout(Duration.ofSeconds(25))
-                .build(), "rapidexCB");
+                .build(), SpringCircuitBreakerConfig.rapidexAPICBId);
 
         resilientClient = new ResilientRapiDexAPIClient(circuitBreakerFactory, rapiDexAPIClient, "20.0", 10L);
     }
