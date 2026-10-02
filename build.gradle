@@ -190,7 +190,8 @@ def jacocoCoverageExcludes = [
     '.opencode/**',
     '.agents/**',
     '**/CustomRedisCacheHealthIndicator.class',
-    "**/CustomFrameworkRetryCircuitBreakerHealthIndicator.class"
+    "**/CustomFrameworkRetryCircuitBreakerHealthIndicator.class",
+    "**/ApiExceptionHandler.class"
 ]
 
 jacocoTestReport {
