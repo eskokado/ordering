@@ -1,11 +1,14 @@
 package com.eskcti.algashop.ordering.core.application.customer.management;
 
+import com.eskcti.algashop.ordering.utils.MockJwtDecoderConfig;
+import com.eskcti.algashop.ordering.utils.TestcontainerPostgreSQLConfig;
 import java.time.LocalDate;
 import java.util.UUID;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.springframework.context.annotation.Import;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
@@ -29,6 +32,7 @@ import com.eskcti.algashop.ordering.core.domain.model.customer.CustomerRegistere
 import com.eskcti.algashop.ordering.infrastructure.adapters.in.listener.customer.CustomerEventListener;
 
 @SpringBootTest
+@Import({ TestcontainerPostgreSQLConfig.class, MockJwtDecoderConfig.class })
 
 @Sql(scripts = "classpath:sql/clean-database.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS, config = @SqlConfig(transactionMode = SqlConfig.TransactionMode.ISOLATED))
 @Sql(scripts = "classpath:sql/clean-database.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD, config = @SqlConfig(transactionMode = SqlConfig.TransactionMode.ISOLATED))

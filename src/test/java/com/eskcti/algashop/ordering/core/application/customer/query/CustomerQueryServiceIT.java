@@ -1,7 +1,10 @@
 package com.eskcti.algashop.ordering.core.application.customer.query;
 
+import com.eskcti.algashop.ordering.utils.MockJwtDecoderConfig;
+import com.eskcti.algashop.ordering.utils.TestcontainerPostgreSQLConfig;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.springframework.context.annotation.Import;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
@@ -26,6 +29,7 @@ import com.eskcti.algashop.ordering.core.domain.model.customer.CustomerTestDataB
 import com.eskcti.algashop.ordering.core.domain.model.customer.Customers;
 
 @SpringBootTest
+@Import({ TestcontainerPostgreSQLConfig.class, MockJwtDecoderConfig.class })
 
 @Sql(scripts = "classpath:sql/clean-database.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS, config = @SqlConfig(transactionMode = SqlConfig.TransactionMode.ISOLATED))
 @Sql(scripts = "classpath:sql/clean-database.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD, config = @SqlConfig(transactionMode = SqlConfig.TransactionMode.ISOLATED))

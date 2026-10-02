@@ -1,9 +1,12 @@
 package com.eskcti.algashop.ordering.core.domain.model.product;
 
+import com.eskcti.algashop.ordering.utils.MockJwtDecoderConfig;
+import com.eskcti.algashop.ordering.utils.TestcontainerPostgreSQLConfig;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.context.annotation.Import;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
@@ -20,6 +23,7 @@ import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
+@Import({ TestcontainerPostgreSQLConfig.class, MockJwtDecoderConfig.class })
 @ActiveProfiles("it")
 class ProductCatalogServiceIT {
 

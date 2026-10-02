@@ -1,5 +1,6 @@
 package com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.shoppingcart;
 
+import com.eskcti.algashop.ordering.utils.TestcontainerPostgreSQLConfig;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -40,7 +41,8 @@ import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.cust
     CustomersPersistenceProvider.class,
     CustomerPersistenceEntityAssembler.class,
     CustomerPersistenceEntityDisassembler.class,
-    SpringDataAuditingConfig.class
+    SpringDataAuditingConfig.class,
+    TestcontainerPostgreSQLConfig.class
 })
 // @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)

@@ -2,9 +2,11 @@ package com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.sho
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.eskcti.algashop.ordering.utils.TestcontainerPostgreSQLConfig;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.context.annotation.Import;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
@@ -21,6 +23,7 @@ import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.cust
 import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.customer.CustomerPersistenceEntityTestDataBuilder;
 
 @DataJpaTest
+@Import(TestcontainerPostgreSQLConfig.class)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Sql(scripts = "classpath:sql/clean-database.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS, config = @SqlConfig(transactionMode = SqlConfig.TransactionMode.ISOLATED))
 @Sql(scripts = "classpath:sql/clean-database.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD, config = @SqlConfig(transactionMode = SqlConfig.TransactionMode.ISOLATED))

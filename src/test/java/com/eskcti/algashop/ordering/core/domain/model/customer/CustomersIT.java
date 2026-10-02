@@ -1,5 +1,6 @@
 package com.eskcti.algashop.ordering.core.domain.model.customer;
 
+import com.eskcti.algashop.ordering.utils.TestcontainerPostgreSQLConfig;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
@@ -29,7 +30,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 @DataJpaTest
 @Import({ CustomersPersistenceProvider.class,
     CustomerPersistenceEntityAssembler.class,
-    CustomerPersistenceEntityDisassembler.class })
+    CustomerPersistenceEntityDisassembler.class, TestcontainerPostgreSQLConfig.class })
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Sql(scripts = "classpath:sql/clean-database.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS, config = @SqlConfig(transactionMode = SqlConfig.TransactionMode.ISOLATED))
 @Sql(scripts = "classpath:sql/clean-database.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD, config = @SqlConfig(transactionMode = SqlConfig.TransactionMode.ISOLATED))

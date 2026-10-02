@@ -4,57 +4,29 @@ import com.eskcti.algashop.ordering.core.application.checkout.BuyNowInputTestDat
 import com.eskcti.algashop.ordering.core.application.checkout.BuyNowInput;
 import com.eskcti.algashop.ordering.core.application.order.query.OrderDetailOutput;
 import com.eskcti.algashop.ordering.core.domain.model.order.OrderId;
+import com.eskcti.algashop.ordering.infrastructure.adapters.in.web.AbstractPresentationIT;
 import com.eskcti.algashop.ordering.utils.AlgaShopResourceUtils;
 
 import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.shoppingcart.ShoppingCartPersistenceEntityRepository;
 import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.customer.CustomerPersistenceEntityRepository;
 import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.customer.CustomerPersistenceEntityTestDataBuilder;
 import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.order.OrderPersistenceEntityRepository;
-import com.github.tomakehurst.wiremock.WireMockServer;
-import com.github.tomakehurst.wiremock.common.ClasspathFileSource;
-import com.github.tomakehurst.wiremock.extension.responsetemplating.ResponseTemplateTransformer;
-import com.github.tomakehurst.wiremock.extension.responsetemplating.TemplateEngine;
-
-import io.restassured.RestAssured;
-import io.restassured.path.json.config.JsonPathConfig;
 
 import org.assertj.core.api.Assertions;
 import org.hamcrest.Matchers;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.jdbc.SqlConfig;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
 import java.util.UUID;
 
 import static com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.shoppingcart.ShoppingCartPersistenceEntityTestDataBuilder.existingShoppingCart;
-import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
-import static io.restassured.config.JsonConfig.*;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-// @AutoConfigureStubRunner(stubsMode = StubRunnerProperties.StubsMode.LOCAL,
-// ids = "com.eskcti.algashop:product-catalog:0.0.1-SNAPSHOT:8781")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-
-@Sql(scripts = "classpath:sql/clean-database.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS, config = @SqlConfig(transactionMode = SqlConfig.TransactionMode.ISOLATED))
-@Sql(scripts = "classpath:sql/clean-database.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD, config = @SqlConfig(transactionMode = SqlConfig.TransactionMode.ISOLATED))
-@Transactional(propagation = Propagation.NOT_SUPPORTED)
-@ActiveProfiles("it")
-public class OrderControllerIT {
-
-  @LocalServerPort
-  private int port;
+public class OrderControllerIT extends AbstractPresentationIT {
 
   @Autowired
   private CustomerPersistenceEntityRepository customerRepository;
@@ -69,44 +41,10 @@ public class OrderControllerIT {
   private static final UUID validProductId = UUID.fromString("fffe6ec2-7103-48b3-8e4f-3b58e43fb75a");
   private static final UUID validShoppingCartId = UUID.fromString("ad265aa3-c77d-46e9-9782-b70c487c1e17");
 
-  private WireMockServer wireMockProductCatalog;
-  private WireMockServer wireMockRapidex;
-
   @BeforeEach
   public void setup() {
-    RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
-    RestAssured.port = port;
-
-    RestAssured.config().jsonConfig(jsonConfig().numberReturnType(JsonPathConfig.NumberReturnType.BIG_DECIMAL));
-
     initDatabase();
-
-    wireMockRapidex = new WireMockServer(options()
-        .port(8780)
-        .usingFilesUnderDirectory("src/test/resources/wiremock/rapidex")
-        .extensions(new ResponseTemplateTransformer(
-            TemplateEngine.defaultTemplateEngine(),
-            true,
-            new ClasspathFileSource("src/test/resources/wiremock/rapidex"),
-            Collections.emptyList())));
-
-    wireMockProductCatalog = new WireMockServer(options()
-        .port(8781)
-        .usingFilesUnderDirectory("src/test/resources/wiremock/product-catalog")
-        .extensions(new ResponseTemplateTransformer(
-            TemplateEngine.defaultTemplateEngine(),
-            true,
-            new ClasspathFileSource("src/test/resources/wiremock/product-catalog"),
-            Collections.emptyList())));
-
-    wireMockRapidex.start();
-    wireMockProductCatalog.start();
-  }
-
-  @AfterEach
-  public void after() {
-    wireMockRapidex.stop();
-    wireMockProductCatalog.stop();
+    initWireMock();
   }
 
   private void initDatabase() {
@@ -117,8 +55,7 @@ public class OrderControllerIT {
   @Test
   public void shouldCreateOrderUsingProduct() {
     String json = AlgaShopResourceUtils.readContent("json/create-order-with-product.json");
-    String createdOrderId = RestAssured
-        .given()
+    String createdOrderId = givenAuthenticated()
         .accept(MediaType.APPLICATION_JSON_VALUE)
         .contentType("application/vnd.order-with-product.v1+json")
         .body(json)
@@ -144,8 +81,7 @@ public class OrderControllerIT {
         .customerId(validCustomerId)
         .build();
 
-    OrderDetailOutput orderDetailOutput = RestAssured
-        .given()
+    OrderDetailOutput orderDetailOutput = givenAuthenticated()
         .accept(MediaType.APPLICATION_JSON_VALUE)
         .contentType("application/vnd.order-with-product.v1+json")
         .body(input)
@@ -175,8 +111,7 @@ public class OrderControllerIT {
             .build());
 
     String json = AlgaShopResourceUtils.readContent("json/create-order-with-shopping-cart.json");
-    String createdOrderId = RestAssured
-        .given()
+    String createdOrderId = givenAuthenticated()
         .accept(MediaType.APPLICATION_JSON_VALUE)
         .contentType("application/vnd.order-with-shopping-cart.v1+json")
         .body(json)
@@ -201,8 +136,7 @@ public class OrderControllerIT {
 
     wireMockProductCatalog.stop();
 
-    RestAssured
-        .given()
+    givenAuthenticated()
         .accept(MediaType.APPLICATION_JSON_VALUE)
         .contentType("application/vnd.order-with-product.v1+json")
         .body(json)
@@ -218,8 +152,7 @@ public class OrderControllerIT {
   @Test
   public void shouldNotCreateOrderUsingProductWhenCustomerWasNotFound() {
     String json = AlgaShopResourceUtils.readContent("json/create-order-with-product-and-invalid-customer.json");
-    RestAssured
-        .given()
+    givenAuthenticated()
         .accept(MediaType.APPLICATION_JSON_VALUE)
         .contentType("application/vnd.order-with-product.v1+json")
         .body(json)
@@ -234,8 +167,7 @@ public class OrderControllerIT {
   @Test
   public void shouldNotCreateOrderUsingProductWhenProductWasNotFound() {
     String json = AlgaShopResourceUtils.readContent("json/create-order-with-product-and-invalid-product.json");
-    RestAssured
-        .given()
+    givenAuthenticated()
         .accept(MediaType.APPLICATION_JSON_VALUE)
         .contentType("application/vnd.order-with-product.v1+json")
         .body(json)
@@ -251,8 +183,7 @@ public class OrderControllerIT {
   public void shouldNotCreateOrderUsingShoppingCartWhenShoppingCartWasNotFound() {
     String json = AlgaShopResourceUtils.readContent(
         "json/create-order-with-shopping-cart-and-invalid-cart.json");
-    RestAssured
-        .given()
+    givenAuthenticated()
         .accept(MediaType.APPLICATION_JSON_VALUE)
         .contentType("application/vnd.order-with-shopping-cart.v1+json")
         .body(json)

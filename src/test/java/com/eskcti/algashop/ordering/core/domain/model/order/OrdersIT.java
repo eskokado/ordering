@@ -1,5 +1,6 @@
 package com.eskcti.algashop.ordering.core.domain.model.order;
 
+import com.eskcti.algashop.ordering.utils.TestcontainerPostgreSQLConfig;
 import java.time.Year;
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -51,7 +52,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Import({ OrdersPersistenceProvider.class, OrderPersistenceEntityAssembler.class,
     OrderPersistenceEntityDisassembler.class,
     CustomersPersistenceProvider.class, CustomerPersistenceEntityAssembler.class,
-    CustomerPersistenceEntityDisassembler.class, SpringDataAuditingConfig.class })
+    CustomerPersistenceEntityDisassembler.class, SpringDataAuditingConfig.class, TestcontainerPostgreSQLConfig.class })
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Sql(scripts = "classpath:sql/clean-database.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS, config = @SqlConfig(transactionMode = SqlConfig.TransactionMode.ISOLATED))
 @Sql(scripts = "classpath:sql/clean-database.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD, config = @SqlConfig(transactionMode = SqlConfig.TransactionMode.ISOLATED))
