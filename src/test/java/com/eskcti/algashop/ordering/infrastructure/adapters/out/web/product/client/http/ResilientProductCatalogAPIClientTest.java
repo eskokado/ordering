@@ -14,12 +14,16 @@ import org.springframework.cloud.circuitbreaker.retry.FrameworkRetryCircuitBreak
 import org.springframework.core.retry.RetryException;
 import org.springframework.core.retry.RetryPolicy;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.oauth2.client.ClientAuthorizationException;
+import org.springframework.security.oauth2.core.OAuth2AuthorizationException;
+import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClientException;
 
 import java.math.BigDecimal;
+import java.net.ConnectException;
 import java.net.SocketTimeoutException;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
@@ -571,5 +575,142 @@ class ResilientProductCatalogAPIClientTest {
 
         assertThatThrownBy(() -> testClient.getById(productId))
                 .isInstanceOf(NoFallbackAvailableException.class);
+    }
+
+    @Test
+    void shouldThrowGatewayTimeoutWhenTokenEndpointIsUnreachable() {
+        UUID productId = UUID.randomUUID();
+        ResourceAccessException tokenError = new ResourceAccessException(
+                "Connection refused", new ConnectException("Connection refused"));
+
+        when(productCatalogAPIClient.getById(productId)).thenThrow(tokenException(tokenError));
+
+        assertThatThrownBy(() -> resilientClient.getById(productId))
+                .isInstanceOf(GatewayTimeoutException.class)
+                .hasMessage("Product Catalog API Timeout");
+
+        verify(productCatalogAPIClient, times(4)).getById(productId);
+    }
+
+    @Test
+    void shouldThrowGatewayTimeoutWhenTokenFailureIsWrappedInOAuth2Exception() {
+        UUID productId = UUID.randomUUID();
+        ResourceAccessException tokenError = new ResourceAccessException(
+                "Connection refused", new ConnectException("Connection refused"));
+        OAuth2AuthorizationException wrapped = new OAuth2AuthorizationException(
+                new OAuth2Error("invalid_token_response"), tokenError);
+
+        when(productCatalogAPIClient.getById(productId)).thenThrow(tokenException(wrapped));
+
+        assertThatThrownBy(() -> resilientClient.getById(productId))
+                .isInstanceOf(GatewayTimeoutException.class)
+                .hasMessage("Product Catalog API Timeout");
+
+        verify(productCatalogAPIClient, times(4)).getById(productId);
+    }
+
+    @Test
+    void shouldThrowServerErrorBadGatewayWhenTokenEndpointReturnsServerError() {
+        UUID productId = UUID.randomUUID();
+        HttpServerErrorException serverError = HttpServerErrorException.create(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                "Internal Server Error",
+                null,
+                null,
+                StandardCharsets.UTF_8);
+
+        when(productCatalogAPIClient.getById(productId)).thenThrow(tokenException(serverError));
+
+        assertThatThrownBy(() -> resilientClient.getById(productId))
+                .isInstanceOf(BadGatewayException.ServerErrorException.class)
+                .hasMessage("Product Catalog API Bad Gateway");
+
+        verify(productCatalogAPIClient, times(4)).getById(productId);
+    }
+
+    @Test
+    void shouldThrowClientErrorBadGatewayWhenTokenEndpointRejectsClient() {
+        UUID productId = UUID.randomUUID();
+        HttpClientErrorException unauthorized = HttpClientErrorException.create(
+                HttpStatus.UNAUTHORIZED,
+                "Unauthorized",
+                null,
+                null,
+                StandardCharsets.UTF_8);
+
+        when(productCatalogAPIClient.getById(productId)).thenThrow(tokenException(unauthorized));
+
+        assertThatThrownBy(() -> resilientClient.getById(productId))
+                .isInstanceOf(BadGatewayException.ClientErrorException.class)
+                .hasMessage("Product Catalog API Bad Gateway");
+
+        verify(productCatalogAPIClient, times(1)).getById(productId);
+    }
+
+    @Test
+    void shouldThrowBadGatewayWhenTokenExceptionHasNoRestClientCause() {
+        UUID productId = UUID.randomUUID();
+
+        when(productCatalogAPIClient.getById(productId)).thenThrow(tokenException(null));
+
+        assertThatThrownBy(() -> resilientClient.getById(productId))
+                .isInstanceOf(BadGatewayException.class)
+                .hasMessage("Product Catalog API Bad Gateway");
+
+        verify(productCatalogAPIClient, times(1)).getById(productId);
+    }
+
+    @Test
+    void shouldThrowBadGatewayWhenTokenRestClientCauseIsNotRecognized() {
+        UUID productId = UUID.randomUUID();
+        RestClientException unknownCause = new RestClientException("error",
+                new IllegalStateException("unexpected"));
+
+        when(productCatalogAPIClient.getById(productId)).thenThrow(tokenException(unknownCause));
+
+        assertThatThrownBy(() -> resilientClient.getById(productId))
+                .isInstanceOf(BadGatewayException.class)
+                .isNotInstanceOf(BadGatewayException.ServerErrorException.class)
+                .isNotInstanceOf(BadGatewayException.ClientErrorException.class)
+                .hasMessage("Product Catalog API Bad Gateway");
+
+        verify(productCatalogAPIClient, times(1)).getById(productId);
+    }
+
+    @Test
+    void shouldThrowGatewayTimeoutWhenTokenRestClientCauseWrapsSocketTimeout() {
+        UUID productId = UUID.randomUUID();
+        RestClientException timeout = new RestClientException("Timeout",
+                new SocketTimeoutException("Read timed out"));
+
+        when(productCatalogAPIClient.getById(productId)).thenThrow(tokenException(timeout));
+
+        assertThatThrownBy(() -> resilientClient.getById(productId))
+                .isInstanceOf(GatewayTimeoutException.class)
+                .hasMessage("Product Catalog API Timeout");
+
+        verify(productCatalogAPIClient, times(4)).getById(productId);
+    }
+
+    @Test
+    void shouldThrowBadGatewayWhenTokenCauseChainIsTooDeep() {
+        UUID productId = UUID.randomUUID();
+        Throwable deepCause = new IllegalStateException("bottom");
+        for (int i = 0; i < 15; i++) {
+            deepCause = new IllegalStateException("level " + i, deepCause);
+        }
+
+        when(productCatalogAPIClient.getById(productId)).thenThrow(tokenException(deepCause));
+
+        assertThatThrownBy(() -> resilientClient.getById(productId))
+                .isInstanceOf(BadGatewayException.class)
+                .hasMessage("Product Catalog API Bad Gateway");
+
+        verify(productCatalogAPIClient, times(1)).getById(productId);
+    }
+
+    private OAuth2AuthorizationException tokenException(Throwable cause) {
+        OAuth2Error error = new OAuth2Error("invalid_token_response", "error retrieving access token", null);
+        return new ClientAuthorizationException(error, "algashop-ordering-service-client", cause);
     }
 }

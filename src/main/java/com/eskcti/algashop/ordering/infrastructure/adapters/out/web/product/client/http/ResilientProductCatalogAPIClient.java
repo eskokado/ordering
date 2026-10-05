@@ -2,14 +2,13 @@ package com.eskcti.algashop.ordering.infrastructure.adapters.out.web.product.cli
 
 import com.eskcti.algashop.ordering.infrastructure.adapters.in.web.exceptionhandler.BadGatewayException;
 import com.eskcti.algashop.ordering.infrastructure.adapters.in.web.exceptionhandler.GatewayTimeoutException;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
 import org.springframework.cloud.client.circuitbreaker.NoFallbackAvailableException;
 import org.springframework.core.retry.RetryException;
 import org.springframework.resilience.annotation.ConcurrencyLimit;
-import org.springframework.resilience.annotation.Retryable;
+import org.springframework.security.oauth2.core.OAuth2AuthorizationException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
@@ -26,6 +25,8 @@ import java.util.UUID;
 @Slf4j
 public class ResilientProductCatalogAPIClient {
 
+    private static final int MAX_CAUSE_DEPTH = 10;
+
     private final ProductCatalogAPIClient productCatalogAPIClient;
     private final CircuitBreakerFactory circuitBreakerFactory;
 
@@ -35,7 +36,11 @@ public class ResilientProductCatalogAPIClient {
         this.circuitBreakerFactory = circuitBreakerFactory;
     }
 
-    @Cacheable(cacheNames = "algashop:product-catalog-api:v1", key = "#productId")
+    @Cacheable(
+        cacheNames = "algashop:product-catalog-api:v1", 
+        key = "#productId",
+        unless="#result == null"
+    )
     @ConcurrencyLimit(10)
     public Optional<ProductResponse> getById(UUID productId) {
         log.info("Trying to load product {}", productId);
@@ -58,14 +63,50 @@ public class ResilientProductCatalogAPIClient {
         log.info("Loading product {}", productId);
         try {
             return Optional.ofNullable(productCatalogAPIClient.getById(productId));
+        } catch (OAuth2AuthorizationException e) {
+            throw translateTokenException(e);
         } catch (HttpClientErrorException e) {
-            if (!(e instanceof HttpClientErrorException.NotFound)) {
-                log.error("Client HTTP error when loading product {}", productId, e);
-            }
             return Optional.empty();
         } catch (RestClientException e) {
             throw translateException(e);
         }
+    }
+
+    private RuntimeException translateTokenException(OAuth2AuthorizationException e) {
+        RestClientException cause = findRestClientCause(e);
+
+        if (cause == null) {
+            return new BadGatewayException("Product Catalog API Bad Gateway", e);
+        }
+
+        if (cause instanceof ResourceAccessException
+            || cause.getCause() instanceof SocketTimeoutException) {
+            return new GatewayTimeoutException("Product Catalog API Timeout", e);
+        }
+
+        if (cause instanceof HttpClientErrorException) {
+            return new BadGatewayException.ClientErrorException("Product Catalog API Bad Gateway", e);
+        }
+
+        if (cause instanceof HttpServerErrorException) {
+            return new BadGatewayException.ServerErrorException("Product Catalog API Bad Gateway", e);
+        }
+
+        return new BadGatewayException("Product Catalog API Bad Gateway", e);
+    }
+
+    private RestClientException findRestClientCause(Throwable exception) {
+        Throwable current = exception;
+        int depth = 0;
+
+        while (current != null && depth++ < MAX_CAUSE_DEPTH) {
+            if (current instanceof RestClientException restClientException) {
+                return restClientException;
+            }
+            current = current.getCause();
+        }
+
+        return null;
     }
 
     private RuntimeException translateException(RestClientException e) {

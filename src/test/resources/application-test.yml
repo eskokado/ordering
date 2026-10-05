@@ -22,6 +22,18 @@ spring:
       resourceserver:
         jwt:
           issuer-uri: http://algashop-authorization-server:8081
+      client:
+        provider:
+          algashop-as:
+            token-uri: http://localhost:8781/oauth2/token
+        registration:
+          algashop-ordering-service-client:
+            provider: algashop-as
+            client-id: algashop-ordering-service
+            client-secret: secret123
+            authorization-grant-type: client_credentials
+            client-authentication-method: client_secret_basic
+            scope: products:read
   flyway:
     enabled: false
 
@@ -29,4 +41,6 @@ algashop:
   integrations:
     shipping.provider: FAKE
     rapidex.url: "http://localhost:8780"
-    product-catalog.url: "http://localhost:8781"
+    product-catalog:
+      url: "http://localhost:8781"
+      oauth2-client-registration-id: algashop-ordering-service-client
