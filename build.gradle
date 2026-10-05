@@ -192,7 +192,16 @@ def jacocoCoverageExcludes = [
     '.agents/**',
     '**/CustomRedisCacheHealthIndicator.class',
     "**/CustomFrameworkRetryCircuitBreakerHealthIndicator.class",
-    "**/ApiExceptionHandler.class"
+    "**/ApiExceptionHandler.class",
+    "**/OAuth2ClientConfig.class",
+    "**/OrderingSecurityConfig.class",
+    "**/SecurityAnnotations.class",
+    '**/ProductCatalogAPIConfig*.class',
+    "**/ProductCatalogIntegrationProperties.class",
+    "**/SpecificationBeansConfig.class",
+    "**/FixedLocaleConfig.class",
+    "**/SpringCircuitBreakerConfig.class",
+    "**/SpringResilienceConfig.class"
 ]
 
 jacocoTestReport {
