@@ -1,5 +1,6 @@
 package com.eskcti.algashop.ordering.infrastructure.config.auditing;
 
+import com.eskcti.algashop.ordering.core.application.security.SecurityCheckApplicationService;
 import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
@@ -20,9 +21,14 @@ public class SpringDataAuditingConfig {
     return () -> Optional.of(OffsetDateTime.now().truncatedTo(ChronoUnit.MILLIS));
   }
 
-  @Bean
-  public AuditorAware<UUID> auditorProvider() {
-    return () -> Optional.of(UUID.randomUUID());
-  }
+    @Bean
+    public AuditorAware<UUID> auditorProvider(SecurityCheckApplicationService securityCheck) {
+        return () -> {
+            if (!securityCheck.isAuthenticated() || securityCheck.isMachineAuthenticated()) {
+                return Optional.empty();
+            }
+            return Optional.of(securityCheck.getAuthenticatedUserId());
+        };
+    }
 
 }
