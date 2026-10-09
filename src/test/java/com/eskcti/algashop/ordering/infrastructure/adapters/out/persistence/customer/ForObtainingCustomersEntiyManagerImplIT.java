@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.eskcti.algashop.ordering.utils.TestcontainerPostgreSQLConfig;
+import com.eskcti.algashop.ordering.utils.SecurityCheckTestConfig;
 import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
@@ -26,7 +27,8 @@ import com.eskcti.algashop.ordering.infrastructure.config.auditing.SpringDataAud
 @Import({
     ForObtainingCustomersEntiyManagerImpl.class,
     SpringDataAuditingConfig.class,
-    TestcontainerPostgreSQLConfig.class
+    TestcontainerPostgreSQLConfig.class,
+    SecurityCheckTestConfig.class
 })
 
 @Sql(scripts = "classpath:sql/clean-database.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS, config = @SqlConfig(transactionMode = SqlConfig.TransactionMode.ISOLATED))

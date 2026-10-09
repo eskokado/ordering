@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.eskcti.algashop.ordering.utils.TestcontainerPostgreSQLConfig;
+import com.eskcti.algashop.ordering.utils.SecurityCheckTestConfig;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
@@ -24,7 +25,8 @@ import jakarta.persistence.EntityManager;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@Import({ SpringDataAuditingConfig.class, TestcontainerPostgreSQLConfig.class })
+@Import({ SpringDataAuditingConfig.class, TestcontainerPostgreSQLConfig.class,
+    SecurityCheckTestConfig.class })
 
 @Sql(scripts = "classpath:sql/clean-database.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS, config = @SqlConfig(transactionMode = SqlConfig.TransactionMode.ISOLATED))
 @Sql(scripts = "classpath:sql/clean-database.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD, config = @SqlConfig(transactionMode = SqlConfig.TransactionMode.ISOLATED))

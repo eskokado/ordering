@@ -1,6 +1,7 @@
 package com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.customer;
 
 import com.eskcti.algashop.ordering.utils.TestcontainerPostgreSQLConfig;
+import com.eskcti.algashop.ordering.utils.SecurityCheckTestConfig;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +27,8 @@ import com.eskcti.algashop.ordering.infrastructure.config.auditing.SpringDataAud
     CustomerPersistenceEntityAssembler.class,
     CustomerPersistenceEntityDisassembler.class,
     SpringDataAuditingConfig.class,
-    TestcontainerPostgreSQLConfig.class
+    TestcontainerPostgreSQLConfig.class,
+    SecurityCheckTestConfig.class
 })
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Sql(scripts = "classpath:sql/clean-database.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS, config = @SqlConfig(transactionMode = SqlConfig.TransactionMode.ISOLATED))

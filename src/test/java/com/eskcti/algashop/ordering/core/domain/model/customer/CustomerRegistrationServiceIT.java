@@ -1,6 +1,7 @@
 package com.eskcti.algashop.ordering.core.domain.model.customer;
 
 import com.eskcti.algashop.ordering.utils.TestcontainerPostgreSQLConfig;
+import com.eskcti.algashop.ordering.utils.SecurityCheckTestConfig;
 import java.time.LocalDate;
 
 import org.assertj.core.api.Assertions;
@@ -43,7 +44,8 @@ import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.cust
     CustomerPersistenceEntityAssembler.class,
     CustomerPersistenceEntityDisassembler.class,
     SpringDataAuditingConfig.class,
-    TestcontainerPostgreSQLConfig.class
+    TestcontainerPostgreSQLConfig.class,
+    SecurityCheckTestConfig.class
 })
 
 @Sql(scripts = "classpath:sql/clean-database.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS, config = @SqlConfig(transactionMode = SqlConfig.TransactionMode.ISOLATED))
