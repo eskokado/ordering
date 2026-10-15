@@ -8,7 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.eskcti.algashop.ordering.core.application.utility.Mapper;
 import com.eskcti.algashop.ordering.core.domain.model.shoppingcart.ShoppingCartNotFoundException;
 import com.eskcti.algashop.ordering.core.ports.out.shoppingcart.ForObtainingShoppingCarts;
-import com.eskcti.algashop.ordering.core.ports.out.shoppingcart.ShoppingCartOutput;
+import com.eskcti.algashop.ordering.core.ports.in.shoppingcart.ShoppingCartOutput;
 
 import lombok.RequiredArgsConstructor;
 
@@ -24,13 +24,13 @@ public class ForObtainingShoppingCartsJpaRepositoryImpl implements ForObtainingS
   public ShoppingCartOutput findById(UUID shoppingCartId) {
     return persistenceRepository.findById(shoppingCartId)
         .map(s -> mapper.convert(s, ShoppingCartOutput.class))
-        .orElseThrow(ShoppingCartNotFoundException::new);
+        .orElseThrow(() -> new ShoppingCartNotFoundException(shoppingCartId));
   }
 
   @Override
   public ShoppingCartOutput findByCustomerId(UUID customerId) {
     return persistenceRepository.findByCustomer_Id(customerId)
         .map(s -> mapper.convert(s, ShoppingCartOutput.class))
-        .orElseThrow(ShoppingCartNotFoundException::new);
+        .orElseThrow(() -> new ShoppingCartNotFoundException(customerId));
   }
 }

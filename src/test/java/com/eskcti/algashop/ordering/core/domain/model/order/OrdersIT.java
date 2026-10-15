@@ -31,11 +31,11 @@ import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.cust
 import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.customer.CustomerPersistenceEntityRepository;
 import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.customer.CustomerPersistenceEntityTestDataBuilder;
 import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.customer.CustomersPersistenceProvider;
+import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.order.OrderPersistenceEntityTestDataBuilder;
 import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.order.OrderPersistenceEntity;
 import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.order.OrderPersistenceEntityAssembler;
 import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.order.OrderPersistenceEntityDisassembler;
 import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.order.OrderPersistenceEntityRepository;
-import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.order.OrderPersistenceEntityTestDataBuilder;
 import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.order.OrdersPersistenceProvider;
 
 import static org.assertj.core.api.Assertions.assertThat;

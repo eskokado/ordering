@@ -1,4 +1,4 @@
-package com.eskcti.algashop.ordering.core.ports.out.shoppingcart;
+package com.eskcti.algashop.ordering.core.ports.in.shoppingcart;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

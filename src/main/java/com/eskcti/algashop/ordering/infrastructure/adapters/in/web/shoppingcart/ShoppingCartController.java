@@ -3,7 +3,7 @@ package com.eskcti.algashop.ordering.infrastructure.adapters.in.web.shoppingcart
 import com.eskcti.algashop.ordering.core.ports.in.shoppingcart.ForManagingShoppingCarts;
 import com.eskcti.algashop.ordering.core.ports.in.shoppingcart.ForQueryingShoppingCarts;
 import com.eskcti.algashop.ordering.core.ports.in.shoppingcart.ShoppingCartItemInput;
-import com.eskcti.algashop.ordering.core.ports.out.shoppingcart.ShoppingCartOutput;
+import com.eskcti.algashop.ordering.core.ports.in.shoppingcart.ShoppingCartOutput;
 import com.eskcti.algashop.ordering.core.domain.model.customer.CustomerNotFoundException;
 import com.eskcti.algashop.ordering.core.domain.model.product.ProductNotFoundException;
 import com.eskcti.algashop.ordering.infrastructure.adapters.in.web.exceptionhandler.UnprocessableEntityException;
@@ -48,7 +48,9 @@ public class ShoppingCartController {
 	@CanReadShoppingCarts
 	public ShoppingCartItemListModel getItems(@PathVariable UUID shoppingCartId) {
 		var items = forQueryingShoppingCarts.findById(shoppingCartId).getItems();
-		return new ShoppingCartItemListModel(items);
+		var itemList = new ShoppingCartItemListModel();
+		itemList.getItems().addAll(items);
+		return itemList;
 	}
 
 	@DeleteMapping("/{shoppingCartId}")

@@ -1,4 +1,4 @@
-package com.eskcti.algashop.ordering.core.application.order.query;
+package com.eskcti.algashop.ordering.core.ports.in.order;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
@@ -11,15 +11,15 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class RecipientData {
-  @NotBlank
-  private String firstName;
+    @NotBlank
+    private String firstName;
 
-  @NotBlank
-  private String lastName;
+    @NotBlank
+    private String lastName;
 
-  @NotBlank
-  private String document;
+    @NotBlank
+    private String document;
 
-  @NotBlank
-  private String phone;
+    @NotBlank
+    private String phone;
 }

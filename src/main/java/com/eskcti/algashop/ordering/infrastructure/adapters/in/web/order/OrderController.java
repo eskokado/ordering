@@ -1,18 +1,21 @@
 package com.eskcti.algashop.ordering.infrastructure.adapters.in.web.order;
 
 import com.eskcti.algashop.ordering.core.application.checkout.BuyNowApplicationService;
-import com.eskcti.algashop.ordering.core.application.checkout.BuyNowInput;
+import com.eskcti.algashop.ordering.core.ports.in.checkout.BuyNowInput;
 import com.eskcti.algashop.ordering.core.application.checkout.CheckoutApplicationService;
-import com.eskcti.algashop.ordering.core.application.checkout.CheckoutInput;
-import com.eskcti.algashop.ordering.core.application.order.query.OrderDetailOutput;
-import com.eskcti.algashop.ordering.core.application.order.query.OrderFilter;
-import com.eskcti.algashop.ordering.core.application.order.query.OrderQueryService;
-import com.eskcti.algashop.ordering.core.application.order.query.OrderSummaryOutput;
+import com.eskcti.algashop.ordering.core.ports.in.checkout.CheckoutInput;
+import com.eskcti.algashop.ordering.core.ports.out.order.OrderDetailOutput;
+import com.eskcti.algashop.ordering.core.ports.in.order.ForQueryingOrders;
+import com.eskcti.algashop.ordering.core.ports.in.order.OrderFilter;
+import com.eskcti.algashop.ordering.core.ports.in.order.ForQueryingOrders;
+import com.eskcti.algashop.ordering.core.ports.out.order.OrderSummaryOutput;
 import com.eskcti.algashop.ordering.core.domain.model.customer.CustomerNotFoundException;
 import com.eskcti.algashop.ordering.core.domain.model.product.ProductNotFoundException;
 import com.eskcti.algashop.ordering.core.domain.model.shoppingcart.ShoppingCartNotFoundException;
 import com.eskcti.algashop.ordering.infrastructure.adapters.in.PageModel;
 import com.eskcti.algashop.ordering.infrastructure.adapters.in.web.exceptionhandler.UnprocessableEntityException;
+import com.eskcti.algashop.ordering.infrastructure.config.security.SecurityAnnotations.CanReadOrders;
+import com.eskcti.algashop.ordering.infrastructure.config.security.SecurityAnnotations.CanWriteOrders;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -33,7 +36,7 @@ import static com.eskcti.algashop.ordering.infrastructure.config.security.Securi
 @RequiredArgsConstructor
 public class OrderController {
 
-  private final OrderQueryService orderQueryService;
+  private final ForQueryingOrders orderQueryService;
   private final CheckoutApplicationService checkoutApplicationService;
   private final BuyNowApplicationService buyNowApplicationService;
 

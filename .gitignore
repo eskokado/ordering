@@ -44,3 +44,6 @@ hs_err_pid*.log
 replay_pid*.log
 *~tmp
 *~tmp
+
+# Pastas legadas
+*_legado/

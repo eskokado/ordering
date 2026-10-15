@@ -1,19 +1,15 @@
-package com.eskcti.algashop.ordering.core.application.checkout;
+package com.eskcti.algashop.ordering.core.application.order;
 
-import org.springframework.stereotype.Component;
-
-import com.eskcti.algashop.ordering.core.application.commons.AddressData;
-import com.eskcti.algashop.ordering.core.domain.model.commons.Address;
-import com.eskcti.algashop.ordering.core.domain.model.commons.Document;
-import com.eskcti.algashop.ordering.core.domain.model.commons.FullName;
-import com.eskcti.algashop.ordering.core.domain.model.commons.Phone;
-import com.eskcti.algashop.ordering.core.domain.model.commons.ZipCode;
+import com.eskcti.algashop.ordering.core.ports.in.commons.AddressData;
+import com.eskcti.algashop.ordering.core.domain.model.commons.*;
 import com.eskcti.algashop.ordering.core.domain.model.order.Recipient;
 import com.eskcti.algashop.ordering.core.domain.model.order.Shipping;
 import com.eskcti.algashop.ordering.core.domain.model.order.shipping.ShippingCostService;
+import com.eskcti.algashop.ordering.core.ports.in.checkout.ShippingInput;
+import org.springframework.stereotype.Component;
 
 @Component
-class ShippingInputDisassembler {
+public class ShippingInputDisassembler {
 
         public Shipping toDomainModel(ShippingInput shippingInput,
                         ShippingCostService.CalculationResult shippingCalculationResult) {

@@ -8,12 +8,15 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
+import java.util.Objects;
 import java.util.List;
 import java.util.UUID;
 
 @Service("securityCheck")
 @Slf4j
 public class OAuth2SecurityCheckApplicationServiceImpl implements SecurityCheckApplicationService {
+
+    private static final String ROLE_CUSTOMER = "ROLE_CUSTOMER";
 
     @Override
     public UUID getAuthenticatedUserId() {
@@ -54,6 +57,24 @@ public class OAuth2SecurityCheckApplicationServiceImpl implements SecurityCheckA
         return audience != null && audience.contains(jwt.getSubject());
     }
 
+    @Override
+    public boolean isCustomer() {
+        return hasAuthority(ROLE_CUSTOMER);
+    }
+
+    private boolean hasAuthority(String rawAuthority) {
+        Authentication authentication;
+        try {
+            authentication = getAuthentication();
+        } catch (IllegalStateException e) {
+            log.debug(e.getMessage(), e);
+            return false;
+        }
+
+        return authentication.getAuthorities()
+                .stream().anyMatch(a -> Objects.equals(a.getAuthority(), rawAuthority));
+    }
+
     private Jwt getJwt() {
         Authentication authentication = getAuthentication();
         if (authentication.getPrincipal() instanceof Jwt jwt) {
@@ -72,4 +93,3 @@ public class OAuth2SecurityCheckApplicationServiceImpl implements SecurityCheckA
         return authentication;
     }
 }
-

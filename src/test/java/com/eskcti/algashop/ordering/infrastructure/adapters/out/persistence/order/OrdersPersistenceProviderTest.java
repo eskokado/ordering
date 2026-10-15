@@ -4,6 +4,8 @@ import org.junit.jupiter.api.Test;
 
 import com.eskcti.algashop.ordering.core.domain.model.order.Order;
 import com.eskcti.algashop.ordering.core.domain.model.order.OrderTestDataBuilder;
+import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.order.OrderPersistenceEntity;
+import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.order.OrdersPersistenceProvider;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;

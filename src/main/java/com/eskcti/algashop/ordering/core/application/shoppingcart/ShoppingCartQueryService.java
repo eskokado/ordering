@@ -1,7 +1,7 @@
 package com.eskcti.algashop.ordering.core.application.shoppingcart;
 
 import com.eskcti.algashop.ordering.core.ports.in.shoppingcart.ForQueryingShoppingCarts;
-import com.eskcti.algashop.ordering.core.ports.out.shoppingcart.ShoppingCartOutput;
+import com.eskcti.algashop.ordering.core.ports.in.shoppingcart.ShoppingCartOutput;
 import com.eskcti.algashop.ordering.core.ports.out.shoppingcart.ForObtainingShoppingCarts;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

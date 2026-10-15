@@ -10,14 +10,14 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.eskcti.algashop.ordering.core.ports.in.customer.CustomerOutput;
-import com.eskcti.algashop.ordering.core.application.order.query.OrderDetailOutput;
-import com.eskcti.algashop.ordering.core.application.order.query.OrderItemDetailOutput;
+import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.order.OrderItemPersistenceEntity;
+import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.order.OrderPersistenceEntity;
+import com.eskcti.algashop.ordering.core.ports.out.order.OrderDetailOutput;
+import com.eskcti.algashop.ordering.core.ports.out.order.OrderItemDetailOutput;
 import com.eskcti.algashop.ordering.core.application.utility.Mapper;
 import com.eskcti.algashop.ordering.core.domain.model.commons.FullName;
 import com.eskcti.algashop.ordering.core.domain.model.customer.BirthDate;
 import com.eskcti.algashop.ordering.core.domain.model.customer.Customer;
-import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.order.OrderItemPersistenceEntity;
-import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.order.OrderPersistenceEntity;
 
 import io.hypersistence.tsid.TSID;
 

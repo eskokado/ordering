@@ -9,6 +9,9 @@ import com.eskcti.algashop.ordering.infrastructure.config.auditing.SpringDataAud
 import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.customer.CustomerPersistenceEntity;
 import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.customer.CustomerPersistenceEntityRepository;
 import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.customer.CustomerPersistenceEntityTestDataBuilder;
+import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.order.OrderPersistenceEntity;
+import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.order.OrderPersistenceEntityRepository;
+
 import java.time.OffsetDateTime;
 
 import org.junit.jupiter.api.Test;
@@ -27,7 +30,7 @@ import jakarta.persistence.EntityManager;
 
 @DataJpaTest
 @Import({ SpringDataAuditingConfig.class, TestcontainerPostgreSQLConfig.class,
-    SecurityCheckTestConfig.class })
+        SecurityCheckTestConfig.class })
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Sql(scripts = "classpath:sql/clean-database.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS, config = @SqlConfig(transactionMode = SqlConfig.TransactionMode.ISOLATED))
 @Sql(scripts = "classpath:sql/clean-database.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD, config = @SqlConfig(transactionMode = SqlConfig.TransactionMode.ISOLATED))

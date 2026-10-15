@@ -38,7 +38,7 @@ public class ShoppingCartManagementApplicationService implements ForManagingShop
     ProductId productId = new ProductId(input.getProductId());
 
     ShoppingCart shoppingCart = shoppingCarts.ofId(shoppingCartId)
-        .orElseThrow(() -> new ShoppingCartNotFoundException());
+        .orElseThrow(() -> new ShoppingCartNotFoundException(shoppingCartId.value()));
 
     Product product = productCatalogService.ofId(productId)
         .orElseThrow(() -> new ProductNotFoundException(productId));
@@ -62,7 +62,7 @@ public class ShoppingCartManagementApplicationService implements ForManagingShop
     Objects.requireNonNull(rawShoppingCartItemId);
     ShoppingCartId shoppingCartId = new ShoppingCartId(rawShoppingCartId);
     ShoppingCart shoppingCart = shoppingCarts.ofId(shoppingCartId)
-        .orElseThrow(() -> new ShoppingCartNotFoundException());
+        .orElseThrow(() -> new ShoppingCartNotFoundException(shoppingCartId.value()));
     shoppingCart.removeItem(new ShoppingCartItemId(rawShoppingCartItemId));
     shoppingCarts.add(shoppingCart);
   }
@@ -72,7 +72,7 @@ public class ShoppingCartManagementApplicationService implements ForManagingShop
     Objects.requireNonNull(rawShoppingCartId);
     ShoppingCartId shoppingCartId = new ShoppingCartId(rawShoppingCartId);
     ShoppingCart shoppingCart = shoppingCarts.ofId(shoppingCartId)
-        .orElseThrow(() -> new ShoppingCartNotFoundException());
+        .orElseThrow(() -> new ShoppingCartNotFoundException(shoppingCartId.value()));
     shoppingCart.empty();
     shoppingCarts.add(shoppingCart);
   }
@@ -82,7 +82,7 @@ public class ShoppingCartManagementApplicationService implements ForManagingShop
     Objects.requireNonNull(rawShoppingCartId);
     ShoppingCartId shoppingCartId = new ShoppingCartId(rawShoppingCartId);
     ShoppingCart shoppingCart = shoppingCarts.ofId(shoppingCartId)
-        .orElseThrow(() -> new ShoppingCartNotFoundException());
+        .orElseThrow(() -> new ShoppingCartNotFoundException(shoppingCartId.value()));
     shoppingCarts.remove(shoppingCart);
   }
 
