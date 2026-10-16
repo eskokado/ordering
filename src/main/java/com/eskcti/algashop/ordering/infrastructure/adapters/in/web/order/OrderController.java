@@ -7,7 +7,6 @@ import com.eskcti.algashop.ordering.core.ports.in.checkout.CheckoutInput;
 import com.eskcti.algashop.ordering.core.ports.out.order.OrderDetailOutput;
 import com.eskcti.algashop.ordering.core.ports.in.order.ForQueryingOrders;
 import com.eskcti.algashop.ordering.core.ports.in.order.OrderFilter;
-import com.eskcti.algashop.ordering.core.ports.in.order.ForQueryingOrders;
 import com.eskcti.algashop.ordering.core.ports.out.order.OrderSummaryOutput;
 import com.eskcti.algashop.ordering.core.domain.model.customer.CustomerNotFoundException;
 import com.eskcti.algashop.ordering.core.domain.model.product.ProductNotFoundException;

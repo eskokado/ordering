@@ -31,7 +31,8 @@ public class OrderPersistenceEntityAssembler {
         orderPersistenceEntity.setTotalAmount(order.totalAmount().value());
         orderPersistenceEntity.setTotalItems(order.totalItems().value());
         orderPersistenceEntity.setStatus(order.status().name());
-        orderPersistenceEntity.setPaymentMethod(order.paymentMethod().name());
+        orderPersistenceEntity.setPaymentMethod(
+                order.paymentMethod() != null ? order.paymentMethod().name() : null);
         orderPersistenceEntity.setPlacedAt(order.placedAt());
         orderPersistenceEntity.setPaidAt(order.paidAt());
         orderPersistenceEntity.setCanceledAt(order.canceledAt());
@@ -135,18 +136,20 @@ public class OrderPersistenceEntityAssembler {
                 .expectedDate(shipping.expectedDate())
                 .cost(shipping.cost().value())
                 .address(toAddressEmbeddable(shipping.address()));
-        Recipient recipient = shipping.recipient();
-        if (recipient != null) {
-            builder.recipient(
-                    RecipientEmbeddable.builder()
-                            .firstName(recipient.fullName().firstName())
-                            .lastName(recipient.fullName().lastName())
-                            .document(recipient.document().value())
-                            .phone(recipient.phone().value())
-                            .build()
-            );
-        }
+        builder.recipient(toRecipientEmbeddable(shipping.recipient()));
         return builder.build();
+    }
+
+    private RecipientEmbeddable toRecipientEmbeddable(Recipient recipient) {
+        if (recipient == null) {
+            return null;
+        }
+        return RecipientEmbeddable.builder()
+                .firstName(recipient.fullName().firstName())
+                .lastName(recipient.fullName().lastName())
+                .document(recipient.document().value())
+                .phone(recipient.phone().value())
+                .build();
     }
 
 }

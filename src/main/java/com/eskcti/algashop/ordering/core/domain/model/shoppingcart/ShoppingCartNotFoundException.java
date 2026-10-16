@@ -14,8 +14,4 @@ public class ShoppingCartNotFoundException extends DomainEntityNotFoundException
     super(message);
   }
 
-  public static ShoppingCartNotFoundException ofCustomer(UUID customerId) {
-    return new ShoppingCartNotFoundException("Shopping cart for customer ID " + customerId + " not found.");
-  }
-
 }

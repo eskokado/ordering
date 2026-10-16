@@ -94,12 +94,9 @@ public class ForObtainingOrdersJpaRepositoryImpl implements ForObtainingOrders {
                                 customer.get("document"),
                                 customer.get("phone"))));
         Predicate[] predicates = toPredicates(builder, root, filter);
-        Order sortOrder = toSortOrder(builder, root, filter);
 
         criteriaQuery.where(predicates);
-        if (sortOrder != null) {
-            criteriaQuery.orderBy(sortOrder);
-        }
+        criteriaQuery.orderBy(toSortOrder(builder, root, filter));
 
         TypedQuery<OrderSummaryOutput> typedQuery = entityManager.createQuery(criteriaQuery);
 
@@ -113,15 +110,11 @@ public class ForObtainingOrdersJpaRepositoryImpl implements ForObtainingOrders {
 
     private Order toSortOrder(CriteriaBuilder builder, Root<OrderPersistenceEntity> root, OrderFilter filter) {
 
-        if (filter.getSortDirectionOrDefault() == Sort.Direction.ASC) {
-            return builder.asc(root.get(filter.getSortByPropertyOrDefault().getPropertyName()));
-        }
-
         if (filter.getSortDirectionOrDefault() == Sort.Direction.DESC) {
             return builder.desc(root.get(filter.getSortByPropertyOrDefault().getPropertyName()));
         }
 
-        return null;
+        return builder.asc(root.get(filter.getSortByPropertyOrDefault().getPropertyName()));
     }
 
     private Predicate[] toPredicates(CriteriaBuilder builder,

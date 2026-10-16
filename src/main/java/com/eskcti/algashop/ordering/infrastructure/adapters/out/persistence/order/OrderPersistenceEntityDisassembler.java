@@ -25,22 +25,34 @@ public class OrderPersistenceEntityDisassembler {
         return Order.existing()
                 .id(new OrderId(persistenceEntity.getId()))
                 .customerId(new CustomerId(persistenceEntity.getCustomerId()))
-                .totalAmount(new Money(persistenceEntity.getTotalAmount()))
-                .totalItems(new Quantity(persistenceEntity.getTotalItems()))
-                .status(OrderStatus.valueOf(persistenceEntity.getStatus()))
-                .paymentMethod(PaymentMethod.valueOf(persistenceEntity.getPaymentMethod()))
+                .version(persistenceEntity.getVersion())
+                .totalAmount(persistenceEntity.getTotalAmount() != null
+                        ? new Money(persistenceEntity.getTotalAmount())
+                        : Money.ZERO)
+                .totalItems(persistenceEntity.getTotalItems() != null
+                        ? new Quantity(persistenceEntity.getTotalItems())
+                        : Quantity.ZERO)
+                .status(persistenceEntity.getStatus() != null
+                        ? OrderStatus.valueOf(persistenceEntity.getStatus())
+                        : OrderStatus.DRAFT)
+                .paymentMethod(persistenceEntity.getPaymentMethod() != null
+                        ? PaymentMethod.valueOf(persistenceEntity.getPaymentMethod())
+                        : null)
                 .placedAt(persistenceEntity.getPlacedAt())
                 .paidAt(persistenceEntity.getPaidAt())
                 .canceledAt(persistenceEntity.getCanceledAt())
                 .readyAt(persistenceEntity.getReadyAt())
-                .items(new HashSet<>())
-                .version(persistenceEntity.getVersion())
+                .billing(toBillingValueObject(persistenceEntity.getBilling()))
+                .shipping(toShippingValueObject(persistenceEntity.getShipping()))
                 .items(toDomainEntity(persistenceEntity.getItems()))
                 .creditCardId(creditCardId)
                 .build();
     }
 
     private Set<OrderItem> toDomainEntity(Set<OrderItemPersistenceEntity> items) {
+        if (items == null || items.isEmpty()) {
+            return new HashSet<>();
+        }
         return items.stream().map(i -> toDomainEntity(i)).collect(Collectors.toSet());
     }
 
@@ -57,6 +69,9 @@ public class OrderPersistenceEntityDisassembler {
     }
 
     private Shipping toShippingValueObject(ShippingEmbeddable shippingEmbeddable) {
+        if (shippingEmbeddable == null) {
+            return null;
+        }
         RecipientEmbeddable recipientEmbeddable = shippingEmbeddable.getRecipient();
         return Shipping.builder()
                 .cost(new Money(shippingEmbeddable.getCost()))
@@ -73,6 +88,9 @@ public class OrderPersistenceEntityDisassembler {
     }
 
     private Billing toBillingValueObject(BillingEmbeddable billingEmbeddable) {
+        if (billingEmbeddable == null) {
+            return null;
+        }
         return Billing.builder()
                 .fullName(new FullName(billingEmbeddable.getFirstName(), billingEmbeddable.getLastName()))
                 .document(new Document(billingEmbeddable.getDocument()))

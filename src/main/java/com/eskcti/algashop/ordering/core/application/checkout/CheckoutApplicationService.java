@@ -10,10 +10,6 @@ import com.eskcti.algashop.ordering.core.domain.model.customer.Customers;
 import com.eskcti.algashop.ordering.core.domain.model.order.*;
 import com.eskcti.algashop.ordering.core.domain.model.order.shipping.OriginAddressService;
 import com.eskcti.algashop.ordering.core.domain.model.order.shipping.ShippingCostService;
-import com.eskcti.algashop.ordering.core.domain.model.product.Product;
-import com.eskcti.algashop.ordering.core.domain.model.product.ProductCatalogService;
-import com.eskcti.algashop.ordering.core.domain.model.product.ProductId;
-import com.eskcti.algashop.ordering.core.domain.model.product.ProductNotFoundException;
 import com.eskcti.algashop.ordering.core.domain.model.shoppingcart.ShoppingCart;
 import com.eskcti.algashop.ordering.core.domain.model.shoppingcart.ShoppingCartId;
 import com.eskcti.algashop.ordering.core.domain.model.shoppingcart.ShoppingCartNotFoundException;
@@ -42,7 +38,6 @@ public class CheckoutApplicationService implements ForBuyingWithShoppingCart {
 
 	private final ShippingCostService shippingCostService;
 	private final OriginAddressService originAddressService;
-	private final ProductCatalogService productCatalogService;
 
 	@Transactional
 	public String checkout(CheckoutInput input) {
@@ -81,11 +76,6 @@ public class CheckoutApplicationService implements ForBuyingWithShoppingCart {
 		ZipCode origin = originAddressService.originAddress().zipCode();
 		ZipCode destination = new ZipCode(shipping.getAddress().getZipCode());
 		return shippingCostService.calculate(new ShippingCostService.CalculationRequest(origin, destination));
-	}
-
-	private Product findProduct(ProductId productId) {
-		return productCatalogService.ofId(productId)
-				.orElseThrow(() -> new ProductNotFoundException());
 	}
 
 }
