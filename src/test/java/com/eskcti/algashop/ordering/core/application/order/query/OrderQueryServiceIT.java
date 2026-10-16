@@ -1,14 +1,19 @@
 package com.eskcti.algashop.ordering.core.application.order.query;
 
 import com.eskcti.algashop.ordering.utils.MockJwtDecoderConfig;
+import com.eskcti.algashop.ordering.utils.SecurityCheckTestConfig;
 import com.eskcti.algashop.ordering.utils.TestcontainerPostgreSQLConfig;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -20,13 +25,14 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.test.context.ActiveProfiles;
 
-import com.eskcti.algashop.ordering.core.application.order.query.CustomerMinimalOutput;
-import com.eskcti.algashop.ordering.core.application.order.query.OrderDetailOutput;
-import com.eskcti.algashop.ordering.core.application.order.query.OrderFilter;
-import com.eskcti.algashop.ordering.core.application.order.query.OrderItemDetailOutput;
-import com.eskcti.algashop.ordering.core.application.order.query.OrderQueryService;
-import com.eskcti.algashop.ordering.core.application.order.query.OrderSummaryOutput;
-import com.eskcti.algashop.ordering.core.application.order.query.ShippingData;
+import com.eskcti.algashop.ordering.core.ports.out.order.CustomerMinimalOutput;
+import com.eskcti.algashop.ordering.core.ports.out.order.OrderDetailOutput;
+import com.eskcti.algashop.ordering.core.ports.in.order.OrderFilter;
+import com.eskcti.algashop.ordering.core.ports.out.order.OrderItemDetailOutput;
+import com.eskcti.algashop.ordering.core.application.order.OrderQueryService;
+import com.eskcti.algashop.ordering.core.application.security.SecurityCheckApplicationService;
+import com.eskcti.algashop.ordering.core.ports.out.order.OrderSummaryOutput;
+import com.eskcti.algashop.ordering.core.ports.in.order.ShippingData;
 import com.eskcti.algashop.ordering.core.domain.model.commons.Email;
 import com.eskcti.algashop.ordering.core.domain.model.commons.FullName;
 import com.eskcti.algashop.ordering.core.domain.model.customer.Customer;
@@ -58,6 +64,18 @@ class OrderQueryServiceIT {
 
         @Autowired
         private Customers customers;
+
+        @MockitoBean
+        private SecurityCheckApplicationService securityCheck;
+
+        @BeforeEach
+        public void configureSecurityCheck() {
+                Mockito.lenient().when(securityCheck.isAuthenticated()).thenReturn(true);
+                Mockito.lenient().when(securityCheck.isMachineAuthenticated()).thenReturn(false);
+                Mockito.lenient().when(securityCheck.isCustomer()).thenReturn(false);
+                Mockito.lenient().when(securityCheck.getAuthenticatedUserId())
+                                .thenReturn(SecurityCheckTestConfig.AUTHENTICATED_USER_ID);
+        }
 
         @Test
         public void shouldFindById() {

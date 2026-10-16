@@ -6,7 +6,7 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Sort;
 
-import com.eskcti.algashop.ordering.core.application.order.query.OrderFilter;
+import com.eskcti.algashop.ordering.core.ports.in.order.OrderFilter;
 
 class OrderFilterTest {
 

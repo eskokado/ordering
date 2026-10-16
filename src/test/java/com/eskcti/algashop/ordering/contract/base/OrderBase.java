@@ -2,11 +2,11 @@ package com.eskcti.algashop.ordering.contract.base;
 
 import com.eskcti.algashop.ordering.core.application.order.query.OrderDetailOutputTestDataBuilder;
 import com.eskcti.algashop.ordering.core.application.checkout.BuyNowApplicationService;
-import com.eskcti.algashop.ordering.core.application.checkout.BuyNowInput;
+import com.eskcti.algashop.ordering.core.ports.in.checkout.BuyNowInput;
 import com.eskcti.algashop.ordering.core.application.checkout.CheckoutApplicationService;
-import com.eskcti.algashop.ordering.core.application.checkout.CheckoutInput;
-import com.eskcti.algashop.ordering.core.application.order.query.OrderFilter;
-import com.eskcti.algashop.ordering.core.application.order.query.OrderQueryService;
+import com.eskcti.algashop.ordering.core.ports.in.checkout.CheckoutInput;
+import com.eskcti.algashop.ordering.core.ports.in.order.OrderFilter;
+import com.eskcti.algashop.ordering.core.application.order.OrderQueryService;
 import com.eskcti.algashop.ordering.core.domain.model.order.OrderNotFoundException;
 import com.eskcti.algashop.ordering.infrastructure.adapters.in.web.order.OrderController;
 

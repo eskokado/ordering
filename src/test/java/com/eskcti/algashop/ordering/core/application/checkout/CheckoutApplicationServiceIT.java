@@ -23,7 +23,7 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.SqlConfig;
 
 import com.eskcti.algashop.ordering.core.application.checkout.CheckoutApplicationService;
-import com.eskcti.algashop.ordering.core.application.checkout.CheckoutInput;
+import com.eskcti.algashop.ordering.core.ports.in.checkout.CheckoutInput;
 import com.eskcti.algashop.ordering.core.domain.model.DomainException;
 import com.eskcti.algashop.ordering.core.domain.model.commons.Money;
 import com.eskcti.algashop.ordering.core.domain.model.commons.Quantity;

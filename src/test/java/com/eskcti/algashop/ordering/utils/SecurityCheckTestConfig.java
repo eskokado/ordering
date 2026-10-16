@@ -29,6 +29,11 @@ public class SecurityCheckTestConfig {
       public boolean isMachineAuthenticated() {
         return false;
       }
+
+      @Override
+      public boolean isCustomer() {
+        return false;
+      }
     };
   }
 }

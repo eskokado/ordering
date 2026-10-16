@@ -1,12 +1,12 @@
 package com.eskcti.algashop.ordering.core.application.order.query;
 
-import com.eskcti.algashop.ordering.core.application.checkout.BillingData;
-import com.eskcti.algashop.ordering.core.application.commons.AddressData;
-import com.eskcti.algashop.ordering.core.application.order.query.CustomerMinimalOutput;
-import com.eskcti.algashop.ordering.core.application.order.query.OrderDetailOutput;
-import com.eskcti.algashop.ordering.core.application.order.query.OrderItemDetailOutput;
-import com.eskcti.algashop.ordering.core.application.order.query.RecipientData;
-import com.eskcti.algashop.ordering.core.application.order.query.ShippingData;
+import com.eskcti.algashop.ordering.core.ports.in.order.BillingData;
+import com.eskcti.algashop.ordering.core.ports.in.commons.AddressData;
+import com.eskcti.algashop.ordering.core.ports.out.order.CustomerMinimalOutput;
+import com.eskcti.algashop.ordering.core.ports.out.order.OrderDetailOutput;
+import com.eskcti.algashop.ordering.core.ports.out.order.OrderItemDetailOutput;
+import com.eskcti.algashop.ordering.core.ports.in.order.RecipientData;
+import com.eskcti.algashop.ordering.core.ports.in.order.ShippingData;
 import com.eskcti.algashop.ordering.core.domain.model.customer.CustomerId;
 import com.eskcti.algashop.ordering.core.domain.model.order.OrderId;
 import com.eskcti.algashop.ordering.core.domain.model.order.OrderItemId;

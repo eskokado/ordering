@@ -4,8 +4,8 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
-import com.eskcti.algashop.ordering.core.ports.out.shoppingcart.ShoppingCartItemOutput;
-import com.eskcti.algashop.ordering.core.ports.out.shoppingcart.ShoppingCartOutput;
+import com.eskcti.algashop.ordering.core.ports.in.shoppingcart.ShoppingCartItemOutput;
+import com.eskcti.algashop.ordering.core.ports.in.shoppingcart.ShoppingCartOutput;
 
 public class ShoppingCartOutputTestDataBuilder {
     public static ShoppingCartOutput.ShoppingCartOutputBuilder aShoppingCart() {

@@ -2,11 +2,11 @@ package com.eskcti.algashop.ordering.core.application.checkout;
 
 import java.util.UUID;
 
-import com.eskcti.algashop.ordering.core.application.checkout.BillingData;
-import com.eskcti.algashop.ordering.core.application.checkout.CheckoutInput;
-import com.eskcti.algashop.ordering.core.application.checkout.ShippingInput;
-import com.eskcti.algashop.ordering.core.application.commons.AddressData;
-import com.eskcti.algashop.ordering.core.application.order.query.RecipientData;
+import com.eskcti.algashop.ordering.core.ports.in.order.BillingData;
+import com.eskcti.algashop.ordering.core.ports.in.checkout.CheckoutInput;
+import com.eskcti.algashop.ordering.core.ports.in.checkout.ShippingInput;
+import com.eskcti.algashop.ordering.core.ports.in.commons.AddressData;
+import com.eskcti.algashop.ordering.core.ports.in.order.RecipientData;
 
 public class CheckoutInputTestDataBuilder {
 

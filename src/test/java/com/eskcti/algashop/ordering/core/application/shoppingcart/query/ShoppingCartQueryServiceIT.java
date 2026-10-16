@@ -20,7 +20,7 @@ import com.eskcti.algashop.ordering.core.domain.model.customer.Customers;
 import com.eskcti.algashop.ordering.core.domain.model.shoppingcart.ShoppingCart;
 import com.eskcti.algashop.ordering.core.domain.model.shoppingcart.ShoppingCarts;
 import com.eskcti.algashop.ordering.core.ports.in.shoppingcart.ForQueryingShoppingCarts;
-import com.eskcti.algashop.ordering.core.ports.out.shoppingcart.ShoppingCartOutput;
+import com.eskcti.algashop.ordering.core.ports.in.shoppingcart.ShoppingCartOutput;
 
 @SpringBootTest
 @Import({ TestcontainerPostgreSQLConfig.class, MockJwtDecoderConfig.class })

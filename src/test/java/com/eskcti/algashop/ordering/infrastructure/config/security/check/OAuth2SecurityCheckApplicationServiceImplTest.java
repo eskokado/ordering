@@ -110,6 +110,28 @@ class OAuth2SecurityCheckApplicationServiceImplTest {
         assertThat(service.isMachineAuthenticated()).isFalse();
     }
 
+    @Test
+    void isCustomer_trueWhenRoleCustomerAuthorityIsPresent() {
+        UUID userId = UUID.randomUUID();
+        SecurityContextHolder.getContext().setAuthentication(
+                new JwtAuthenticationToken(userJwt(userId.toString()), List.of(() -> "ROLE_CUSTOMER")));
+
+        assertThat(service.isCustomer()).isTrue();
+    }
+
+    @Test
+    void isCustomer_falseWhenRoleCustomerAuthorityIsAbsent() {
+        UUID userId = UUID.randomUUID();
+        authorize(userJwt(userId.toString()));
+
+        assertThat(service.isCustomer()).isFalse();
+    }
+
+    @Test
+    void isCustomer_falseWhenNoAuthentication() {
+        assertThat(service.isCustomer()).isFalse();
+    }
+
     private void authorize(Jwt jwt) {
         SecurityContextHolder.getContext().setAuthentication(
                 new JwtAuthenticationToken(jwt, List.of(() -> "SCOPE_orders:read")));

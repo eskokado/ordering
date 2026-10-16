@@ -1,8 +1,8 @@
 package com.eskcti.algashop.ordering.infrastructure.adapters.in.web.order;
 
 import com.eskcti.algashop.ordering.core.application.checkout.BuyNowInputTestDataBuilder;
-import com.eskcti.algashop.ordering.core.application.checkout.BuyNowInput;
-import com.eskcti.algashop.ordering.core.application.order.query.OrderDetailOutput;
+import com.eskcti.algashop.ordering.core.ports.in.checkout.BuyNowInput;
+import com.eskcti.algashop.ordering.core.ports.out.order.OrderDetailOutput;
 import com.eskcti.algashop.ordering.core.domain.model.order.OrderId;
 import com.eskcti.algashop.ordering.infrastructure.adapters.in.web.AbstractPresentationIT;
 import com.eskcti.algashop.ordering.utils.AlgaShopResourceUtils;
