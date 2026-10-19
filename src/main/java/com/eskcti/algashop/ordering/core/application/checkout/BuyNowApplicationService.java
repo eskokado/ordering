@@ -2,6 +2,7 @@ package com.eskcti.algashop.ordering.core.application.checkout;
 
 import com.eskcti.algashop.ordering.core.application.order.BillingInputDisassembler;
 import com.eskcti.algashop.ordering.core.application.order.ShippingInputDisassembler;
+import com.eskcti.algashop.ordering.core.application.security.SecurityCheckApplicationService;
 import com.eskcti.algashop.ordering.core.domain.model.DomainException;
 import com.eskcti.algashop.ordering.core.domain.model.commons.Quantity;
 import com.eskcti.algashop.ordering.core.domain.model.commons.ZipCode;
@@ -19,11 +20,14 @@ import com.eskcti.algashop.ordering.core.domain.model.product.ProductNotFoundExc
 import com.eskcti.algashop.ordering.core.ports.in.checkout.BuyNowInput;
 import com.eskcti.algashop.ordering.core.ports.in.checkout.ForBuyingProduct;
 import com.eskcti.algashop.ordering.core.ports.in.checkout.ShippingInput;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Objects;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -41,10 +45,14 @@ public class BuyNowApplicationService implements ForBuyingProduct {
     private final ShippingInputDisassembler shippingInputDisassembler;
     private final BillingInputDisassembler billingInputDisassembler;
 
+    private final SecurityCheckApplicationService securityCheck;
+
     @Transactional
     @Override
     public String buyNow(BuyNowInput input) {
         Objects.requireNonNull(input);
+
+        verifyCanOrderFor(input.getCustomerId());
 
         PaymentMethod paymentMethod = PaymentMethod.valueOf(input.getPaymentMethod());
         CustomerId customerId = new CustomerId(input.getCustomerId());
@@ -76,6 +84,12 @@ public class BuyNowApplicationService implements ForBuyingProduct {
         orders.add(order);
 
         return order.id().toString();
+    }
+
+    private void verifyCanOrderFor(@NotNull UUID customerId) {
+        if (!(securityCheck.isCustomer() && securityCheck.getAuthenticatedUserId().equals(customerId))) {
+            throw new AccessDeniedException("Cannot order for customer " + customerId);
+        }
     }
 
     private ShippingCostService.CalculationResult calculateShippingCost(ShippingInput shipping) {
