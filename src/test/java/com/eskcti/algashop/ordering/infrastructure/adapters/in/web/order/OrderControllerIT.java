@@ -6,6 +6,7 @@ import com.eskcti.algashop.ordering.core.ports.out.order.OrderDetailOutput;
 import com.eskcti.algashop.ordering.core.domain.model.order.OrderId;
 import com.eskcti.algashop.ordering.infrastructure.adapters.in.web.AbstractPresentationIT;
 import com.eskcti.algashop.ordering.utils.AlgaShopResourceUtils;
+import com.eskcti.algashop.ordering.utils.MockJwtDecoderFactory;
 
 import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.shoppingcart.ShoppingCartPersistenceEntityRepository;
 import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.customer.CustomerPersistenceEntityRepository;
@@ -153,7 +154,9 @@ public class OrderControllerIT extends AbstractPresentationIT {
         @Test
         public void shouldNotCreateOrderUsingProductWhenCustomerWasNotFound() {
                 String json = AlgaShopResourceUtils
-                                .readContent("json/create-order-with-product-and-invalid-customer.json");
+                                .readContent("json/create-order-with-product-and-invalid-customer.json")
+                                .replace("73677343-9c25-4bff-a1d8-fea3830b6d97", validCustomerId.toString());
+                customerRepository.deleteById(validCustomerId);
                 givenAuthenticated()
                                 .accept(MediaType.APPLICATION_JSON_VALUE)
                                 .contentType("application/vnd.order-with-product.v1+json")
@@ -180,6 +183,22 @@ public class OrderControllerIT extends AbstractPresentationIT {
                                 .assertThat()
                                 .contentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE)
                                 .statusCode(HttpStatus.UNPROCESSABLE_ENTITY.value());
+        }
+
+        @Test
+        public void shouldReturnForbiddenWhenOrderingForAnotherCustomer() {
+                String json = AlgaShopResourceUtils.readContent("json/create-order-with-product.json");
+
+                givenAuthenticatedWithToken(MockJwtDecoderFactory.OTHER_CUSTOMER_TOKEN_VALUE)
+                                .accept(MediaType.APPLICATION_JSON_VALUE)
+                                .contentType("application/vnd.order-with-product.v1+json")
+                                .body(json)
+                                .when()
+                                .post("/api/v1/orders")
+                                .then()
+                                .assertThat()
+                                .contentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE)
+                                .statusCode(HttpStatus.FORBIDDEN.value());
         }
 
         @Test

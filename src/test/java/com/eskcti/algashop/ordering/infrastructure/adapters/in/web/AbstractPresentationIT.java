@@ -59,8 +59,12 @@ public abstract class AbstractPresentationIT {
     }
 
     protected RequestSpecification givenAuthenticated() {
+        return givenAuthenticatedWithToken(MockJwtDecoderFactory.DEFAULT_TOKEN_VALUE);
+    }
+
+    protected RequestSpecification givenAuthenticatedWithToken(String tokenValue) {
         return RestAssured.given()
-                .header("Authorization", "Bearer " + MockJwtDecoderFactory.DEFAULT_TOKEN_VALUE);
+                .header("Authorization", "Bearer " + tokenValue);
     }
 
     protected static void initWireMock() {

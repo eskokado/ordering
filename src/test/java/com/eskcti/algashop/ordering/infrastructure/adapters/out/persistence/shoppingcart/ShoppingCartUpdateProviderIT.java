@@ -1,19 +1,13 @@
 package com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.shoppingcart;
 
-import com.eskcti.algashop.ordering.utils.TestcontainerPostgreSQLConfig;
+import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.AbstractPersistenceIT;
+
 import com.eskcti.algashop.ordering.utils.SecurityCheckTestConfig;
+import com.eskcti.algashop.ordering.utils.TestcontainerPostgreSQLConfig;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
-import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
-import org.springframework.context.annotation.Import;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.jdbc.SqlConfig;
 
 import com.eskcti.algashop.ordering.core.domain.model.commons.Money;
 import com.eskcti.algashop.ordering.core.domain.model.commons.Quantity;
@@ -32,8 +26,9 @@ import com.eskcti.algashop.ordering.infrastructure.config.auditing.SpringDataAud
 import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.customer.CustomerPersistenceEntityAssembler;
 import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.customer.CustomerPersistenceEntityDisassembler;
 import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.customer.CustomersPersistenceProvider;
+import org.springframework.context.annotation.Import;
 
-@DataJpaTest
+// @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @Import({
     ShoppingCartUpdateProvider.class,
     ShoppingCartsPersistenceProvider.class,
@@ -46,13 +41,7 @@ import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.cust
     TestcontainerPostgreSQLConfig.class,
     SecurityCheckTestConfig.class
 })
-// @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@Sql(scripts = "classpath:sql/clean-database.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS, config = @SqlConfig(transactionMode = SqlConfig.TransactionMode.ISOLATED))
-@Sql(scripts = "classpath:sql/clean-database.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD, config = @SqlConfig(transactionMode = SqlConfig.TransactionMode.ISOLATED))
-@Transactional(propagation = Propagation.NOT_SUPPORTED)
-@ActiveProfiles("it")
-class ShoppingCartUpdateProviderIT {
+class ShoppingCartUpdateProviderIT extends AbstractPersistenceIT {
 
   private ShoppingCartsPersistenceProvider persistenceProvider;
   private CustomersPersistenceProvider customersPersistenceProvider;
@@ -82,7 +71,6 @@ class ShoppingCartUpdateProviderIT {
   }
 
   @Test
-  @Transactional(propagation = Propagation.NEVER)
   void shouldUpdateItemPriceAndTotalAmount() {
     ShoppingCart shoppingCart = ShoppingCart.startShopping(CustomerTestDataBuilder.DEFAULT_CUSTOMER_ID);
 
@@ -114,7 +102,6 @@ class ShoppingCartUpdateProviderIT {
   }
 
   @Test
-  @Transactional(propagation = Propagation.NEVER)
   void shouldUpdateItemAvailability() {
     ShoppingCart shoppingCart = ShoppingCart.startShopping(CustomerTestDataBuilder.DEFAULT_CUSTOMER_ID);
 

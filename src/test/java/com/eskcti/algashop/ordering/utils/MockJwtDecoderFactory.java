@@ -4,11 +4,6 @@ import org.mockito.Mockito;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 
-import java.time.Instant;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 public class MockJwtDecoderFactory {
 
     public static final String DEFAULT_ISSUER_URI = "http://auth.algashop.local:8081";
@@ -23,43 +18,28 @@ public class MockJwtDecoderFactory {
             "shipping-costs:preview"
     };
 
-    public static final String DEFAULT_SUBJECT = "00000000-0000-0000-0000-000000000001";
+    public static final String DEFAULT_SUBJECT = MockJwtFactory.DEFAULT_SUBJECT;
+
+    public static final String OTHER_CUSTOMER_TOKEN_VALUE = "fake.jwt.other-customer";
+
+    public static final String OTHER_CUSTOMER_SUBJECT = "7f259ce6-58a7-4133-b0eb-18dfbb305e8b";
 
     public static final String DEFAULT_TOKEN_VALUE = "fake.jwt.token";
 
-    public static JwtDecoder createMockJwtDecoder() {
-        return createMockJwtDecoder(DEFAULT_SUBJECT, DEFAULT_ISSUER_URI, DEFAULT_SCOPES);
-    }
+    public static final String[] DEFAULT_AUDIENCES = new String[] { "algashop-api" };
 
-    public static JwtDecoder createMockJwtDecoder(String subject, String issuer, String[] scopes) {
+    public static JwtDecoder createMockJwtDecoder() {
         JwtDecoder jwtDecoder = Mockito.mock(JwtDecoder.class);
         Mockito.when(jwtDecoder.decode(Mockito.anyString()))
-                .thenReturn(buildJwt(subject, issuer, scopes));
+                .thenReturn(buildJwt(DEFAULT_SUBJECT, DEFAULT_ISSUER_URI, DEFAULT_SCOPES));
+        Mockito.when(jwtDecoder.decode(OTHER_CUSTOMER_TOKEN_VALUE))
+                .thenReturn(buildJwt(OTHER_CUSTOMER_SUBJECT, DEFAULT_ISSUER_URI, DEFAULT_SCOPES));
         return jwtDecoder;
     }
 
     public static Jwt buildJwt(String subject, String issuer, String[] scopes) {
-        Instant now = Instant.now();
-        Instant expiresAt = now.plusSeconds(600);
-
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("sub", subject);
-        claims.put("iss", issuer);
-        claims.put("aud", List.of("algashop-api"));
-
-        if (scopes != null && scopes.length > 0) {
-            claims.put("scope", String.join(" ", scopes));
-        }
-
-        return Jwt.withTokenValue(DEFAULT_TOKEN_VALUE)
-                .issuedAt(now)
-                .expiresAt(expiresAt)
-                .issuer(issuer)
-                .subject(subject)
-                .audience(List.of("algashop-api"))
-                .claims(c -> c.putAll(claims))
-                .headers(h -> h.put("alg", "none"))
-                .build();
+        return MockJwtFactory.buildJwt(DEFAULT_TOKEN_VALUE, subject, issuer, scopes,
+                MockJwtFactory.DEFAULT_ROLE, DEFAULT_AUDIENCES);
     }
 
 }

@@ -1,7 +1,9 @@
 package com.eskcti.algashop.ordering.core.domain.model.customer;
 
-import com.eskcti.algashop.ordering.utils.TestcontainerPostgreSQLConfig;
+import com.eskcti.algashop.ordering.core.domain.model.AbstractRepositoryIT;
+
 import com.eskcti.algashop.ordering.utils.SecurityCheckTestConfig;
+import com.eskcti.algashop.ordering.utils.TestcontainerPostgreSQLConfig;
 import java.time.LocalDate;
 
 import org.assertj.core.api.Assertions;
@@ -9,15 +11,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
-import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.jdbc.SqlConfig;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.eskcti.algashop.ordering.core.domain.model.commons.Address;
 import com.eskcti.algashop.ordering.core.domain.model.commons.Document;
@@ -36,8 +31,7 @@ import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.cust
 import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.customer.CustomerPersistenceEntityRepository;
 import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.customer.CustomersPersistenceProvider;
 
-@DataJpaTest
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+
 @Import({
     CustomerRegistrationService.class,
     CustomersPersistenceProvider.class,
@@ -47,12 +41,7 @@ import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.cust
     TestcontainerPostgreSQLConfig.class,
     SecurityCheckTestConfig.class
 })
-
-@Sql(scripts = "classpath:sql/clean-database.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS, config = @SqlConfig(transactionMode = SqlConfig.TransactionMode.ISOLATED))
-@Sql(scripts = "classpath:sql/clean-database.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD, config = @SqlConfig(transactionMode = SqlConfig.TransactionMode.ISOLATED))
-@Transactional(propagation = Propagation.NOT_SUPPORTED)
-@ActiveProfiles("it")
-class CustomerRegistrationServiceIT {
+class CustomerRegistrationServiceIT extends AbstractRepositoryIT {
 
   @Autowired
   private CustomerRegistrationService customerRegistrationService;

@@ -1,23 +1,16 @@
 package com.eskcti.algashop.ordering.core.application.shoppingcart;
 
-import com.eskcti.algashop.ordering.utils.MockJwtDecoderConfig;
-import com.eskcti.algashop.ordering.utils.TestcontainerPostgreSQLConfig;
+import com.eskcti.algashop.ordering.core.application.AbstractApplicationIT;
+
 import java.util.Optional;
 import java.util.UUID;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.springframework.context.annotation.Import;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.jdbc.SqlConfig;
 
 import com.eskcti.algashop.ordering.core.ports.in.shoppingcart.ShoppingCartItemInput;
 import com.eskcti.algashop.ordering.core.domain.model.commons.Quantity;
@@ -43,14 +36,8 @@ import com.eskcti.algashop.ordering.core.domain.model.shoppingcart.ShoppingCartN
 import com.eskcti.algashop.ordering.core.domain.model.shoppingcart.ShoppingCarts;
 import com.eskcti.algashop.ordering.infrastructure.adapters.in.listener.shoppingcart.ShoppingCartEventListener;
 
-@SpringBootTest
-@Import({ TestcontainerPostgreSQLConfig.class, MockJwtDecoderConfig.class })
 
-@Sql(scripts = "classpath:sql/clean-database.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS, config = @SqlConfig(transactionMode = SqlConfig.TransactionMode.ISOLATED))
-@Sql(scripts = "classpath:sql/clean-database.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD, config = @SqlConfig(transactionMode = SqlConfig.TransactionMode.ISOLATED))
-@Transactional(propagation = Propagation.NOT_SUPPORTED)
-@ActiveProfiles("it")
-class ShoppingCartManagementApplicationServiceIT {
+class ShoppingCartManagementApplicationServiceIT extends AbstractApplicationIT {
 
   @Autowired
   private ShoppingCartManagementApplicationService service;

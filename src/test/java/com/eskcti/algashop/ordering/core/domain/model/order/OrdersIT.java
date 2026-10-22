@@ -1,7 +1,9 @@
 package com.eskcti.algashop.ordering.core.domain.model.order;
 
-import com.eskcti.algashop.ordering.utils.TestcontainerPostgreSQLConfig;
+import com.eskcti.algashop.ordering.core.domain.model.AbstractRepositoryIT;
+
 import com.eskcti.algashop.ordering.utils.SecurityCheckTestConfig;
+import com.eskcti.algashop.ordering.utils.TestcontainerPostgreSQLConfig;
 import java.time.Year;
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -11,9 +13,6 @@ import java.util.function.Supplier;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
-import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
-import org.springframework.context.annotation.Import;
 
 import com.eskcti.algashop.ordering.core.domain.model.commons.Money;
 import com.eskcti.algashop.ordering.core.domain.model.commons.Quantity;
@@ -38,29 +37,19 @@ import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.orde
 import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.order.OrderPersistenceEntityRepository;
 import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.order.OrdersPersistenceProvider;
 
+import org.springframework.context.annotation.Import;
 import static org.assertj.core.api.Assertions.assertThat;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.jdbc.SqlConfig;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
-@DataJpaTest
 @Import({ OrdersPersistenceProvider.class, OrderPersistenceEntityAssembler.class,
     OrderPersistenceEntityDisassembler.class,
     CustomersPersistenceProvider.class, CustomerPersistenceEntityAssembler.class,
     CustomerPersistenceEntityDisassembler.class, SpringDataAuditingConfig.class, TestcontainerPostgreSQLConfig.class,
     SecurityCheckTestConfig.class })
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@Sql(scripts = "classpath:sql/clean-database.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS, config = @SqlConfig(transactionMode = SqlConfig.TransactionMode.ISOLATED))
-@Sql(scripts = "classpath:sql/clean-database.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD, config = @SqlConfig(transactionMode = SqlConfig.TransactionMode.ISOLATED))
-@Transactional(propagation = Propagation.NOT_SUPPORTED)
-@ActiveProfiles("it")
-class OrdersIT {
+class OrdersIT extends AbstractRepositoryIT {
 
   private Orders orders;
   private Customers customers;

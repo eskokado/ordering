@@ -1,18 +1,15 @@
 package com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.customer;
 
-import com.eskcti.algashop.ordering.utils.TestcontainerPostgreSQLConfig;
+import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.AbstractPersistenceIT;
+
+import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.customer.CustomerPersistenceEntityAssembler;
+import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.customer.CustomerPersistenceEntityDisassembler;
+import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.customer.CustomersPersistenceProvider;
 import com.eskcti.algashop.ordering.utils.SecurityCheckTestConfig;
+import com.eskcti.algashop.ordering.utils.TestcontainerPostgreSQLConfig;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
-import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
-import org.springframework.context.annotation.Import;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.jdbc.SqlConfig;
 
 import com.eskcti.algashop.ordering.core.domain.model.commons.Email;
 import com.eskcti.algashop.ordering.core.domain.model.commons.FullName;
@@ -20,8 +17,8 @@ import com.eskcti.algashop.ordering.core.domain.model.customer.Customer;
 import com.eskcti.algashop.ordering.core.domain.model.customer.CustomerId;
 import com.eskcti.algashop.ordering.core.domain.model.customer.CustomerTestDataBuilder;
 import com.eskcti.algashop.ordering.infrastructure.config.auditing.SpringDataAuditingConfig;
+import org.springframework.context.annotation.Import;
 
-@DataJpaTest
 @Import({
     CustomersPersistenceProvider.class,
     CustomerPersistenceEntityAssembler.class,
@@ -30,12 +27,7 @@ import com.eskcti.algashop.ordering.infrastructure.config.auditing.SpringDataAud
     TestcontainerPostgreSQLConfig.class,
     SecurityCheckTestConfig.class
 })
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@Sql(scripts = "classpath:sql/clean-database.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS, config = @SqlConfig(transactionMode = SqlConfig.TransactionMode.ISOLATED))
-@Sql(scripts = "classpath:sql/clean-database.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD, config = @SqlConfig(transactionMode = SqlConfig.TransactionMode.ISOLATED))
-@Transactional(propagation = Propagation.NOT_SUPPORTED)
-@ActiveProfiles("it")
-class CustomersPersistenceProviderIT {
+class CustomersPersistenceProviderIT extends AbstractPersistenceIT {
 
   private final CustomersPersistenceProvider persistenceProvider;
   private final CustomerPersistenceEntityRepository entityRepository;
@@ -74,7 +66,6 @@ class CustomersPersistenceProviderIT {
   }
 
   @Test
-  @Transactional(propagation = Propagation.NOT_SUPPORTED)
   public void shouldAddFindAndNotFailWhenNoTransaction() {
     Customer customer = CustomerTestDataBuilder.existingCustomer().build();
     persistenceProvider.add(customer);

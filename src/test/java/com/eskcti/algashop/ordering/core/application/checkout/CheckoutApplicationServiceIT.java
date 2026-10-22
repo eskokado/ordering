@@ -1,7 +1,7 @@
 package com.eskcti.algashop.ordering.core.application.checkout;
 
-import com.eskcti.algashop.ordering.utils.MockJwtDecoderConfig;
-import com.eskcti.algashop.ordering.utils.TestcontainerPostgreSQLConfig;
+import com.eskcti.algashop.ordering.core.application.AbstractApplicationIT;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Optional;
@@ -11,16 +11,10 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.springframework.context.annotation.Import;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.jdbc.SqlConfig;
 
 import com.eskcti.algashop.ordering.core.application.checkout.CheckoutApplicationService;
 import com.eskcti.algashop.ordering.core.ports.in.checkout.CheckoutInput;
@@ -48,15 +42,10 @@ import com.eskcti.algashop.ordering.core.domain.model.shoppingcart.ShoppingCartN
 import com.eskcti.algashop.ordering.core.domain.model.shoppingcart.ShoppingCartTestDataBuilder;
 import com.eskcti.algashop.ordering.core.domain.model.shoppingcart.ShoppingCarts;
 import com.eskcti.algashop.ordering.infrastructure.adapters.in.listener.order.OrderEventListener;
+import com.eskcti.algashop.ordering.utils.WithMockJwt;
 
-@SpringBootTest
-@Import({ TestcontainerPostgreSQLConfig.class, MockJwtDecoderConfig.class })
 
-@Sql(scripts = "classpath:sql/clean-database.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS, config = @SqlConfig(transactionMode = SqlConfig.TransactionMode.ISOLATED))
-@Sql(scripts = "classpath:sql/clean-database.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD, config = @SqlConfig(transactionMode = SqlConfig.TransactionMode.ISOLATED))
-@Transactional(propagation = Propagation.NOT_SUPPORTED)
-@ActiveProfiles("it")
-class CheckoutApplicationServiceIT {
+class CheckoutApplicationServiceIT extends AbstractApplicationIT {
 
         @Autowired
         private CheckoutApplicationService service;
@@ -234,5 +223,48 @@ class CheckoutApplicationServiceIT {
                 Assertions.assertThatThrownBy(() -> service.checkout(input))
                                 .isInstanceOf(DomainException.class)
                                 .hasMessage("Credit card id is required");
+        }
+
+        @Test
+        void shouldThrowAccessDeniedExceptionWhenOrderingForAnotherCustomer() {
+                if (!customers.exists(CustomerTestDataBuilder.SECOND_CUSTOMER_ID)) {
+                        customers.add(CustomerTestDataBuilder.existingCustomer()
+                                        .id(CustomerTestDataBuilder.SECOND_CUSTOMER_ID)
+                                        .email(CustomerTestDataBuilder.SECOND_CUSTOMER_EMAIL)
+                                        .build());
+                }
+
+                ShoppingCart shoppingCart = ShoppingCartTestDataBuilder
+                                .aShoppingCart()
+                                .customerId(CustomerTestDataBuilder.SECOND_CUSTOMER_ID)
+                                .withItems(false).build();
+                shoppingCarts.add(shoppingCart);
+
+                CheckoutInput input = CheckoutInputTestDataBuilder.aCheckoutInput()
+                                .shoppingCartId(shoppingCart.id().value())
+                                .build();
+
+                Assertions.assertThatExceptionOfType(AccessDeniedException.class)
+                                .isThrownBy(() -> service.checkout(input));
+        }
+
+        @Test
+        @WithMockJwt(role = "ADMIN")
+        void shouldThrowAccessDeniedExceptionWhenAuthenticatedUserIsNotCustomer() {
+                Product product = ProductTestDataBuilder.aProduct().inStock(true).build();
+
+                ShoppingCart shoppingCart = ShoppingCartTestDataBuilder
+                                .aShoppingCart()
+                                .customerId(CustomerTestDataBuilder.DEFAULT_CUSTOMER_ID)
+                                .withItems(false).build();
+                shoppingCart.addItem(product, new Quantity(1));
+                shoppingCarts.add(shoppingCart);
+
+                CheckoutInput input = CheckoutInputTestDataBuilder.aCheckoutInput()
+                                .shoppingCartId(shoppingCart.id().value())
+                                .build();
+
+                Assertions.assertThatExceptionOfType(AccessDeniedException.class)
+                                .isThrownBy(() -> service.checkout(input));
         }
 }

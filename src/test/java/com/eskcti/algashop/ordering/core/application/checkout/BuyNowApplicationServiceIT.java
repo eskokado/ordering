@@ -1,7 +1,7 @@
 package com.eskcti.algashop.ordering.core.application.checkout;
 
-import com.eskcti.algashop.ordering.utils.MockJwtDecoderConfig;
-import com.eskcti.algashop.ordering.utils.TestcontainerPostgreSQLConfig;
+import com.eskcti.algashop.ordering.core.application.AbstractApplicationIT;
+
 import java.time.LocalDate;
 import java.util.Optional;
 
@@ -9,21 +9,15 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.springframework.context.annotation.Import;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.jdbc.SqlConfig;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
 import com.eskcti.algashop.ordering.core.application.checkout.BuyNowApplicationService;
 import com.eskcti.algashop.ordering.core.ports.in.checkout.BuyNowInput;
 import com.eskcti.algashop.ordering.core.domain.model.DomainException;
 import com.eskcti.algashop.ordering.core.domain.model.commons.Money;
-import com.eskcti.algashop.ordering.core.domain.model.customer.CustomerId;
 import com.eskcti.algashop.ordering.core.domain.model.customer.CustomerNotFoundException;
 import com.eskcti.algashop.ordering.core.domain.model.customer.CustomerTestDataBuilder;
 import com.eskcti.algashop.ordering.core.domain.model.customer.Customers;
@@ -34,15 +28,10 @@ import com.eskcti.algashop.ordering.core.domain.model.product.Product;
 import com.eskcti.algashop.ordering.core.domain.model.product.ProductCatalogService;
 import com.eskcti.algashop.ordering.core.domain.model.product.ProductNotFoundException;
 import com.eskcti.algashop.ordering.core.domain.model.product.ProductTestDataBuilder;
+import com.eskcti.algashop.ordering.utils.WithMockJwt;
 
-@SpringBootTest
-@Import({ TestcontainerPostgreSQLConfig.class, MockJwtDecoderConfig.class })
 
-@Sql(scripts = "classpath:sql/clean-database.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS, config = @SqlConfig(transactionMode = SqlConfig.TransactionMode.ISOLATED))
-@Sql(scripts = "classpath:sql/clean-database.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD, config = @SqlConfig(transactionMode = SqlConfig.TransactionMode.ISOLATED))
-@Transactional(propagation = Propagation.NOT_SUPPORTED)
-@ActiveProfiles("it")
-class BuyNowApplicationServiceIT {
+class BuyNowApplicationServiceIT extends AbstractApplicationIT {
 
         @Autowired
         private BuyNowApplicationService buyNowApplicationService;
@@ -50,7 +39,7 @@ class BuyNowApplicationServiceIT {
         @Autowired
         private Orders orders;
 
-        @Autowired
+        @MockitoSpyBean
         private Customers customers;
 
         @MockitoBean
@@ -91,18 +80,32 @@ class BuyNowApplicationServiceIT {
 
         @Test
         public void shouldThrowExceptionWhenCustomerDoesNotExist() {
-                Product product = ProductTestDataBuilder.aProduct()
-                                .id(ProductTestDataBuilder.DEFAULT_PRODUCT_ID)
-                                .build();
-                Mockito.when(productCatalogService.ofId(ProductTestDataBuilder.DEFAULT_PRODUCT_ID))
-                                .thenReturn(Optional.of(product));
+                Mockito.doReturn(Optional.empty())
+                                .when(customers).ofId(CustomerTestDataBuilder.DEFAULT_CUSTOMER_ID);
 
-                BuyNowInput input = BuyNowInputTestDataBuilder.aBuyNowInput()
-                                .customerId(new CustomerId().value())
-                                .build();
+                BuyNowInput input = BuyNowInputTestDataBuilder.aBuyNowInput().build();
 
                 Assertions.assertThatThrownBy(() -> buyNowApplicationService.buyNow(input))
                                 .isInstanceOf(CustomerNotFoundException.class);
+        }
+
+        @Test
+        public void shouldThrowAccessDeniedExceptionWhenOrderingForAnotherCustomer() {
+                BuyNowInput input = BuyNowInputTestDataBuilder.aBuyNowInput()
+                                .customerId(CustomerTestDataBuilder.SECOND_CUSTOMER_ID.value())
+                                .build();
+
+                Assertions.assertThatThrownBy(() -> buyNowApplicationService.buyNow(input))
+                                .isInstanceOf(AccessDeniedException.class);
+        }
+
+        @Test
+        @WithMockJwt(role = "ADMIN")
+        public void shouldThrowAccessDeniedExceptionWhenAuthenticatedUserIsNotCustomer() {
+                BuyNowInput input = BuyNowInputTestDataBuilder.aBuyNowInput().build();
+
+                Assertions.assertThatThrownBy(() -> buyNowApplicationService.buyNow(input))
+                                .isInstanceOf(AccessDeniedException.class);
         }
 
         @Test
