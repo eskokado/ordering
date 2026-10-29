@@ -2,17 +2,17 @@ package com.eskcti.algashop.ordering.core.application.checkout;
 
 import com.eskcti.algashop.ordering.core.application.order.BillingInputDisassembler;
 import com.eskcti.algashop.ordering.core.application.order.ShippingInputDisassembler;
-import com.eskcti.algashop.ordering.core.application.security.SecurityCheckApplicationService;
+import com.eskcti.algashop.ordering.core.application.security.SecurityCheck;
 import com.eskcti.algashop.ordering.core.domain.model.DomainException;
 import com.eskcti.algashop.ordering.core.domain.model.commons.ZipCode;
 import com.eskcti.algashop.ordering.core.domain.model.customer.Customer;
+import com.eskcti.algashop.ordering.core.domain.model.customer.CustomerId;
 import com.eskcti.algashop.ordering.core.domain.model.customer.CustomerNotFoundException;
 import com.eskcti.algashop.ordering.core.domain.model.customer.Customers;
 import com.eskcti.algashop.ordering.core.domain.model.order.*;
 import com.eskcti.algashop.ordering.core.domain.model.order.shipping.OriginAddressService;
 import com.eskcti.algashop.ordering.core.domain.model.order.shipping.ShippingCostService;
 import com.eskcti.algashop.ordering.core.domain.model.shoppingcart.ShoppingCart;
-import com.eskcti.algashop.ordering.core.domain.model.shoppingcart.ShoppingCartId;
 import com.eskcti.algashop.ordering.core.domain.model.shoppingcart.ShoppingCartNotFoundException;
 import com.eskcti.algashop.ordering.core.domain.model.shoppingcart.ShoppingCarts;
 import com.eskcti.algashop.ordering.core.ports.in.checkout.CheckoutInput;
@@ -43,12 +43,15 @@ public class CheckoutApplicationService implements ForBuyingWithShoppingCart {
 	private final ShippingCostService shippingCostService;
 	private final OriginAddressService originAddressService;
 
-	private final SecurityCheckApplicationService securityCheck;
+	private final SecurityCheck securityCheck;
 
 	@Transactional
 	public String checkout(CheckoutInput input) {
 		Objects.requireNonNull(input);
 		PaymentMethod paymentMethod = PaymentMethod.valueOf(input.getPaymentMethod());
+		CustomerId customerId = new CustomerId(input.getCustomerId());
+		Customer customer = customers.ofId(customerId)
+				.orElseThrow(() -> new CustomerNotFoundException(customerId));
 
 		CreditCardId creditCardId = null;
 
@@ -59,13 +62,10 @@ public class CheckoutApplicationService implements ForBuyingWithShoppingCart {
 			creditCardId = new CreditCardId(input.getCreditCardId());
 		}
 
-		ShoppingCartId shoppingCartId = new ShoppingCartId(input.getShoppingCartId());
-		ShoppingCart shoppingCart = shoppingCarts.ofId(shoppingCartId)
-				.orElseThrow(() -> new ShoppingCartNotFoundException(shoppingCartId.value()));
+		ShoppingCart shoppingCart = shoppingCarts.ofCustomer(customerId)
+				.orElseThrow(() -> ShoppingCartNotFoundException.ofCustomer(customerId.value()));
 
 		verifyCanOrderFor(shoppingCart.customerId().value());
-
-		Customer customer = customers.ofId(shoppingCart.customerId()).orElseThrow(() -> new CustomerNotFoundException());
 
 		var shippingCalculationResult = calculateShippingCost(input.getShipping());
 

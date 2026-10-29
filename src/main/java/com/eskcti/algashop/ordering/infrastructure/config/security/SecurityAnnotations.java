@@ -9,39 +9,57 @@ import java.lang.annotation.Target;
 
 public class SecurityAnnotations {
 
-    @Target({ElementType.METHOD, ElementType.TYPE})
+    @Target({ ElementType.METHOD, ElementType.TYPE })
     @Retention(RetentionPolicy.RUNTIME)
-    @PreAuthorize("hasAuthority('SCOPE_orders:read')")
-    public @interface CanReadOrders {}
+    @PreAuthorize("hasAuthority('SCOPE_orders:read') and not hasRole('CUSTOMER')")
+    public @interface CanReadOrders {
+    }
 
-    @Target({ElementType.METHOD, ElementType.TYPE})
-    @Retention(RetentionPolicy.RUNTIME)
-    @PreAuthorize("hasAuthority('SCOPE_orders:write')")
-    public @interface CanWriteOrders {}
-
-    @Target({ElementType.METHOD, ElementType.TYPE})
-    @Retention(RetentionPolicy.RUNTIME)
-    @PreAuthorize("hasAuthority('SCOPE_customers:read')")
-    public @interface CanReadCustomers {}
-
-    @Target({ElementType.METHOD, ElementType.TYPE})
-    @Retention(RetentionPolicy.RUNTIME)
-    @PreAuthorize("hasAuthority('SCOPE_customers:write')")
-    public @interface CanWriteCustomers {}
-
-    @Target({ElementType.METHOD, ElementType.TYPE})
-    @Retention(RetentionPolicy.RUNTIME)
-    @PreAuthorize("hasAuthority('SCOPE_shopping-carts:read')")
-    public @interface CanReadShoppingCarts {}
-
-    @Target({ElementType.METHOD, ElementType.TYPE})
-    @Retention(RetentionPolicy.RUNTIME)
-    @PreAuthorize("hasAuthority('SCOPE_shopping-carts:write')")
-    public @interface CanWriteShoppingCarts {}
-
-    @Target({ElementType.METHOD, ElementType.TYPE})
+    @Target({ ElementType.METHOD, ElementType.TYPE })
     @Retention(RetentionPolicy.RUNTIME)
     @PreAuthorize("hasAuthority('SCOPE_shipping-costs:preview')")
-    public @interface CanPreviewShippingCosts {}
-}
+    public @interface CanPreviewShippingCosts {
+    }
 
+    @Target({ ElementType.METHOD, ElementType.TYPE })
+    @Retention(RetentionPolicy.RUNTIME)
+    @PreAuthorize("hasAuthority('SCOPE_customers:read') and not hasRole('CUSTOMER')")
+    public @interface CanReadCustomers {
+    }
+
+    @Target({ ElementType.METHOD, ElementType.TYPE })
+    @Retention(RetentionPolicy.RUNTIME)
+    @PreAuthorize("hasAuthority('SCOPE_shopping-carts:read')")
+    public @interface CanReadShoppingCarts {
+    }
+
+    @Target({ ElementType.METHOD, ElementType.TYPE })
+    @Retention(RetentionPolicy.RUNTIME)
+    @PreAuthorize("hasAuthority('SCOPE_shopping-carts:write')")
+    public @interface CanWriteShoppingCarts {
+    }
+
+    @Target({ ElementType.METHOD, ElementType.TYPE })
+    @Retention(RetentionPolicy.RUNTIME)
+    @PreAuthorize("hasAuthority('SCOPE_customers:write') and hasRole('CUSTOMER')")
+    public @interface CanWriteMyCustomerProfile {
+    }
+
+    @Target({ ElementType.METHOD, ElementType.TYPE })
+    @Retention(RetentionPolicy.RUNTIME)
+    @PreAuthorize("hasAuthority('SCOPE_customers:read') and hasRole('CUSTOMER')")
+    public @interface CanReadMyCustomerProfile {
+    }
+
+    @Target({ ElementType.METHOD, ElementType.TYPE })
+    @Retention(RetentionPolicy.RUNTIME)
+    @PreAuthorize("hasAuthority('SCOPE_orders:write') and hasRole('CUSTOMER')")
+    public @interface CanWriteMyOrders {
+    }
+
+    @Target({ ElementType.METHOD, ElementType.TYPE })
+    @Retention(RetentionPolicy.RUNTIME)
+    @PreAuthorize("hasAuthority('SCOPE_orders:read') and hasRole('CUSTOMER')")
+    public @interface CanReadMyOrders {
+    }
+}

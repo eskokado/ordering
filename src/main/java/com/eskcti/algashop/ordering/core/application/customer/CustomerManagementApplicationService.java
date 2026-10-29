@@ -33,11 +33,12 @@ public class CustomerManagementApplicationService implements ForManagingCustomer
   private final Customers customers;
 
   @Transactional
-  public UUID create(CustomerInput input) {
+  public UUID create(UUID customerUserId, CustomerInput input) {
     Objects.requireNonNull(input);
     AddressData address = input.getAddress();
 
     Customer customer = customerRegistration.register(
+        new CustomerId(customerUserId),
         new FullName(input.getFirstName(), input.getLastName()),
         new BirthDate(input.getBirthDate()),
         new Email(input.getEmail()),
@@ -102,10 +103,9 @@ public class CustomerManagementApplicationService implements ForManagingCustomer
 
   @Transactional
   public void changeEmail(UUID rawCustomerId, String newEmail) {
-    Objects.requireNonNull(rawCustomerId);
-    Objects.requireNonNull(newEmail);
-    Customer customer = customers.ofId(new CustomerId(rawCustomerId))
-        .orElseThrow(() -> new CustomerNotFoundException());
+    CustomerId customerId = new CustomerId(rawCustomerId);
+    Customer customer = customers.ofId(customerId)
+        .orElseThrow(() -> new CustomerNotFoundException(customerId));
     customerRegistration.changeEmail(customer, new Email(newEmail));
     customers.add(customer);
   }

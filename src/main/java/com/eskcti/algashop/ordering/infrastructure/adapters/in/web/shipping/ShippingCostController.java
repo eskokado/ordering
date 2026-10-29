@@ -3,13 +3,13 @@ package com.eskcti.algashop.ordering.infrastructure.adapters.in.web.shipping;
 import com.eskcti.algashop.ordering.core.application.shipping.ShippingApplicationService;
 import com.eskcti.algashop.ordering.core.application.shipping.ShippingCostPreviewInput;
 import com.eskcti.algashop.ordering.core.application.shipping.ShippingCostPreviewOutput;
+import com.eskcti.algashop.ordering.infrastructure.config.security.SecurityAnnotations;
+
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-
-import static com.eskcti.algashop.ordering.infrastructure.config.security.SecurityAnnotations.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -17,8 +17,8 @@ public class ShippingCostController {
 
     private final ShippingApplicationService shippingApplicationService;
 
+    @SecurityAnnotations.CanPreviewShippingCosts
     @PostMapping("/api/v1/shipping-cost-previews")
-    @CanPreviewShippingCosts
     public ShippingCostPreviewOutput previewShippingCost(@RequestBody @Valid ShippingCostPreviewInput input) {
         return shippingApplicationService.previewCost(input);
     }

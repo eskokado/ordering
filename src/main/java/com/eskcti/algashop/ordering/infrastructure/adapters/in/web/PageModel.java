@@ -1,4 +1,4 @@
-package com.eskcti.algashop.ordering.infrastructure.adapters.in;
+package com.eskcti.algashop.ordering.infrastructure.adapters.in.web;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

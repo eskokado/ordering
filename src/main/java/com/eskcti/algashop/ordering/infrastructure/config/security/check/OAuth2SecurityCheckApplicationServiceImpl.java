@@ -1,6 +1,6 @@
 package com.eskcti.algashop.ordering.infrastructure.config.security.check;
 
-import com.eskcti.algashop.ordering.core.application.security.SecurityCheckApplicationService;
+import com.eskcti.algashop.ordering.core.application.security.SecurityCheck;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
@@ -14,7 +14,7 @@ import java.util.UUID;
 
 @Service("securityCheck")
 @Slf4j
-public class OAuth2SecurityCheckApplicationServiceImpl implements SecurityCheckApplicationService {
+public class OAuth2SecurityCheckApplicationServiceImpl implements SecurityCheck {
 
     private static final String ROLE_CUSTOMER = "ROLE_CUSTOMER";
 
@@ -60,6 +60,14 @@ public class OAuth2SecurityCheckApplicationServiceImpl implements SecurityCheckA
     @Override
     public boolean isCustomer() {
         return hasAuthority(ROLE_CUSTOMER);
+    }
+
+    @Override
+    public boolean canOrderFor(UUID customerId) {
+        if (customerId == null) {
+            return false;
+        }
+        return isCustomer() && getAuthenticatedUserId().equals(customerId);
     }
 
     private boolean hasAuthority(String rawAuthority) {
