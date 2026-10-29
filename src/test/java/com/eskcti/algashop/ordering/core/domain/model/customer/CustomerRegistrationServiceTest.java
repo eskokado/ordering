@@ -39,6 +39,7 @@ class CustomerRegistrationServiceTest {
         .thenReturn(true);
 
     Customer customer = customerRegistrationService.register(
+        new CustomerId(),
         new FullName("John", "Doe"),
         new BirthDate(LocalDate.of(1991, 7, 5)),
         new Email("johndoe@email.com"),
@@ -65,6 +66,7 @@ class CustomerRegistrationServiceTest {
         .thenReturn(false);
 
     Assertions.assertThatThrownBy(() -> customerRegistrationService.register(
+        new CustomerId(),
         new FullName("John", "Doe"),
         new BirthDate(LocalDate.of(1991, 7, 5)),
         new Email("johndoe@email.com"),

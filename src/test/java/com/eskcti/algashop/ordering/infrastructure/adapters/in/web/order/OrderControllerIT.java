@@ -61,7 +61,7 @@ public class OrderControllerIT extends AbstractPresentationIT {
                                 .contentType("application/vnd.order-with-product.v1+json")
                                 .body(json)
                                 .when()
-                                .post("/api/v1/orders")
+                                .post("/api/v1/customers/me/orders")
                                 .then()
                                 .assertThat()
                                 .contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -87,7 +87,7 @@ public class OrderControllerIT extends AbstractPresentationIT {
                                 .contentType("application/vnd.order-with-product.v1+json")
                                 .body(input)
                                 .when()
-                                .post("/api/v1/orders")
+                                .post("/api/v1/customers/me/orders")
                                 .then()
                                 .assertThat()
                                 .contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -118,7 +118,7 @@ public class OrderControllerIT extends AbstractPresentationIT {
                                 .contentType("application/vnd.order-with-shopping-cart.v1+json")
                                 .body(json)
                                 .when()
-                                .post("/api/v1/orders")
+                                .post("/api/v1/customers/me/orders")
                                 .then()
                                 .assertThat()
                                 .contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -143,7 +143,7 @@ public class OrderControllerIT extends AbstractPresentationIT {
                                 .contentType("application/vnd.order-with-product.v1+json")
                                 .body(json)
                                 .when()
-                                .post("/api/v1/orders")
+                                .post("/api/v1/customers/me/orders")
                                 .then()
                                 .assertThat()
                                 .contentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE)
@@ -162,7 +162,7 @@ public class OrderControllerIT extends AbstractPresentationIT {
                                 .contentType("application/vnd.order-with-product.v1+json")
                                 .body(json)
                                 .when()
-                                .post("/api/v1/orders")
+                                .post("/api/v1/customers/me/orders")
                                 .then()
                                 .assertThat()
                                 .contentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE)
@@ -178,7 +178,7 @@ public class OrderControllerIT extends AbstractPresentationIT {
                                 .contentType("application/vnd.order-with-product.v1+json")
                                 .body(json)
                                 .when()
-                                .post("/api/v1/orders")
+                                .post("/api/v1/customers/me/orders")
                                 .then()
                                 .assertThat()
                                 .contentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE)
@@ -186,19 +186,58 @@ public class OrderControllerIT extends AbstractPresentationIT {
         }
 
         @Test
-        public void shouldReturnForbiddenWhenOrderingForAnotherCustomer() {
+        public void shouldReturnForbiddenWhenAuthenticatedUserIsNotCustomer() {
                 String json = AlgaShopResourceUtils.readContent("json/create-order-with-product.json");
 
-                givenAuthenticatedWithToken(MockJwtDecoderFactory.OTHER_CUSTOMER_TOKEN_VALUE)
+                givenAuthenticatedWithToken(MockJwtDecoderFactory.ADMIN_TOKEN_VALUE)
                                 .accept(MediaType.APPLICATION_JSON_VALUE)
                                 .contentType("application/vnd.order-with-product.v1+json")
                                 .body(json)
                                 .when()
-                                .post("/api/v1/orders")
+                                .post("/api/v1/customers/me/orders")
                                 .then()
                                 .assertThat()
                                 .contentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE)
                                 .statusCode(HttpStatus.FORBIDDEN.value());
+        }
+
+        @Test
+        public void shouldFindAndFilterMyOrders() {
+                String json = AlgaShopResourceUtils.readContent("json/create-order-with-product.json");
+                String createdOrderId = givenAuthenticated()
+                                .accept(MediaType.APPLICATION_JSON_VALUE)
+                                .contentType("application/vnd.order-with-product.v1+json")
+                                .body(json)
+                                .when()
+                                .post("/api/v1/customers/me/orders")
+                                .then()
+                                .assertThat()
+                                .statusCode(HttpStatus.CREATED.value())
+                                .extract()
+                                .jsonPath().getString("id");
+
+                givenAuthenticated()
+                                .accept(MediaType.APPLICATION_JSON_VALUE)
+                                .when()
+                                .get("/api/v1/customers/me/orders/{orderId}", createdOrderId)
+                                .then()
+                                .assertThat()
+                                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                                .statusCode(HttpStatus.OK.value())
+                                .body("id", Matchers.is(createdOrderId));
+
+                givenAuthenticated()
+                                .accept(MediaType.APPLICATION_JSON_VALUE)
+                                .queryParam("size", 10)
+                                .queryParam("page", 0)
+                                .when()
+                                .get("/api/v1/customers/me/orders")
+                                .then()
+                                .assertThat()
+                                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                                .statusCode(HttpStatus.OK.value())
+                                .body("totalElements", Matchers.greaterThanOrEqualTo(1),
+                                                "content[0].id", Matchers.is(createdOrderId));
         }
 
         @Test
@@ -210,7 +249,7 @@ public class OrderControllerIT extends AbstractPresentationIT {
                                 .contentType("application/vnd.order-with-shopping-cart.v1+json")
                                 .body(json)
                                 .when()
-                                .post("/api/v1/orders")
+                                .post("/api/v1/customers/me/orders")
                                 .then()
                                 .assertThat()
                                 .contentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE)

@@ -7,7 +7,9 @@ import com.eskcti.algashop.ordering.core.application.checkout.CheckoutApplicatio
 import com.eskcti.algashop.ordering.core.ports.in.checkout.CheckoutInput;
 import com.eskcti.algashop.ordering.core.ports.in.order.OrderFilter;
 import com.eskcti.algashop.ordering.core.application.order.OrderQueryService;
+import com.eskcti.algashop.ordering.core.application.security.SecurityCheck;
 import com.eskcti.algashop.ordering.core.domain.model.order.OrderNotFoundException;
+import com.eskcti.algashop.ordering.infrastructure.adapters.in.web.order.MyOrdersController;
 import com.eskcti.algashop.ordering.infrastructure.adapters.in.web.order.OrderController;
 
 import io.restassured.module.mockmvc.RestAssuredMockMvc;
@@ -22,8 +24,9 @@ import org.springframework.web.context.WebApplicationContext;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.UUID;
 
-@WebMvcTest(controllers = OrderController.class)
+@WebMvcTest(controllers = {OrderController.class, MyOrdersController.class})
 public class OrderBase {
 
         @Autowired
@@ -38,12 +41,17 @@ public class OrderBase {
         @MockitoBean
         private CheckoutApplicationService checkoutApplicationService;
 
+        @MockitoBean
+        private SecurityCheck securityCheck;
+
         public static final String validOrderId = "01226N0640J7Q";
 
         public static final String notFoundOrderId = "01226N0693HDH";
 
         @BeforeEach
         void setUp() {
+                Mockito.when(securityCheck.getAuthenticatedUserId())
+                                .thenReturn(UUID.fromString("6e148bd5-47f6-4022-b9da-07cfaa294f7a"));
                 Mockito.when(orderQueryService.filter(Mockito.any(OrderFilter.class)))
                                 .thenReturn(new PageImpl<>(List.of()));
 

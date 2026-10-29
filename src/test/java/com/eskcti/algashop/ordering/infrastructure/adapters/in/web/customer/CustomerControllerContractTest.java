@@ -26,8 +26,8 @@ import com.eskcti.algashop.ordering.core.ports.in.customer.CustomerFilter;
 import com.eskcti.algashop.ordering.core.ports.in.customer.CustomerOutput;
 import com.eskcti.algashop.ordering.core.ports.in.customer.CustomerSummaryOutput;
 import com.eskcti.algashop.ordering.core.ports.in.shoppingcart.ForQueryingShoppingCarts;
+import com.eskcti.algashop.ordering.core.application.security.SecurityCheck;
 import com.eskcti.algashop.ordering.core.domain.model.DomainException;
-import com.eskcti.algashop.ordering.core.domain.model.customer.CustomerArchivedException;
 import com.eskcti.algashop.ordering.core.domain.model.customer.CustomerEmailIsInUseException;
 import com.eskcti.algashop.ordering.core.domain.model.customer.CustomerNotFoundException;
 import com.eskcti.algashop.ordering.core.ports.in.shoppingcart.ShoppingCartItemOutput;
@@ -39,7 +39,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
 
-@WebMvcTest(controllers = CustomerController.class)
+@WebMvcTest(controllers = {CustomerController.class, MyCustomerController.class})
 class CustomerControllerContractTest {
 
   @Autowired
@@ -54,8 +54,14 @@ class CustomerControllerContractTest {
   @MockitoBean
   private ForQueryingShoppingCarts forQueryingShoppingCarts;
 
+  @MockitoBean
+  private SecurityCheck securityCheck;
+
+  private static final UUID AUTHENTICATED_USER_ID = UUID.randomUUID();
+
   @BeforeEach
   public void setupAll() {
+    Mockito.lenient().when(securityCheck.getAuthenticatedUserId()).thenReturn(AUTHENTICATED_USER_ID);
     RestAssuredMockMvc.mockMvc(MockMvcBuilders.webAppContextSetup(context)
         .defaultResponseCharacterEncoding(StandardCharsets.UTF_8)
         .build());
@@ -69,7 +75,7 @@ class CustomerControllerContractTest {
   public void createCustomerContract() {
     UUID customerId = UUID.randomUUID();
     CustomerOutput customerOutput = CustomerOutputTestDataBuilder.existing().id(customerId).build();
-    Mockito.when(forManagingCustomers.create(Mockito.any(CustomerInput.class)))
+    Mockito.when(forManagingCustomers.create(Mockito.any(UUID.class), Mockito.any(CustomerInput.class)))
         .thenReturn(customerId);
     Mockito.when(forQueryingCustomers.findById(Mockito.any(UUID.class)))
         .thenReturn(customerOutput);
@@ -101,12 +107,12 @@ class CustomerControllerContractTest {
         .body(jsonInput)
         .contentType(MediaType.APPLICATION_JSON_VALUE)
         .when()
-        .post("/api/v1/customers")
+        .post("/api/v1/customers/me")
         .then()
         .assertThat()
         .contentType(MediaType.APPLICATION_JSON_VALUE)
         .statusCode(HttpStatus.CREATED.value())
-        .header("Location", Matchers.containsString("/api/v1/customers/" + customerId))
+        .header("Location", Matchers.containsString("/api/v1/customers/me"))
         .body(
             "id", Matchers.notNullValue(),
             "registeredAt", Matchers.notNullValue(),
@@ -156,7 +162,7 @@ class CustomerControllerContractTest {
         .contentType(MediaType.APPLICATION_JSON)
         .body(jsonInput)
         .when()
-        .post("/api/v1/customers")
+        .post("/api/v1/customers/me")
         .then()
         .assertThat()
         .contentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE)
@@ -168,6 +174,29 @@ class CustomerControllerContractTest {
             "detail", Matchers.notNullValue(),
             "fields", Matchers.notNullValue());
 
+  }
+
+  @Test
+  public void loadCustomerContract() {
+    CustomerOutput customerOutput = CustomerOutputTestDataBuilder.existing().id(AUTHENTICATED_USER_ID).build();
+
+    Mockito.when(forQueryingCustomers.findById(AUTHENTICATED_USER_ID))
+        .thenReturn(customerOutput);
+
+    RestAssuredMockMvc
+        .given()
+        .accept(MediaType.APPLICATION_JSON)
+        .when()
+        .get("/api/v1/customers/me")
+        .then()
+        .assertThat()
+        .contentType(MediaType.APPLICATION_JSON_VALUE)
+        .statusCode(HttpStatus.OK.value())
+        .body(
+            "id", Matchers.equalTo(AUTHENTICATED_USER_ID.toString()),
+            "firstName", Matchers.is(customerOutput.getFirstName()),
+            "lastName", Matchers.is(customerOutput.getLastName()),
+            "email", Matchers.is(customerOutput.getEmail()));
   }
 
   @Test
@@ -342,7 +371,7 @@ class CustomerControllerContractTest {
 
   @Test
   public void createCustomerError409Contract() {
-    Mockito.when(forManagingCustomers.create(Mockito.any(CustomerInput.class)))
+    Mockito.when(forManagingCustomers.create(Mockito.any(UUID.class), Mockito.any(CustomerInput.class)))
         .thenThrow(CustomerEmailIsInUseException.class);
 
     String jsonInput = """
@@ -372,7 +401,7 @@ class CustomerControllerContractTest {
         .body(jsonInput)
         .contentType(MediaType.APPLICATION_JSON_VALUE)
         .when()
-        .post("/api/v1/customers")
+        .post("/api/v1/customers/me")
         .then()
         .assertThat()
         .contentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE)
@@ -385,7 +414,7 @@ class CustomerControllerContractTest {
 
   @Test
   public void createCustomerError502Contract() {
-    Mockito.when(forManagingCustomers.create(Mockito.any(CustomerInput.class)))
+    Mockito.when(forManagingCustomers.create(Mockito.any(UUID.class), Mockito.any(CustomerInput.class)))
         .thenThrow(new BadGatewayException("Product Catalog API Bad Gateway", new RuntimeException("upstream")));
 
     String jsonInput = """
@@ -415,7 +444,7 @@ class CustomerControllerContractTest {
         .body(jsonInput)
         .contentType(MediaType.APPLICATION_JSON_VALUE)
         .when()
-        .post("/api/v1/customers")
+        .post("/api/v1/customers/me")
         .then()
         .assertThat()
         .contentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE)
@@ -429,7 +458,7 @@ class CustomerControllerContractTest {
 
   @Test
   public void createCustomerError422Contract() {
-    Mockito.when(forManagingCustomers.create(Mockito.any(CustomerInput.class)))
+    Mockito.when(forManagingCustomers.create(Mockito.any(UUID.class), Mockito.any(CustomerInput.class)))
         .thenThrow(DomainException.class);
 
     String jsonInput = """
@@ -459,7 +488,7 @@ class CustomerControllerContractTest {
         .body(jsonInput)
         .contentType(MediaType.APPLICATION_JSON_VALUE)
         .when()
-        .post("/api/v1/customers")
+        .post("/api/v1/customers/me")
         .then()
         .assertThat()
         .contentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE)
@@ -472,7 +501,7 @@ class CustomerControllerContractTest {
 
   @Test
   public void createCustomerError500Contract() {
-    Mockito.when(forManagingCustomers.create(Mockito.any(CustomerInput.class)))
+    Mockito.when(forManagingCustomers.create(Mockito.any(UUID.class), Mockito.any(CustomerInput.class)))
         .thenThrow(RuntimeException.class);
 
     String jsonInput = """
@@ -502,7 +531,7 @@ class CustomerControllerContractTest {
         .body(jsonInput)
         .contentType(MediaType.APPLICATION_JSON_VALUE)
         .when()
-        .post("/api/v1/customers")
+        .post("/api/v1/customers/me")
         .then()
         .assertThat()
         .contentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE)
@@ -519,7 +548,7 @@ class CustomerControllerContractTest {
     DateTimeFormatter formatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
     AddressData address = customer.getAddress();
 
-    UUID customerId = UUID.randomUUID();
+    UUID customerId = AUTHENTICATED_USER_ID;
     Mockito.doNothing().when(forManagingCustomers)
         .update(Mockito.eq(customerId), Mockito.any());
     Mockito.when(forQueryingCustomers.findById(Mockito.any(UUID.class)))
@@ -549,7 +578,7 @@ class CustomerControllerContractTest {
         .body(jsonInput)
         .contentType(MediaType.APPLICATION_JSON_VALUE)
         .when()
-        .put("/api/v1/customers/{customerId}", customerId)
+        .put("/api/v1/customers/me")
         .then()
         .assertThat()
         .contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -603,7 +632,7 @@ class CustomerControllerContractTest {
         .contentType(MediaType.APPLICATION_JSON)
         .body(jsonInput)
         .when()
-        .put("/api/v1/customers/{customerId}", customerId)
+        .put("/api/v1/customers/me")
         .then()
         .assertThat()
         .contentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE)
@@ -618,7 +647,7 @@ class CustomerControllerContractTest {
 
   @Test
   public void updateCustomerError404Contract() {
-    UUID invalidCustomerId = UUID.randomUUID();
+    UUID invalidCustomerId = AUTHENTICATED_USER_ID;
 
     Mockito.doThrow(CustomerNotFoundException.class)
         .when(forManagingCustomers)
@@ -648,7 +677,7 @@ class CustomerControllerContractTest {
         .body(jsonInput)
         .contentType(MediaType.APPLICATION_JSON_VALUE)
         .when()
-        .put("/api/v1/customers/{customerId}", invalidCustomerId)
+        .put("/api/v1/customers/me")
         .then()
         .assertThat()
         .contentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE)
@@ -661,7 +690,7 @@ class CustomerControllerContractTest {
 
   @Test
   public void updateCustomerError409Contract() {
-    UUID customerId = UUID.randomUUID();
+    UUID customerId = AUTHENTICATED_USER_ID;
 
     Mockito.doThrow(CustomerEmailIsInUseException.class)
         .when(forManagingCustomers)
@@ -691,7 +720,7 @@ class CustomerControllerContractTest {
         .body(jsonInput)
         .contentType(MediaType.APPLICATION_JSON_VALUE)
         .when()
-        .put("/api/v1/customers/{customerId}", customerId)
+        .put("/api/v1/customers/me")
         .then()
         .assertThat()
         .contentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE)
@@ -704,7 +733,7 @@ class CustomerControllerContractTest {
 
   @Test
   public void updateCustomerError422Contract() {
-    UUID customerId = UUID.randomUUID();
+    UUID customerId = AUTHENTICATED_USER_ID;
 
     Mockito.doThrow(DomainException.class)
         .when(forManagingCustomers)
@@ -734,7 +763,7 @@ class CustomerControllerContractTest {
         .body(jsonInput)
         .contentType(MediaType.APPLICATION_JSON_VALUE)
         .when()
-        .put("/api/v1/customers/{customerId}", customerId)
+        .put("/api/v1/customers/me")
         .then()
         .assertThat()
         .contentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE)
@@ -742,92 +771,6 @@ class CustomerControllerContractTest {
         .body(
             "status", Matchers.is(HttpStatus.UNPROCESSABLE_ENTITY.value()),
             "type", Matchers.is("/errors/unprocessable-entity"),
-            "title", Matchers.notNullValue());
-  }
-
-  @Test
-  public void deleteCustomerContract() {
-    UUID customerId = UUID.randomUUID();
-
-    Mockito.doNothing().when(forManagingCustomers)
-        .archive(customerId);
-
-    RestAssuredMockMvc
-        .given()
-        .contentType(MediaType.APPLICATION_JSON_VALUE)
-        .when()
-        .delete("/api/v1/customers/{customerId}", customerId)
-        .then()
-        .assertThat()
-        .statusCode(HttpStatus.NO_CONTENT.value());
-  }
-
-  @Test
-  public void deleteCustomerError404Contract() {
-    UUID invalidCustomerId = UUID.randomUUID();
-
-    Mockito.doThrow(CustomerNotFoundException.class)
-        .when(forManagingCustomers)
-        .archive(invalidCustomerId);
-
-    RestAssuredMockMvc
-        .given()
-        .accept(MediaType.APPLICATION_JSON)
-        .when()
-        .delete("/api/v1/customers/{customerId}", invalidCustomerId)
-        .then()
-        .assertThat()
-        .contentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE)
-        .statusCode(HttpStatus.NOT_FOUND.value())
-        .body(
-            "status", Matchers.is(HttpStatus.NOT_FOUND.value()),
-            "type", Matchers.is("/errors/not-found"),
-            "title", Matchers.notNullValue());
-  }
-
-  @Test
-  public void deleteCustomerError422Contract() {
-    UUID customerId = UUID.randomUUID();
-
-    Mockito.doThrow(CustomerArchivedException.class)
-        .when(forManagingCustomers)
-        .archive(customerId);
-
-    RestAssuredMockMvc
-        .given()
-        .accept(MediaType.APPLICATION_JSON)
-        .when()
-        .delete("/api/v1/customers/{customerId}", customerId)
-        .then()
-        .assertThat()
-        .contentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE)
-        .statusCode(HttpStatus.UNPROCESSABLE_ENTITY.value())
-        .body(
-            "status", Matchers.is(HttpStatus.UNPROCESSABLE_ENTITY.value()),
-            "type", Matchers.is("/errors/unprocessable-entity"),
-            "title", Matchers.notNullValue());
-  }
-
-  @Test
-  public void deleteCustomerError500Contract() {
-    UUID customerId = UUID.randomUUID();
-
-    Mockito.doThrow(RuntimeException.class)
-        .when(forManagingCustomers)
-        .archive(customerId);
-
-    RestAssuredMockMvc
-        .given()
-        .accept(MediaType.APPLICATION_JSON)
-        .when()
-        .delete("/api/v1/customers/{customerId}", customerId)
-        .then()
-        .assertThat()
-        .contentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE)
-        .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
-        .body(
-            "status", Matchers.is(HttpStatus.INTERNAL_SERVER_ERROR.value()),
-            "type", Matchers.is("/errors/internal"),
             "title", Matchers.notNullValue());
   }
 

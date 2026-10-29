@@ -23,7 +23,7 @@ import com.eskcti.algashop.ordering.core.ports.out.order.OrderDetailOutput;
 import com.eskcti.algashop.ordering.core.ports.in.order.OrderFilter;
 import com.eskcti.algashop.ordering.core.ports.out.order.OrderItemDetailOutput;
 import com.eskcti.algashop.ordering.core.application.order.OrderQueryService;
-import com.eskcti.algashop.ordering.core.application.security.SecurityCheckApplicationService;
+import com.eskcti.algashop.ordering.core.application.security.SecurityCheck;
 import com.eskcti.algashop.ordering.core.ports.out.order.OrderSummaryOutput;
 import com.eskcti.algashop.ordering.core.ports.in.order.ShippingData;
 import com.eskcti.algashop.ordering.core.domain.model.commons.Email;
@@ -40,7 +40,6 @@ import com.eskcti.algashop.ordering.core.domain.model.order.OrderTestDataBuilder
 import com.eskcti.algashop.ordering.core.domain.model.order.Orders;
 import com.eskcti.algashop.ordering.core.domain.model.order.PaymentMethod;
 
-
 class OrderQueryServiceIT extends AbstractApplicationIT {
 
         @Autowired
@@ -53,7 +52,7 @@ class OrderQueryServiceIT extends AbstractApplicationIT {
         private Customers customers;
 
         @MockitoBean
-        private SecurityCheckApplicationService securityCheck;
+        private SecurityCheck securityCheck;
 
         @BeforeEach
         public void configureSecurityCheck() {
@@ -171,6 +170,42 @@ class OrderQueryServiceIT extends AbstractApplicationIT {
                                                 "225-09-1992",
                                                 "john.doe@gmail.com",
                                                 "123-111-9911");
+        }
+
+        @Test
+        public void shouldFindByIdAndCustomerId() {
+                Customer customer = CustomerTestDataBuilder.existingCustomer().build();
+                customers.add(customer);
+
+                Order order = OrderTestDataBuilder.aPlacedOrder()
+                                .customerId(customer.id())
+                                .build();
+                orders.add(order);
+
+                OrderDetailOutput output = queryService.findByIdAndCustomerId(
+                                order.id().toString(), customer.id().value());
+
+                Assertions.assertThat(output.getId()).isEqualTo(order.id().toString());
+                Assertions.assertThat(output.getCustomer().getId()).isEqualTo(customer.id().value());
+        }
+
+        @Test
+        public void shouldThrowOrderNotFoundExceptionWhenOrderDoesNotBelongToCustomer() {
+                Customer customer = CustomerTestDataBuilder.existingCustomer().build();
+                Customer otherCustomer = CustomerTestDataBuilder.brandNewCustomer()
+                                .fullName(new FullName("Jane", "Doe"))
+                                .email(new Email("janedoe_order_query@example.com")).build();
+                customers.add(customer);
+                customers.add(otherCustomer);
+
+                Order order = OrderTestDataBuilder.aPlacedOrder()
+                                .customerId(customer.id())
+                                .build();
+                orders.add(order);
+
+                Assertions.assertThatThrownBy(() -> queryService.findByIdAndCustomerId(
+                                order.id().toString(), otherCustomer.id().value()))
+                                .isInstanceOf(OrderNotFoundException.class);
         }
 
         @Test

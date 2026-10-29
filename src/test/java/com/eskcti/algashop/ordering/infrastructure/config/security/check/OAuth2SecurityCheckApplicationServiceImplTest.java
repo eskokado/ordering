@@ -132,9 +132,51 @@ class OAuth2SecurityCheckApplicationServiceImplTest {
         assertThat(service.isCustomer()).isFalse();
     }
 
+    @Test
+    void canOrderFor_falseWhenCustomerIdIsNull() {
+        UUID userId = UUID.randomUUID();
+        authorizeCustomer(userJwt(userId.toString()));
+
+        assertThat(service.canOrderFor(null)).isFalse();
+    }
+
+    @Test
+    void canOrderFor_trueWhenAuthenticatedCustomerMatches() {
+        UUID userId = UUID.randomUUID();
+        authorizeCustomer(userJwt(userId.toString()));
+
+        assertThat(service.canOrderFor(userId)).isTrue();
+    }
+
+    @Test
+    void canOrderFor_falseWhenAuthenticatedCustomerDoesNotMatch() {
+        UUID userId = UUID.randomUUID();
+        authorizeCustomer(userJwt(userId.toString()));
+
+        assertThat(service.canOrderFor(UUID.randomUUID())).isFalse();
+    }
+
+    @Test
+    void canOrderFor_falseWhenUserIsNotCustomer() {
+        UUID userId = UUID.randomUUID();
+        authorize(userJwt(userId.toString()));
+
+        assertThat(service.canOrderFor(userId)).isFalse();
+    }
+
+    @Test
+    void canOrderFor_falseWhenNoAuthentication() {
+        assertThat(service.canOrderFor(UUID.randomUUID())).isFalse();
+    }
+
     private void authorize(Jwt jwt) {
         SecurityContextHolder.getContext().setAuthentication(
                 new JwtAuthenticationToken(jwt, List.of(() -> "SCOPE_orders:read")));
+    }
+
+    private void authorizeCustomer(Jwt jwt) {
+        SecurityContextHolder.getContext().setAuthentication(
+                new JwtAuthenticationToken(jwt, List.of(() -> "ROLE_CUSTOMER")));
     }
 
     private Jwt userJwt(String subject, String... audience) {

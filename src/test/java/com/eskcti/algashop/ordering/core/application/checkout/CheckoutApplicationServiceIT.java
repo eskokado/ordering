@@ -5,7 +5,6 @@ import com.eskcti.algashop.ordering.core.application.AbstractApplicationIT;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Optional;
-import java.util.UUID;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -98,7 +97,6 @@ class CheckoutApplicationServiceIT extends AbstractApplicationIT {
                 shoppingCarts.add(shoppingCart);
 
                 CheckoutInput input = CheckoutInputTestDataBuilder.aCheckoutInput()
-                                .shoppingCartId(shoppingCart.id().value())
                                 .build();
 
                 String orderId = service.checkout(input);
@@ -134,7 +132,6 @@ class CheckoutApplicationServiceIT extends AbstractApplicationIT {
                 shoppingCarts.add(shoppingCart);
 
                 CheckoutInput input = CheckoutInputTestDataBuilder.aCheckoutInput()
-                                .shoppingCartId(shoppingCart.id().value())
                                 .build();
 
                 String orderId = service.checkout(input);
@@ -159,7 +156,6 @@ class CheckoutApplicationServiceIT extends AbstractApplicationIT {
                                 .when(customers).ofId(CustomerTestDataBuilder.DEFAULT_CUSTOMER_ID);
 
                 CheckoutInput input = CheckoutInputTestDataBuilder.aCheckoutInput()
-                                .shoppingCartId(shoppingCart.id().value())
                                 .build();
 
                 Assertions.assertThatExceptionOfType(CustomerNotFoundException.class)
@@ -169,7 +165,6 @@ class CheckoutApplicationServiceIT extends AbstractApplicationIT {
         @Test
         void shouldThrowShoppingCartNotFoundExceptionWhenCheckoutWithNonExistingShoppingCart() {
                 CheckoutInput input = CheckoutInputTestDataBuilder.aCheckoutInput()
-                                .shoppingCartId(UUID.randomUUID())
                                 .build();
 
                 Assertions.assertThatExceptionOfType(ShoppingCartNotFoundException.class)
@@ -185,7 +180,6 @@ class CheckoutApplicationServiceIT extends AbstractApplicationIT {
                 shoppingCarts.add(shoppingCart);
 
                 CheckoutInput input = CheckoutInputTestDataBuilder.aCheckoutInput()
-                                .shoppingCartId(shoppingCart.id().value())
                                 .build();
 
                 Assertions.assertThatExceptionOfType(ShoppingCartCantProceedToCheckoutException.class)
@@ -206,7 +200,6 @@ class CheckoutApplicationServiceIT extends AbstractApplicationIT {
                 shoppingCarts.add(shoppingCart);
 
                 CheckoutInput input = CheckoutInputTestDataBuilder.aCheckoutInput()
-                                .shoppingCartId(shoppingCart.id().value())
                                 .build();
 
                 Assertions.assertThatExceptionOfType(ShoppingCartCantProceedToCheckoutException.class)
@@ -216,7 +209,6 @@ class CheckoutApplicationServiceIT extends AbstractApplicationIT {
         @Test
         void shouldThrowDomainExceptionWhenCreditCardIdIsMissingAndPaymentMethodIsCreditCard() {
                 CheckoutInput input = CheckoutInputTestDataBuilder.aCheckoutInput()
-                                .shoppingCartId(UUID.randomUUID())
                                 .creditCardId(null)
                                 .build();
 
@@ -241,7 +233,7 @@ class CheckoutApplicationServiceIT extends AbstractApplicationIT {
                 shoppingCarts.add(shoppingCart);
 
                 CheckoutInput input = CheckoutInputTestDataBuilder.aCheckoutInput()
-                                .shoppingCartId(shoppingCart.id().value())
+                                .customerId(CustomerTestDataBuilder.SECOND_CUSTOMER_ID.value())
                                 .build();
 
                 Assertions.assertThatExceptionOfType(AccessDeniedException.class)
@@ -261,7 +253,6 @@ class CheckoutApplicationServiceIT extends AbstractApplicationIT {
                 shoppingCarts.add(shoppingCart);
 
                 CheckoutInput input = CheckoutInputTestDataBuilder.aCheckoutInput()
-                                .shoppingCartId(shoppingCart.id().value())
                                 .build();
 
                 Assertions.assertThatExceptionOfType(AccessDeniedException.class)

@@ -72,6 +72,7 @@ class CustomerRegistrationServiceIT extends AbstractRepositoryIT {
   @Test
   public void shouldRegister() {
     Customer customer = customerRegistrationService.register(
+        new CustomerId(),
         new FullName("John", "Doe"),
         new BirthDate(LocalDate.of(1991, 7, 5)),
         new Email("johndoe@email.com"),
@@ -90,6 +91,7 @@ class CustomerRegistrationServiceIT extends AbstractRepositoryIT {
     customers.add(CustomerTestDataBuilder.existingCustomer().email(email).build());
 
     Assertions.assertThatThrownBy(() -> customerRegistrationService.register(
+        new CustomerId(),
         new FullName("John", "Doe"),
         new BirthDate(LocalDate.of(1991, 7, 5)),
         email,

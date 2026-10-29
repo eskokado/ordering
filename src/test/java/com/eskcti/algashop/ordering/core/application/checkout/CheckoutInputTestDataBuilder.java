@@ -7,12 +7,13 @@ import com.eskcti.algashop.ordering.core.ports.in.checkout.CheckoutInput;
 import com.eskcti.algashop.ordering.core.ports.in.checkout.ShippingInput;
 import com.eskcti.algashop.ordering.core.ports.in.commons.AddressData;
 import com.eskcti.algashop.ordering.core.ports.in.order.RecipientData;
+import com.eskcti.algashop.ordering.core.domain.model.customer.CustomerTestDataBuilder;
 
 public class CheckoutInputTestDataBuilder {
 
         public static CheckoutInput.CheckoutInputBuilder aCheckoutInput() {
                 return CheckoutInput.builder()
-                                .shoppingCartId(UUID.randomUUID())
+                                .customerId(CustomerTestDataBuilder.DEFAULT_CUSTOMER_ID.value())
                                 .paymentMethod("CREDIT_CARD")
                                 .creditCardId(UUID.randomUUID())
                                 .shipping(ShippingInput.builder()

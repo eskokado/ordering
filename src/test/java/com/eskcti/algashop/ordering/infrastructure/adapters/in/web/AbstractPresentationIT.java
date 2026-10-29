@@ -68,6 +68,7 @@ public abstract class AbstractPresentationIT {
     }
 
     protected static void initWireMock() {
+        stopMock();
         wireMockRapidex = new WireMockServer(options()
                 .port(8780)
                 .usingFilesUnderDirectory(RAPIDEX_FOLDER)

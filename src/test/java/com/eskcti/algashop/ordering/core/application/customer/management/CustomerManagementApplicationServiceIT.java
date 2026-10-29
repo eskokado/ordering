@@ -43,7 +43,7 @@ class CustomerManagementApplicationServiceIT extends AbstractApplicationIT {
   public void shouldRegister() {
     CustomerInput input = CustomerInputTestDataBuilder.aCustomer().build();
 
-    UUID customerId = customerManagementApplicationService.create(input);
+    UUID customerId = customerManagementApplicationService.create(UUID.randomUUID(), input);
     Assertions.assertThat(customerId).isNotNull();
 
     CustomerOutput customerOutput = queryService.findById(customerId);
@@ -79,7 +79,7 @@ class CustomerManagementApplicationServiceIT extends AbstractApplicationIT {
     CustomerInput input = CustomerInputTestDataBuilder.aCustomer().build();
     CustomerUpdateInput updateInput = CustomerUpdateInputTestDataBuilder.aCustomerUpdate().build();
 
-    UUID customerId = customerManagementApplicationService.create(input);
+    UUID customerId = customerManagementApplicationService.create(UUID.randomUUID(), input);
     Assertions.assertThat(customerId).isNotNull();
 
     customerManagementApplicationService.update(customerId, updateInput);
@@ -129,7 +129,7 @@ class CustomerManagementApplicationServiceIT extends AbstractApplicationIT {
         .promotionNotificationsAllowed(false)
         .build();
 
-    UUID customerId = customerManagementApplicationService.create(input);
+    UUID customerId = customerManagementApplicationService.create(UUID.randomUUID(), input);
     customerManagementApplicationService.update(customerId, updateInput);
 
     CustomerOutput customerOutput = queryService.findById(customerId);
@@ -140,7 +140,7 @@ class CustomerManagementApplicationServiceIT extends AbstractApplicationIT {
   @Test
   public void shouldArchiveCustomer() {
     CustomerInput input = CustomerInputTestDataBuilder.aCustomer().build();
-    UUID customerId = customerManagementApplicationService.create(input);
+    UUID customerId = customerManagementApplicationService.create(UUID.randomUUID(), input);
     Assertions.assertThat(customerId).isNotNull();
 
     customerManagementApplicationService.archive(customerId);
@@ -186,7 +186,7 @@ class CustomerManagementApplicationServiceIT extends AbstractApplicationIT {
   @Test
   public void shouldThrowCustomerArchivedExceptionWhenArchivingAlreadyArchivedCustomer() {
     CustomerInput input = CustomerInputTestDataBuilder.aCustomer().build();
-    UUID customerId = customerManagementApplicationService.create(input);
+    UUID customerId = customerManagementApplicationService.create(UUID.randomUUID(), input);
     Assertions.assertThat(customerId).isNotNull();
 
     customerManagementApplicationService.archive(customerId);
@@ -198,7 +198,7 @@ class CustomerManagementApplicationServiceIT extends AbstractApplicationIT {
   @Test
   public void shouldChangeEmail() {
     CustomerInput input = CustomerInputTestDataBuilder.aCustomer().build();
-    UUID customerId = customerManagementApplicationService.create(input);
+    UUID customerId = customerManagementApplicationService.create(UUID.randomUUID(), input);
 
     customerManagementApplicationService.changeEmail(customerId, "newemail@email.com");
 
@@ -218,7 +218,7 @@ class CustomerManagementApplicationServiceIT extends AbstractApplicationIT {
   @Test
   public void shouldThrowCustomerArchivedExceptionWhenChangingEmailOfArchivedCustomer() {
     CustomerInput input = CustomerInputTestDataBuilder.aCustomer().build();
-    UUID customerId = customerManagementApplicationService.create(input);
+    UUID customerId = customerManagementApplicationService.create(UUID.randomUUID(), input);
 
     customerManagementApplicationService.archive(customerId);
 
@@ -229,7 +229,7 @@ class CustomerManagementApplicationServiceIT extends AbstractApplicationIT {
   @Test
   public void shouldThrowIllegalArgumentExceptionWhenChangingEmailToInvalidFormat() {
     CustomerInput input = CustomerInputTestDataBuilder.aCustomer().build();
-    UUID customerId = customerManagementApplicationService.create(input);
+    UUID customerId = customerManagementApplicationService.create(UUID.randomUUID(), input);
 
     Assertions.assertThatExceptionOfType(IllegalArgumentException.class)
         .isThrownBy(() -> customerManagementApplicationService.changeEmail(customerId, "email-invalido"));
@@ -238,9 +238,9 @@ class CustomerManagementApplicationServiceIT extends AbstractApplicationIT {
   @Test
   public void shouldThrowCustomerEmailIsInUseExceptionWhenChangingEmailToExistingEmail() {
     UUID firstCustomerId = customerManagementApplicationService.create(
-        CustomerInputTestDataBuilder.aCustomer().email("first@email.com").build());
+        UUID.randomUUID(), CustomerInputTestDataBuilder.aCustomer().email("first@email.com").build());
     customerManagementApplicationService.create(
-        CustomerInputTestDataBuilder.aCustomer().email("second@email.com").build());
+        UUID.randomUUID(), CustomerInputTestDataBuilder.aCustomer().email("second@email.com").build());
 
     Assertions.assertThatExceptionOfType(CustomerEmailIsInUseException.class)
         .isThrownBy(() -> customerManagementApplicationService.changeEmail(firstCustomerId, "second@email.com"));

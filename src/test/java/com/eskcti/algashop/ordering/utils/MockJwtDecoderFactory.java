@@ -24,6 +24,8 @@ public class MockJwtDecoderFactory {
 
     public static final String OTHER_CUSTOMER_SUBJECT = "7f259ce6-58a7-4133-b0eb-18dfbb305e8b";
 
+    public static final String ADMIN_TOKEN_VALUE = "fake.jwt.admin";
+
     public static final String DEFAULT_TOKEN_VALUE = "fake.jwt.token";
 
     public static final String[] DEFAULT_AUDIENCES = new String[] { "algashop-api" };
@@ -34,12 +36,18 @@ public class MockJwtDecoderFactory {
                 .thenReturn(buildJwt(DEFAULT_SUBJECT, DEFAULT_ISSUER_URI, DEFAULT_SCOPES));
         Mockito.when(jwtDecoder.decode(OTHER_CUSTOMER_TOKEN_VALUE))
                 .thenReturn(buildJwt(OTHER_CUSTOMER_SUBJECT, DEFAULT_ISSUER_URI, DEFAULT_SCOPES));
+        Mockito.when(jwtDecoder.decode(ADMIN_TOKEN_VALUE))
+                .thenReturn(buildJwt(DEFAULT_SUBJECT, DEFAULT_ISSUER_URI, DEFAULT_SCOPES, "ADMIN"));
         return jwtDecoder;
     }
 
     public static Jwt buildJwt(String subject, String issuer, String[] scopes) {
+        return buildJwt(subject, issuer, scopes, MockJwtFactory.DEFAULT_ROLE);
+    }
+
+    public static Jwt buildJwt(String subject, String issuer, String[] scopes, String role) {
         return MockJwtFactory.buildJwt(DEFAULT_TOKEN_VALUE, subject, issuer, scopes,
-                MockJwtFactory.DEFAULT_ROLE, DEFAULT_AUDIENCES);
+                role, DEFAULT_AUDIENCES);
     }
 
 }
