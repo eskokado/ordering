@@ -7,7 +7,7 @@ import com.eskcti.algashop.ordering.core.application.checkout.CheckoutApplicatio
 import com.eskcti.algashop.ordering.core.ports.in.checkout.CheckoutInput;
 import com.eskcti.algashop.ordering.core.ports.in.order.OrderFilter;
 import com.eskcti.algashop.ordering.core.application.order.OrderQueryService;
-import com.eskcti.algashop.ordering.core.application.security.SecurityCheck;
+import com.eskcti.algashop.ordering.core.application.security.SecurityChecks;
 import com.eskcti.algashop.ordering.core.domain.model.order.OrderNotFoundException;
 import com.eskcti.algashop.ordering.infrastructure.adapters.in.web.order.MyOrdersController;
 import com.eskcti.algashop.ordering.infrastructure.adapters.in.web.order.OrderController;
@@ -26,7 +26,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.UUID;
 
-@WebMvcTest(controllers = {OrderController.class, MyOrdersController.class})
+@WebMvcTest(controllers = { OrderController.class, MyOrdersController.class })
 public class OrderBase {
 
         @Autowired
@@ -42,7 +42,7 @@ public class OrderBase {
         private CheckoutApplicationService checkoutApplicationService;
 
         @MockitoBean
-        private SecurityCheck securityCheck;
+        private SecurityChecks securityCheck;
 
         public static final String validOrderId = "01226N0640J7Q";
 
