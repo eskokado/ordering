@@ -1,6 +1,6 @@
 package com.eskcti.algashop.ordering.utils;
 
-import com.eskcti.algashop.ordering.core.application.security.SecurityCheck;
+import com.eskcti.algashop.ordering.core.application.security.SecurityChecks;
 import java.util.UUID;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
@@ -11,8 +11,8 @@ public class SecurityCheckTestConfig {
   public static final UUID AUTHENTICATED_USER_ID = UUID.fromString("00000000-0000-0000-0000-000000000001");
 
   @Bean
-  public SecurityCheck securityCheck() {
-    return new SecurityCheck() {
+  public SecurityChecks securityCheck() {
+    return new SecurityChecks() {
 
       @Override
       public UUID getAuthenticatedUserId() {

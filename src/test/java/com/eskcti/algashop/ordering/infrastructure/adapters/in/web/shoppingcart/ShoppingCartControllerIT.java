@@ -1,12 +1,10 @@
 package com.eskcti.algashop.ordering.infrastructure.adapters.in.web.shoppingcart;
 
 import com.eskcti.algashop.ordering.infrastructure.adapters.in.web.AbstractPresentationIT;
-import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.shoppingcart.ShoppingCartPersistenceEntityRepository;
 import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.customer.CustomerPersistenceEntityRepository;
 import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.customer.CustomerPersistenceEntityTestDataBuilder;
-import com.eskcti.algashop.ordering.utils.AlgaShopResourceUtils;
+import com.eskcti.algashop.ordering.infrastructure.adapters.out.persistence.shoppingcart.ShoppingCartPersistenceEntityRepository;
 
-import org.assertj.core.api.Assertions;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -43,28 +41,7 @@ public class ShoppingCartControllerIT extends AbstractPresentationIT {
     }
 
     @Test
-    public void shouldCreateShoppingCart() {
-        String json = AlgaShopResourceUtils.readContent("json/create-shopping-cart.json");
-
-        UUID createdShoppingCart = givenAuthenticated()
-                .accept(MediaType.APPLICATION_JSON_VALUE)
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .body(json)
-                .when()
-                .post("/api/v1/shopping-carts")
-                .then()
-                .assertThat()
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .statusCode(HttpStatus.CREATED.value())
-                .body("id", Matchers.not(Matchers.emptyString()))
-                .extract()
-                .jsonPath().getUUID("id");
-
-        Assertions.assertThat(shoppingCartRepository.existsById(createdShoppingCart)).isTrue();
-    }
-
-    @Test
-    public void shouldAddProductToShoppingCart() {
+    public void shouldFindShoppingCartById() {
         var shoppingCartPersistence = existingShoppingCart().items(new HashSet<>())
                 .customer(customerRepository.getReferenceById(validCustomerId))
                 .build();
@@ -73,21 +50,35 @@ public class ShoppingCartControllerIT extends AbstractPresentationIT {
 
         UUID shoppingCartId = shoppingCartPersistence.getId();
 
-        String json = AlgaShopResourceUtils.readContent("json/add-product-to-shopping-cart.json");
+        givenAuthenticated()
+                .accept(MediaType.APPLICATION_JSON_VALUE)
+                .when()
+                .get("/api/v1/shopping-carts/{shoppingCartId}", shoppingCartId)
+                .then()
+                .assertThat()
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .statusCode(HttpStatus.OK.value())
+                .body("id", Matchers.equalTo(shoppingCartId.toString()));
+    }
+
+    @Test
+    public void shouldListShoppingCartItems() {
+        var shoppingCartPersistence = existingShoppingCart()
+                .customer(customerRepository.getReferenceById(validCustomerId))
+                .build();
+
+        shoppingCartRepository.save(shoppingCartPersistence);
+
+        UUID shoppingCartId = shoppingCartPersistence.getId();
 
         givenAuthenticated()
                 .accept(MediaType.APPLICATION_JSON_VALUE)
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .body(json)
                 .when()
-                .post("/api/v1/shopping-carts/{shoppingCartId}/items", shoppingCartId)
+                .get("/api/v1/shopping-carts/{shoppingCartId}/items", shoppingCartId)
                 .then()
                 .assertThat()
-                .statusCode(HttpStatus.NO_CONTENT.value());
-
-        var shoppingCartPersistenceEntity = shoppingCartRepository.findById(shoppingCartPersistence.getId())
-                .orElseThrow();
-        Assertions.assertThat(shoppingCartPersistenceEntity.getTotalItems()).isEqualTo(2);
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .statusCode(HttpStatus.OK.value())
+                .body("items", Matchers.hasSize(2));
     }
-
 }

@@ -23,7 +23,7 @@ import com.eskcti.algashop.ordering.core.ports.out.order.OrderDetailOutput;
 import com.eskcti.algashop.ordering.core.ports.in.order.OrderFilter;
 import com.eskcti.algashop.ordering.core.ports.out.order.OrderItemDetailOutput;
 import com.eskcti.algashop.ordering.core.application.order.OrderQueryService;
-import com.eskcti.algashop.ordering.core.application.security.SecurityCheck;
+import com.eskcti.algashop.ordering.core.application.security.SecurityChecks;
 import com.eskcti.algashop.ordering.core.ports.out.order.OrderSummaryOutput;
 import com.eskcti.algashop.ordering.core.ports.in.order.ShippingData;
 import com.eskcti.algashop.ordering.core.domain.model.commons.Email;
@@ -52,7 +52,7 @@ class OrderQueryServiceIT extends AbstractApplicationIT {
         private Customers customers;
 
         @MockitoBean
-        private SecurityCheck securityCheck;
+        private SecurityChecks securityCheck;
 
         @BeforeEach
         public void configureSecurityCheck() {
