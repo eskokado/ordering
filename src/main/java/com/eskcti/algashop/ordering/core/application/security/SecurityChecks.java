@@ -2,7 +2,7 @@ package com.eskcti.algashop.ordering.core.application.security;
 
 import java.util.UUID;
 
-public interface SecurityCheck {
+public interface SecurityChecks {
     UUID getAuthenticatedUserId();
 
     boolean isAuthenticated();

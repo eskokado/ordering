@@ -1,6 +1,6 @@
 package com.eskcti.algashop.ordering.core.application.order;
 
-import com.eskcti.algashop.ordering.core.application.security.SecurityCheck;
+import com.eskcti.algashop.ordering.core.application.security.SecurityChecks;
 import com.eskcti.algashop.ordering.core.ports.in.order.ForQueryingOrders;
 import com.eskcti.algashop.ordering.core.ports.in.order.OrderFilter;
 import com.eskcti.algashop.ordering.core.ports.out.order.ForObtainingOrders;

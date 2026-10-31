@@ -1,6 +1,6 @@
 package com.eskcti.algashop.ordering.infrastructure.config.auditing;
 
-import com.eskcti.algashop.ordering.core.application.security.SecurityCheck;
+import com.eskcti.algashop.ordering.core.application.security.SecurityChecks;
 import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
@@ -22,7 +22,7 @@ public class SpringDataAuditingConfig {
     }
 
     @Bean
-    public AuditorAware<UUID> auditorProvider(SecurityCheck securityCheck) {
+    public AuditorAware<UUID> auditorProvider(SecurityChecks securityCheck) {
         return () -> {
             if (!securityCheck.isAuthenticated() || securityCheck.isMachineAuthenticated()) {
                 return Optional.empty();

@@ -12,7 +12,7 @@ import com.eskcti.algashop.ordering.core.ports.in.shoppingcart.ShoppingCartItemO
 
 @Data
 @NoArgsConstructor
-@Setter
+@AllArgsConstructor
 public class ShoppingCartItemListModel {
-    private final List<ShoppingCartItemOutput> items = new ArrayList<>();
+    private List<ShoppingCartItemOutput> items = new ArrayList<>();
 }

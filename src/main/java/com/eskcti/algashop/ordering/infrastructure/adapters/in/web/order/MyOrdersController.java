@@ -2,7 +2,7 @@ package com.eskcti.algashop.ordering.infrastructure.adapters.in.web.order;
 
 import com.eskcti.algashop.ordering.core.application.checkout.BuyNowApplicationService;
 import com.eskcti.algashop.ordering.core.application.checkout.CheckoutApplicationService;
-import com.eskcti.algashop.ordering.core.application.security.SecurityCheck;
+import com.eskcti.algashop.ordering.core.application.security.SecurityChecks;
 import com.eskcti.algashop.ordering.core.domain.model.customer.CustomerNotFoundException;
 import com.eskcti.algashop.ordering.core.domain.model.product.ProductNotFoundException;
 import com.eskcti.algashop.ordering.core.domain.model.shoppingcart.ShoppingCartNotFoundException;
@@ -29,7 +29,7 @@ public class MyOrdersController {
     private final CheckoutApplicationService checkoutApplicationService;
     private final BuyNowApplicationService buyNowApplicationService;
 
-    private final SecurityCheck securityChecks;
+    private final SecurityChecks securityChecks;
 
     @SecurityAnnotations.CanReadMyOrders
     @GetMapping("/{orderId}")

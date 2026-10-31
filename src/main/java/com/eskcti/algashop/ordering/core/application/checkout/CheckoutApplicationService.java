@@ -2,7 +2,7 @@ package com.eskcti.algashop.ordering.core.application.checkout;
 
 import com.eskcti.algashop.ordering.core.application.order.BillingInputDisassembler;
 import com.eskcti.algashop.ordering.core.application.order.ShippingInputDisassembler;
-import com.eskcti.algashop.ordering.core.application.security.SecurityCheck;
+import com.eskcti.algashop.ordering.core.application.security.SecurityChecks;
 import com.eskcti.algashop.ordering.core.domain.model.DomainException;
 import com.eskcti.algashop.ordering.core.domain.model.commons.ZipCode;
 import com.eskcti.algashop.ordering.core.domain.model.customer.Customer;
@@ -43,7 +43,7 @@ public class CheckoutApplicationService implements ForBuyingWithShoppingCart {
 	private final ShippingCostService shippingCostService;
 	private final OriginAddressService originAddressService;
 
-	private final SecurityCheck securityCheck;
+	private final SecurityChecks securityCheck;
 
 	@Transactional
 	public String checkout(CheckoutInput input) {

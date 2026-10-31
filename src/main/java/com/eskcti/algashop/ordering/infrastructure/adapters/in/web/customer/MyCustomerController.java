@@ -1,6 +1,6 @@
 package com.eskcti.algashop.ordering.infrastructure.adapters.in.web.customer;
 
-import com.eskcti.algashop.ordering.core.application.security.SecurityCheck;
+import com.eskcti.algashop.ordering.core.application.security.SecurityChecks;
 import com.eskcti.algashop.ordering.core.ports.in.customer.*;
 import com.eskcti.algashop.ordering.infrastructure.config.security.SecurityAnnotations;
 import jakarta.servlet.http.HttpServletResponse;
@@ -22,7 +22,7 @@ public class MyCustomerController {
 
 	private final ForManagingCustomers forManagingCustomers;
 	private final ForQueryingCustomers forQueryingCustomers;
-	private final SecurityCheck securityChecks;
+	private final SecurityChecks securityChecks;
 
 	@SecurityAnnotations.CanWriteMyCustomerProfile
 	@PostMapping

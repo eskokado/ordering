@@ -2,7 +2,7 @@ package com.eskcti.algashop.ordering.core.application.checkout;
 
 import com.eskcti.algashop.ordering.core.application.order.BillingInputDisassembler;
 import com.eskcti.algashop.ordering.core.application.order.ShippingInputDisassembler;
-import com.eskcti.algashop.ordering.core.application.security.SecurityCheck;
+import com.eskcti.algashop.ordering.core.application.security.SecurityChecks;
 import com.eskcti.algashop.ordering.core.domain.model.DomainException;
 import com.eskcti.algashop.ordering.core.domain.model.commons.Quantity;
 import com.eskcti.algashop.ordering.core.domain.model.commons.ZipCode;
@@ -45,7 +45,7 @@ public class BuyNowApplicationService implements ForBuyingProduct {
     private final ShippingInputDisassembler shippingInputDisassembler;
     private final BillingInputDisassembler billingInputDisassembler;
 
-    private final SecurityCheck securityCheck;
+    private final SecurityChecks securityCheck;
 
     @Transactional
     @Override
