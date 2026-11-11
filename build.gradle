@@ -83,6 +83,7 @@ dependencies {
     implementation 'io.awspring.cloud:spring-cloud-aws-starter-parameter-store'
 
     implementation 'org.springframework.cloud:spring-cloud-starter-circuitbreaker-framework-retry'
+    implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
 
     runtimeOnly 'org.postgresql:postgresql'
     compileOnly 'org.projectlombok:lombok'
