@@ -15,7 +15,7 @@ spring:
         static: us-east-1
       endpoint: http://algashop-localstack:4566
   cache:
-    type: redis
+    type: none # redis
   datasource:
     url: ${ordering.params.datasource.url}
     username: ${ordering.secrets.datasource.username}
