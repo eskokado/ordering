@@ -18,5 +18,5 @@ algashop:
     shipping.provider: RAPIDEX
     rapidex.url: http://wiremock:8080
     product-catalog:
-      url: http://algashop-product-catalog:8084
+      url: http://product-catalog
       oauth2-client-registration-id: algashop-ordering-service-client
