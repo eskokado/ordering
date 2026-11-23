@@ -7,10 +7,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.cloud.circuitbreaker.retry.CircuitBreakerRetryPolicy;
+import org.springframework.cloud.circuitbreaker.retry.FrameworkRetryCircuitBreaker;
+import org.springframework.cloud.circuitbreaker.retry.FrameworkRetryCircuitBreakerFactory;
 import org.springframework.cloud.client.circuitbreaker.CircuitBreaker;
 import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
 import org.springframework.cloud.client.circuitbreaker.NoFallbackAvailableException;
-import org.springframework.cloud.circuitbreaker.retry.FrameworkRetryCircuitBreakerFactory;
 import org.springframework.core.retry.RetryException;
 import org.springframework.core.retry.RetryPolicy;
 import org.springframework.http.HttpStatus;
@@ -30,10 +32,10 @@ import java.time.Duration;
 import java.util.Optional;
 import java.util.UUID;
 
+import static com.eskcti.algashop.ordering.infrastructure.config.resilience.SpringCircuitBreakerConfig.productCatalogCBId;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -61,9 +63,9 @@ class ResilientProductCatalogAPIClientTest {
                 .build();
         circuitBreakerFactory.configure(builder -> builder
                 .retryPolicy(retryPolicy)
-                .openTimeout(Duration.ofSeconds(10))
-                .resetTimeout(Duration.ofSeconds(25))
-                .build(), "productCatalogCB");
+                .openTimeout(Duration.ofMillis(500))
+                .resetTimeout(Duration.ofSeconds(10))
+                .build(), productCatalogCBId);
 
         resilientClient = new ResilientProductCatalogAPIClient(circuitBreakerFactory, productCatalogAPIClient);
     }
@@ -305,40 +307,151 @@ class ResilientProductCatalogAPIClientTest {
     }
 
     @Test
-    void shouldOpenCircuitAfterRepeatedFailures() {
+    void shouldOpenCircuitAfterFirstExhaustedFailure() {
         UUID productId = UUID.randomUUID();
         ResourceAccessException timeout = new ResourceAccessException("Connection timed out");
 
         when(productCatalogAPIClient.getById(productId)).thenThrow(timeout);
 
-        for (int i = 0; i < 20; i++) {
-            try {
-                resilientClient.getById(productId);
-            } catch (Exception ignored) {
-            }
-        }
+        assertThatThrownBy(() -> resilientClient.getById(productId))
+                .isInstanceOf(GatewayTimeoutException.class);
 
-        verify(productCatalogAPIClient, atLeastOnce()).getById(productId);
+        assertThat(circuitBreakerPolicy().getState()).isEqualTo(CircuitBreakerRetryPolicy.State.OPEN);
+        verify(productCatalogAPIClient, times(4)).getById(productId);
     }
 
     @Test
-    void shouldFailFastWhenCircuitIsOpen() {
+    void shouldFailFastWithoutCallingDelegateWhenCircuitIsOpen() {
         UUID productId = UUID.randomUUID();
         ResourceAccessException timeout = new ResourceAccessException("Connection timed out");
 
         when(productCatalogAPIClient.getById(productId)).thenThrow(timeout);
 
-        for (int i = 0; i < 20; i++) {
-            try {
-                resilientClient.getById(productId);
-            } catch (Exception ignored) {
-            }
-        }
+        assertThatThrownBy(() -> resilientClient.getById(productId))
+                .isInstanceOf(GatewayTimeoutException.class);
 
-        try {
-            resilientClient.getById(productId);
-        } catch (Exception ignored) {
-        }
+        assertThatThrownBy(() -> resilientClient.getById(productId))
+                .isInstanceOf(GatewayTimeoutException.class);
+
+        assertThat(circuitBreakerPolicy().getState()).isEqualTo(CircuitBreakerRetryPolicy.State.OPEN);
+        verify(productCatalogAPIClient, times(4)).getById(productId);
+    }
+
+    @Test
+    void shouldTransitionToHalfOpenAndCloseCircuitAfterOpenTimeout() throws InterruptedException {
+        UUID productId = UUID.randomUUID();
+        ResourceAccessException timeout = new ResourceAccessException("Connection timed out");
+        ProductResponse response = new ProductResponse(
+                productId,
+                "Recovered Product",
+                new BigDecimal("500.00"),
+                true);
+
+        when(productCatalogAPIClient.getById(productId))
+                .thenThrow(timeout)
+                .thenThrow(timeout)
+                .thenThrow(timeout)
+                .thenThrow(timeout)
+                .thenReturn(response);
+
+        assertThatThrownBy(() -> resilientClient.getById(productId))
+                .isInstanceOf(GatewayTimeoutException.class);
+        assertThat(circuitBreakerPolicy().getState()).isEqualTo(CircuitBreakerRetryPolicy.State.OPEN);
+
+        Thread.sleep(700);
+
+        Optional<ProductResponse> result = resilientClient.getById(productId);
+
+        assertThat(result).isPresent();
+        assertThat(result.get().getName()).isEqualTo("Recovered Product");
+        assertThat(circuitBreakerPolicy().getState()).isEqualTo(CircuitBreakerRetryPolicy.State.CLOSED);
+        verify(productCatalogAPIClient, times(5)).getById(productId);
+    }
+
+    @Test
+    void shouldReopenCircuitWhenHalfOpenProbeFails() throws InterruptedException {
+        UUID productId = UUID.randomUUID();
+        ResourceAccessException timeout = new ResourceAccessException("Connection timed out");
+
+        when(productCatalogAPIClient.getById(productId)).thenThrow(timeout);
+
+        assertThatThrownBy(() -> resilientClient.getById(productId))
+                .isInstanceOf(GatewayTimeoutException.class);
+
+        Thread.sleep(700);
+
+        assertThatThrownBy(() -> resilientClient.getById(productId))
+                .isInstanceOf(GatewayTimeoutException.class);
+        assertThat(circuitBreakerPolicy().getState()).isEqualTo(CircuitBreakerRetryPolicy.State.OPEN);
+
+        assertThatThrownBy(() -> resilientClient.getById(productId))
+                .isInstanceOf(GatewayTimeoutException.class);
+        verify(productCatalogAPIClient, times(8)).getById(productId);
+    }
+
+    @Test
+    void shouldResetCircuitAfterResetTimeoutEvenWhenOpenTimeoutHasNotElapsed() throws InterruptedException {
+        FrameworkRetryCircuitBreakerFactory factory = factoryWith(3, Duration.ofSeconds(30), Duration.ofMillis(300));
+        ResilientProductCatalogAPIClient client =
+                new ResilientProductCatalogAPIClient(factory, productCatalogAPIClient);
+
+        UUID productId = UUID.randomUUID();
+        ResourceAccessException timeout = new ResourceAccessException("Connection timed out");
+        ProductResponse response = new ProductResponse(
+                productId,
+                "Recovered Product",
+                new BigDecimal("500.00"),
+                true);
+
+        when(productCatalogAPIClient.getById(productId))
+                .thenThrow(timeout)
+                .thenThrow(timeout)
+                .thenThrow(timeout)
+                .thenThrow(timeout)
+                .thenReturn(response);
+
+        assertThatThrownBy(() -> client.getById(productId))
+                .isInstanceOf(GatewayTimeoutException.class);
+        assertThat(policyOf(factory).getState()).isEqualTo(CircuitBreakerRetryPolicy.State.OPEN);
+
+        Thread.sleep(500);
+
+        assertThat(client.getById(productId)).isPresent();
+        assertThat(policyOf(factory).getState()).isEqualTo(CircuitBreakerRetryPolicy.State.CLOSED);
+        verify(productCatalogAPIClient, times(5)).getById(productId);
+    }
+
+    @Test
+    void shouldNotRetryWhenMaxRetriesIsConfiguredToZero() {
+        FrameworkRetryCircuitBreakerFactory factory = factoryWith(0, Duration.ofSeconds(10), Duration.ofSeconds(25));
+        ResilientProductCatalogAPIClient client =
+                new ResilientProductCatalogAPIClient(factory, productCatalogAPIClient);
+
+        UUID productId = UUID.randomUUID();
+        when(productCatalogAPIClient.getById(productId))
+                .thenThrow(new ResourceAccessException("Connection timed out"));
+
+        assertThatThrownBy(() -> client.getById(productId))
+                .isInstanceOf(GatewayTimeoutException.class);
+
+        assertThat(policyOf(factory).getState()).isEqualTo(CircuitBreakerRetryPolicy.State.OPEN);
+        verify(productCatalogAPIClient, times(1)).getById(productId);
+    }
+
+    @Test
+    void shouldRespectConfiguredMaxRetries() {
+        FrameworkRetryCircuitBreakerFactory factory = factoryWith(5, Duration.ofSeconds(10), Duration.ofSeconds(25));
+        ResilientProductCatalogAPIClient client =
+                new ResilientProductCatalogAPIClient(factory, productCatalogAPIClient);
+
+        UUID productId = UUID.randomUUID();
+        when(productCatalogAPIClient.getById(productId))
+                .thenThrow(new ResourceAccessException("Connection timed out"));
+
+        assertThatThrownBy(() -> client.getById(productId))
+                .isInstanceOf(GatewayTimeoutException.class);
+
+        verify(productCatalogAPIClient, times(6)).getById(productId);
     }
 
     @Test
@@ -418,25 +531,6 @@ class ResilientProductCatalogAPIClientTest {
         resilientClient.getById(productId);
 
         verify(productCatalogAPIClient, times(1)).getById(productId);
-    }
-
-    @Test
-    void shouldConsecutiveFailuresTriggerCircuitBreakerProtection() {
-        UUID productId = UUID.randomUUID();
-        ResourceAccessException timeout = new ResourceAccessException("Connection timed out");
-
-        when(productCatalogAPIClient.getById(productId)).thenThrow(timeout);
-
-        int totalFailures = 0;
-        for (int i = 0; i < 30; i++) {
-            try {
-                resilientClient.getById(productId);
-            } catch (Exception e) {
-                totalFailures++;
-            }
-        }
-
-        assertThat(totalFailures).isGreaterThanOrEqualTo(1);
     }
 
     @Test
@@ -707,6 +801,33 @@ class ResilientProductCatalogAPIClientTest {
                 .hasMessage("Product Catalog API Bad Gateway");
 
         verify(productCatalogAPIClient, times(1)).getById(productId);
+    }
+
+    private CircuitBreakerRetryPolicy circuitBreakerPolicy() {
+        return policyOf(circuitBreakerFactory);
+    }
+
+    private static CircuitBreakerRetryPolicy policyOf(FrameworkRetryCircuitBreakerFactory factory) {
+        FrameworkRetryCircuitBreaker circuitBreaker =
+                (FrameworkRetryCircuitBreaker) factory.create(productCatalogCBId);
+        return circuitBreaker.getCircuitBreakerPolicy();
+    }
+
+    private static FrameworkRetryCircuitBreakerFactory factoryWith(
+            long maxRetries, Duration openTimeout, Duration resetTimeout) {
+        FrameworkRetryCircuitBreakerFactory factory = new FrameworkRetryCircuitBreakerFactory();
+        RetryPolicy retryPolicy = RetryPolicy.builder()
+                .maxRetries(maxRetries)
+                .multiplier(2)
+                .delay(Duration.ofMillis(10))
+                .includes(GatewayTimeoutException.class, BadGatewayException.ServerErrorException.class)
+                .build();
+        factory.configure(builder -> builder
+                .retryPolicy(retryPolicy)
+                .openTimeout(openTimeout)
+                .resetTimeout(resetTimeout)
+                .build(), productCatalogCBId);
+        return factory;
     }
 
     private OAuth2AuthorizationException tokenException(Throwable cause) {
